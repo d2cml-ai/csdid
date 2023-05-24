@@ -1,2 +1,4 @@
-def compute_att() -> list:
+# from .did import *
+
+def compute_att_gt() -> list:
   pass
