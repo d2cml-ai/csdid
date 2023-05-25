@@ -1,2 +1,25 @@
-def process_attgt() -> list:
+def process_attgt(
+    yname,
+    tname,
+    gname,
+    data,
+    idname=None,
+    xformla=None,
+    panel=True,
+    allow_unbalanced_panel=False,
+    control_group=["nevertrated", "notyettreated"],
+    anticipation=0,
+    weightsname=None,
+    alpha=0.05,
+    bstrap=True,
+    cband=True,
+    cband=True,
+    biters=1000,
+    clustervars=None,
+    est_method="dr",
+    base_period="varying",
+    print_details=False,
+    pl=False,
+    cores=1,
+  ) -> list:
   pass
