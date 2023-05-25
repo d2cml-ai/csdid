@@ -1,4 +1,11 @@
 {
   "editor.tabSize": 2,
-  "editor.insertSpaces": true
+  "editor.insertSpaces": true,
+  "python.linting.pylintEnabled": true,
+  "python.linting.enabled": false
+  // "python.formatting.provider": "autopep8",
+  // "[python]": {
+  //   "editor.defaultFormatter": "ms-python.python"
+  // },
+  // "python.formatting.autopep8Args": ["--indent-size", "2"]
 }
