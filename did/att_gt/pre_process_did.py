@@ -1,5 +1,5 @@
 import pandas as pd, numpy as np
-from DID_params import DIDparams
+# from DID_params import DIDparams
 import patsy 
 
 def makeBalancedPanel(data, idname, tname):
@@ -155,7 +155,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     'control_group': control_group, 'anticipation': anticipation,
     'weights_name': weights_name, 'panel': panel,
     'true_rep_cross_section': true_rep_cross_section,
-    'clustervar': clustervar
+    'clustervars': clustervar
   }
   return did_params
 

@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import mstats, norm
 from joblib import Parallel, delayed
 import pandas as pd
-from BMisc import multiplier_bootstrap
+from .BMisc import multiplier_bootstrap
 
 def mboot(inf_func, DIDparams, pl=False, cores=1):
     # Setup needed variables

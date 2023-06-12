@@ -1,5 +1,5 @@
-from BMisc import TorF
-from mboot import mboot
+from .BMisc import TorF
+from .mboot import mboot
 import numpy as np
 import scipy.stats as stats
 import pandas as pd

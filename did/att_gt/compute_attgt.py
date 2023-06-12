@@ -199,9 +199,9 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
         # print(att_est)
 
   output = {
-    "att" : att_est,
     'group': group ,
     'year': year,
+    "att" : att_est,
     'post ': post_array
   }
   return (output, np.array(inf_func))

@@ -2,8 +2,8 @@ import pickle
 import pandas as pd
 import numpy as np
 from scipy.stats import norm
-from utils import get_agg_inf_func, get_se, wif, AGGTEobj
-from mboot import mboot
+from .utils import get_agg_inf_func, get_se, wif, AGGTEobj
+from .mboot import mboot
 import warnings
 
 def compute_aggte(MP,

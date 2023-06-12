@@ -80,7 +80,7 @@
 #'
 #'
 #'
-from compute_aggte import compute_aggte
+from .compute_aggte import compute_aggte
 import inspect
 
 def aggte(MP, 
