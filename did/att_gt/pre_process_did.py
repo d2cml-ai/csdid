@@ -154,7 +154,8 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     'n': n, 'nG': nG, 'nT': nT,
     'control_group': control_group, 'anticipation': anticipation,
     'weights_name': weights_name, 'panel': panel,
-    'true_rep_cross_section': true_rep_cross_section
+    'true_rep_cross_section': true_rep_cross_section,
+    'clustervar': clustervar
   }
   return did_params
 
