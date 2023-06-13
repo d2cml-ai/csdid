@@ -1,7 +1,7 @@
 
 import pandas as pd, numpy as np
 import patsy 
-from utils.bmisc import makeBalancedPanel
+from csdid.utils.bmisc import makeBalancedPanel
 
 fml = patsy.dmatrices
 

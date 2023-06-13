@@ -4,8 +4,8 @@ import numpy as np
 from scipy.stats import norm
 
 
-from aggte_fnc.utils import get_agg_inf_func, get_se, wif, AGGTEobj
-from utils.mboot import mboot
+from csdid.aggte_fnc.utils import get_agg_inf_func, get_se, wif, AGGTEobj
+from csdid.utils.mboot import mboot
 import warnings
 
 def compute_aggte(MP,

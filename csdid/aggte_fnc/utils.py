@@ -1,5 +1,6 @@
-from utils.bmisc import TorF
-from utils.mboot import mboot
+from csdid.utils.bmisc import TorF
+from csdid.utils.mboot import mboot
+
 import numpy as np
 import scipy.stats as stats
 import pandas as pd

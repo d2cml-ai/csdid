@@ -1,7 +1,8 @@
 import numpy as np, pandas as pd
 import patsy 
 from drdid import drdid, reg_did
-from utils.bmisc import panel2cs2
+
+from csdid.utils.bmisc import panel2cs2
 
 fml = patsy.dmatrices
 

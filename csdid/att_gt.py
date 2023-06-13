@@ -1,10 +1,11 @@
 # from aggte import AGGte
-from aggte_fnc.aggte import aggte as agg_te
+from csdid.aggte_fnc.aggte import aggte as agg_te
 
-from attgt_fnc.preprocess_did import pre_process_did
-from attgt_fnc.compute_att_gt import compute_att_gt
+from csdid.attgt_fnc.preprocess_did import pre_process_did
+from csdid.attgt_fnc.compute_att_gt import compute_att_gt
 
-from utils.mboot import mboot
+from csdid.utils.mboot import mboot
+
 import numpy as np
 
 # class ATTgt(AGGte):
@@ -102,36 +103,36 @@ class ATTgt:
   
 
 
-import yaml, pandas as pd
+# import yaml, pandas as pd
 
-with open('configs/data.yml') as f:
-  dt = yaml.safe_load(f)
+# with open('configs/data.yml') as f:
+#   dt = yaml.safe_load(f)
 
-data = pd.read_csv(dt['mpdata'])
+# data = pd.read_csv(dt['mpdata'])
 
 
-yname = "lemp"
-gname = "first.treat"
-idname = "countyreal"
-tname = "year"
-xformla = f"lemp~1"
-# data = mpdta
-# print(data)
-# print(tname)
-b = ATTgt(yname, tname, idname, gname, data = data, xformla=xformla).fit()
-c = b.summ_attgt().summary2
-b.aggte(balance_e=1)
-# print(c)
+# yname = "lemp"
+# gname = "first.treat"
+# idname = "countyreal"
+# tname = "year"
+# xformla = f"lemp~1"
+# # data = mpdta
+# # print(data)
+# # print(tname)
+# b = ATTgt(yname, tname, idname, gname, data = data, xformla=xformla).fit()
+# c = b.summ_attgt().summary2
+# b.aggte(balance_e=1)
+# # print(c)
 
-# print(aggte(b.MP, typec='dynamic'))
-# data = pd.read_csv(dt['simdata'])
+# # print(aggte(b.MP, typec='dynamic'))
+# # data = pd.read_csv(dt['simdata'])
 
-# yname = "Y"
-# tname = "period"
-# idname = "id"
-# gname = "G"
-# data = data
-# xformla = "Y~1"
+# # yname = "Y"
+# # tname = "period"
+# # idname = "id"
+# # gname = "G"
+# # data = data
+# # xformla = "Y~1"
 
 
 # a = ATTgt(yname, idname, gname, data, xformla=xformla).fit().summ_attgt()
