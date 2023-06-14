@@ -102,28 +102,6 @@ class ATTgt:
     
   
 
-
-# import yaml, pandas as pd
-
-# with open('configs/data.yml') as f:
-#   dt = yaml.safe_load(f)
-
-# data = pd.read_csv(dt['mpdata'])
-
-
-# yname = "lemp"
-# gname = "first.treat"
-# idname = "countyreal"
-# tname = "year"
-# xformla = f"lemp~1"
-# # data = mpdta
-# # print(data)
-# # print(tname)
-# b = ATTgt(yname, tname, idname, gname, data = data, xformla=xformla).fit()
-# c = b.summ_attgt().summary2
-# b.aggte(balance_e=1)
-# # print(c)
-
 # # print(aggte(b.MP, typec='dynamic'))
 # # data = pd.read_csv(dt['simdata'])
 
