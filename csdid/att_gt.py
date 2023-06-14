@@ -6,7 +6,13 @@ from csdid.attgt_fnc.compute_att_gt import compute_att_gt
 
 from csdid.utils.mboot import mboot
 
-import numpy as np
+from csdid.plots.gplot import gplot, splot
+
+
+from plotnine import ggplot, facet_wrap
+
+
+import numpy as np, pandas as pd
 
 # class ATTgt(AGGte):
 class ATTgt:
@@ -49,12 +55,12 @@ class ATTgt:
     self.dp = dp
     n = dp['n']
 
-    MP = {
+    mp = {
       'group': group, 'att': att, 't': tt,
       'DIDparams': dp, 'inffunc': inf_fnc, 
       'n': n
     }
-    self.MP = MP
+    self.MP = mp
 
 
     cband_lower = att - crit_val * se
@@ -65,11 +71,20 @@ class ATTgt:
 
     result.update(
       {
-        'std': se, 'l_se': cband_lower,
+        'se': se, 'l_se': cband_lower,
+        'c': crit_val,
         'u_se': cband_upper, 'sig': sig_text
        })
 
-    self.results = result
+    rst = result
+    did_object = {
+      'group': mp['group'],
+      't': mp['t'],
+      'att': rst['att'],
+      'se': rst['se'],
+      'c': rst['c'],
+    }
+    self.did_object = did_object
     return self
   def summ_attgt(self, n = 4):
     result = self.results
@@ -93,33 +108,102 @@ class ATTgt:
     clustervars   = None,
     ):
     mp = self.MP
+    did_object = self.did_object
+    
+    did_object.update({
+      'type': typec
+      }
+    )
+
+
     agg_te(
       mp, typec=typec, balance_e=balance_e, 
       min_e=min_e, max_e=max_e, na_rm=na_rm, bstrap=bstrap, 
       biters=biters, cband=cband, alp=alp, clustervars=clustervars
     )
     return self
+  def plot_attgt(self, ylim=None, 
+                xlab=None, 
+                ylab=None, 
+                title="Group",
+                xgap=1, 
+                ncol=1, 
+                legend=True, 
+                group=None, 
+                ref_line=0,
+                theming=True, 
+                grtitle="Group"
+                ):
+
+    did_object = self.did_object
+
+    grp = did_object['group']
+    t_i = did_object['t']
+
+    G = len(np.unique(grp))
+    Y = len(np.unique(t_i))
+    g = np.unique(grp)[np.argsort(np.unique(grp))].astype(int)
+    y = np.unique(t_i)
+
+    results = pd.DataFrame({'year': np.tile(y, G)})
+    results['group'] = np.repeat(g, Y)
+    results['grtitle'] = grtitle + ' ' + results['group'].astype(str)
+    results['att'] = did_object['att']
+    results['att_se'] = did_object['se']
+    results['post'] = np.where(results['year'] >= grp, 1, 0)
+    results['year'] = results['year']
+    results['c'] = did_object['c']
+
+    if group is None:
+      group = g
+      if any(group not in g for group in group):
+        raise ValueError("Some of the specified groups do not exist in the data. Reporting all available groups.")
+
+
+    results = results.query(
+      'group in @group'
+      )
     
-  
+    self.data_plot_attgt = results
 
-# # print(aggte(b.MP, typec='dynamic'))
-# # data = pd.read_csv(dt['simdata'])
+    mplots = gplot(results, ylim, xlab, ylab, title, xgap, legend, ref_line, theming) + \
+              facet_wrap('~ grtitle', ncol=ncol, scales='free')
 
-# # yname = "Y"
-# # tname = "period"
-# # idname = "id"
-# # gname = "G"
-# # data = data
-# # xformla = "Y~1"
+    return mplots 
+  def plot_aggte(self, ylim=None, 
+                   xlab=None, 
+                   ylab=None, 
+                   title="", 
+                   xgap=1, 
+                   legend=True, 
+                   ref_line=0, 
+                   theming=True,
+                   **kwargs):
+    did_object = self.did_object
 
+    post_treat = 1 * (np.asarray(did_object["egt"]).astype(int) >= 0)
+    
+    results = {
+        "year": list(map(int, did_object["egt"])),
+        "att": did_object["att_egt"],
+        "att_se": did_object["se_egt"][0],
+        "post": post_treat
+    }
+    
+    results = pd.DataFrame(results)
+    
+    if did_object['crit_val_egt'] is None:
+        results['c'] = abs(norm.ppf(0.025))
+    else:
+        results['c'] = did_object['crit_val_egt']
 
-# a = ATTgt(yname, idname, gname, data, xformla=xformla).fit().summ_attgt()
-# mp = a.MP
+    if title == "":
+        title = "Average Effect by Group" if did_object["type"] == "group" else "Average Effect by Length of Exposure"
 
-
-# b = aggte(mp, typec='simple')
-# # print(b)
-
-# print(b)
-
-# print(a)
+    if did_object['type'] == 'group':
+        p = splot(results, ylim, xlab, ylab, title, legend, ref_line, theming)
+    else:
+        p = gplot(results, ylim, xlab, ylab, title, xgap, legend, ref_line, theming)
+    # p
+    # print(p) 
+    return p
