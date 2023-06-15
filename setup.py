@@ -1,10 +1,15 @@
 from setuptools import setup, find_packages
 
+with open('requirements.txt') as f:
+  requi = f.read().splitlines()
+
+from csdid._version import __version
+
 
 
 setup(
   name = 'csdid',
-  version='0.1.74',
+  version=__version,
   url='https://github.com/d2cml-ai/csdid',
   author='D2CML Team, Alexander Quispe, Carlos Guevara, Jhon Flroes',
   keywords=['Causal inference', 'Research'],
@@ -17,6 +22,7 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Topic :: Scientific/Engineering",
     ],
+  install_requires=requi,
   packages=find_packages(),
   package_data={
     'data': ['data/*'],
