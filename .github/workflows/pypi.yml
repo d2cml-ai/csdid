@@ -12,15 +12,15 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - name: Set up Python
+      - uses: actions/checkout@v2
+
+      - id: Python_pip
+        name: Python dependencies
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x # Ajusta la versión de Python según corresponda
-
-      # - name: Install dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install setuptools wheel twine
+          python-version: "3.8"
+          cache: "pip"
+      - run: pip install -r requirements.txt
 
       - name: Build and publish
         # env:
