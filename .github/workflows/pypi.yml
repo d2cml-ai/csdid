@@ -26,5 +26,3 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           ls /home/runner/work/csdid
-          python /home/runner/work/csdid/setup.py sdist
-          twine upload dist/*
