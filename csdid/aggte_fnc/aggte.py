@@ -96,7 +96,7 @@ def aggte(MP,
           clustervars=None):
     call = inspect.currentframe().f_back.f_locals.copy()
 
-    compute_aggte(MP=MP, 
+    return compute_aggte(MP=MP, 
                   typec=typec, 
                   balance_e=balance_e, 
                   min_e=min_e, 
@@ -108,4 +108,6 @@ def aggte(MP,
                   alp=alp, 
                   clustervars=clustervars, 
                   call=call)
+
+ 
 

@@ -75,6 +75,8 @@ class ATTgt:
         'c': crit_val,
         'u_se': cband_upper, 'sig': sig_text
        })
+    
+    self.results = result
 
     rst = result
     did_object = {
@@ -89,11 +91,13 @@ class ATTgt:
   def summ_attgt(self, n = 4):
     result = self.results
     att_gt = pd.DataFrame(result)
+    att_gt = att_gt.drop('c', axis=1)
     name_attgt_df = ['Group', 'Time', 'ATT(g, t)', 'Post', "Std. Error", "[95% Pointwise", 'Conf. Band]', '']
     att_gt.columns = name_attgt_df
     att_gt = att_gt.round(n)
     self.summary2 = att_gt
     return self
+
   def aggte(
     self, 
     typec         = "group",
@@ -116,11 +120,13 @@ class ATTgt:
     )
 
 
-    agg_te(
+    atte = agg_te(
       mp, typec=typec, balance_e=balance_e, 
       min_e=min_e, max_e=max_e, na_rm=na_rm, bstrap=bstrap, 
       biters=biters, cband=cband, alp=alp, clustervars=clustervars
     )
+
+    self.atte = atte
     return self
   def plot_attgt(self, ylim=None, 
                 xlab=None, 
@@ -179,7 +185,8 @@ class ATTgt:
                    ref_line=0, 
                    theming=True,
                    **kwargs):
-    did_object = self.did_object
+
+    did_object = self.atte
 
     post_treat = 1 * (np.asarray(did_object["egt"]).astype(int) >= 0)
     
@@ -198,7 +205,9 @@ class ATTgt:
         results['c'] = did_object['crit_val_egt']
 
     if title == "":
-        title = "Average Effect by Group" if did_object["type"] == "group" else "Average Effect by Length of Exposure"
+        title = "Average Effect by Group" if\
+          did_object["type"] == "group" else\
+            "Average Effect by Length of Exposure"
 
     if did_object['type'] == 'group':
         p = splot(results, ylim, xlab, ylab, title, legend, ref_line, theming)

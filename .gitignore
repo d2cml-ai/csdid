@@ -5,3 +5,5 @@ methods_r/
 
 dist/
 *info
+*html
+test/plot_files

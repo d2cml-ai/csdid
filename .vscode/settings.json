@@ -2,7 +2,11 @@
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
   "python.linting.pylintEnabled": true,
-  "python.linting.enabled": false
+  "python.linting.enabled": false,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python"
+  },
+  "python.formatting.provider": "none"
   // "python.formatting.provider": "autopep8",
   // "[python]": {
   //   "editor.defaultFormatter": "ms-python.python"

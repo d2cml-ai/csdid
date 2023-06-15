@@ -108,7 +108,7 @@ out = ATTgt(yname = "lemp",
               gname = "first.treat",
               idname = "countyreal",
               tname = "year",
-              xformla = "lemp~1",
+              xformla = f"lemp~1",
               data = data,
               ).fit(est_method = 'dr')
 ```
@@ -117,7 +117,7 @@ out = ATTgt(yname = "lemp",
 Summary table
 
 ```{python, eval = False}
-# out.summ_attgt().summary2
+out.summ_attgt().summary2
 ```
 
 plots
@@ -128,5 +128,10 @@ out.plot_attgt(ylim=(-.25, .1))
 
 
 ```{python}
-out.aggte()
+out.aggte(typec='calendar')
+```
+
+
+```{python}
+out.plot_aggte()
 ```

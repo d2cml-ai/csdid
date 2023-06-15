@@ -100,7 +100,7 @@ out = ATTgt(yname = "lemp",
               gname = "first.treat",
               idname = "countyreal",
               tname = "year",
-              xformla = "lemp~1",
+              xformla = f"lemp~1",
               data = data,
               ).fit(est_method = 'dr')
 ```
@@ -108,8 +108,38 @@ out = ATTgt(yname = "lemp",
 Summary table
 
 ``` python
-# out.summ_attgt().summary2
+out.summ_attgt().summary2
 ```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+&#10;    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+&#10;    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+|     | Group | Time | ATT(g, t) | Post | Std. Error | \[95% Pointwise | Conf. Band\] |     |
+|-----|-------|------|-----------|------|------------|-----------------|--------------|-----|
+| 0   | 2004  | 2004 | -0.0105   | 1    | 0.0307     | -0.0917         | 0.0707       |     |
+| 1   | 2004  | 2005 | -0.0704   | 1    | 0.0429     | -0.1841         | 0.0433       |     |
+| 2   | 2004  | 2006 | -0.1373   | 1    | 0.0491     | -0.2673         | -0.0072      | \*  |
+| 3   | 2004  | 2007 | -0.1008   | 1    | 0.0461     | -0.2229         | 0.0213       |     |
+| 4   | 2006  | 2004 | 0.0065    | 0    | 0.0324     | -0.0792         | 0.0923       |     |
+| 5   | 2006  | 2005 | -0.0028   | 0    | 0.0271     | -0.0746         | 0.0691       |     |
+| 6   | 2006  | 2006 | -0.0046   | 1    | 0.0243     | -0.0690         | 0.0598       |     |
+| 7   | 2006  | 2007 | -0.0412   | 1    | 0.0299     | -0.1203         | 0.0379       |     |
+| 8   | 2007  | 2004 | 0.0305    | 0    | 0.0270     | -0.0410         | 0.1021       |     |
+| 9   | 2007  | 2005 | -0.0027   | 0    | 0.0285     | -0.0783         | 0.0728       |     |
+| 10  | 2007  | 2006 | -0.0311   | 0    | 0.0315     | -0.1145         | 0.0523       |     |
+| 11  | 2007  | 2007 | -0.0261   | 1    | 0.0288     | -0.1023         | 0.0502       |     |
+
+</div>
 
 plots
 
@@ -117,32 +147,41 @@ plots
 out.plot_attgt(ylim=(-.25, .1))
 ```
 
-    C:\Users\Jhon\AppData\Local\Programs\Python\Python38\lib\site-packages\plotnine\layer.py:364: PlotnineWarning: geom_errorbar : Removed 1 rows containing missing values.
+    C:\Users\Jhon\AppData\Local\Programs\Python\Python38\lib\site-packages\plotnine\layer.py:364: PlotnineWarning: geom_errorbar : Removed 2 rows containing missing values.
 
 ![](README_files/figure-commonmark/cell-5-output-2.png)
 
     <Figure Size: (640 x 480)>
 
 ``` python
-out.aggte()
+out.aggte(typec='calendar')
 ```
 
 
 
-    Overall summary of ATT's based on group/cohort aggregation:
-       ATT Std. Error  [95.0%  Conf. Int.] 
-    -0.031     0.0214 -0.0729       0.0108 
+    Overall summary of ATT's based on calendar time aggregation:
+        ATT Std. Error  [95.0%  Conf. Int.] 
+    -0.0417      0.022 -0.0849       0.0015 
 
 
-    Group Effects:
-       Group  Estimate  Std. Error  [95.0% Simult.   Conf. Band   
-    0   2004   -0.0797      0.0384          -0.1549     -0.0046  *
-    1   2006   -0.0229      0.0239          -0.0697      0.0239   
-    2   2007   -0.0261      0.0288          -0.0824      0.0303   
+    Time Effects (calendar):
+       Time  Estimate  Std. Error  [95.0% Simult.   Conf. Band  
+    0  2004   -0.0105      0.0313          -0.0719      0.0509  
+    1  2005   -0.0704      0.0410          -0.1507      0.0099  
+    2  2006   -0.0488      0.0266          -0.1009      0.0033  
+    3  2007   -0.0371      0.0231          -0.0824      0.0083  
     ---
     Signif. codes: `*' confidence band does not cover 0
     Control Group:  Never Treated , 
     Anticipation Periods:  0
     Estimation Method:  Doubly Robust
 
-    <csdid.att_gt.ATTgt at 0x1553d29d970>
+    <csdid.att_gt.ATTgt at 0x27d39c122e0>
+
+``` python
+out.plot_aggte()
+```
+
+![](README_files/figure-commonmark/cell-7-output-1.png)
+
+    <Figure Size: (640 x 480)>
