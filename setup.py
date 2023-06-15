@@ -1,11 +1,10 @@
 from setuptools import setup, find_packages
 
-with open('requirements.txt') as f:
-  requi = f.read().splitlines()
-
+# with open('requirements.txt') as f:
+#     required = f.read().splitlines()
+# print(required)
 from csdid._version import __version
-
-
+print(__version)
 
 setup(
   name = 'csdid',
@@ -22,7 +21,7 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Topic :: Scientific/Engineering",
     ],
-  install_requires=requi,
+  # install_requires=requi,
   packages=find_packages(),
   package_data={
     'data': ['data/*'],
