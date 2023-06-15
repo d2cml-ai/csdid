@@ -9,7 +9,7 @@ from csdid.utils.mboot import mboot
 from csdid.plots.gplot import gplot, splot
 
 
-from plotnine import ggplot, facet_wrap
+import matplotlib.pyplot as plt
 
 
 import numpy as np, pandas as pd
@@ -166,16 +166,34 @@ class ATTgt:
         raise ValueError("Some of the specified groups do not exist in the data. Reporting all available groups.")
 
 
-    results = results.query(
-      'group in @group'
-      )
+    # results = results.query(
+    #   'group in @group'
+    #   )
     
-    self.data_plot_attgt = results
+    # self.data_plot_attgt = results
 
-    mplots = gplot(results, ylim, xlab, ylab, title, xgap, legend, ref_line, theming) + \
-              facet_wrap('~ grtitle', ncol=ncol, scales='free')
+    # mplots = gplot(results, ylim, xlab, ylab, title, xgap, legend, ref_line, theming) + \
+    #           facet_wrap('~ grtitle', ncol=ncol, scales='free')
 
-    return mplots 
+    legend_1 = False    # for multiple subplots, legend outside 
+    fig, axes = plt.subplots(nrows=len(group), ncols=1, figsize=(10, 5))  # Adjust the figsize as needed
+    handles = []
+    labels = []
+    for i, group_cat in enumerate(group):
+        group_data = results.loc[results['group'] == group_cat]
+        title = group_data['grtitle'].unique()[0]
+        ax = axes[i]
+        ax = gplot(group_data, ax, ylim, xlab, ylab, title, xgap, legend_1, ref_line, theming)
+    plt.tight_layout()
+    if legend is True:
+        handles_ax, labels_ax = ax.get_legend_handles_labels()
+        handles.extend(handles_ax)
+        labels.extend(labels_ax)
+        fig.legend(handles, labels, loc='lower center', fontsize='small', bbox_to_anchor=(0.545, -0.075), ncol=2)
+    
+    plt.show()
+    return fig 
+
   def plot_aggte(self, ylim=None, 
                    xlab=None, 
                    ylab=None, 
@@ -209,10 +227,21 @@ class ATTgt:
           did_object["type"] == "group" else\
             "Average Effect by Length of Exposure"
 
-    if did_object['type'] == 'group':
-        p = splot(results, ylim, xlab, ylab, title, legend, ref_line, theming)
+    # if did_object['type'] == 'group':
+    #     p = splot(results, ylim, xlab, ylab, title, legend, ref_line, theming)
+    # else:
+    #     p = gplot(results, ylim, xlab, ylab, title, xgap, legend, ref_line, theming)
+    
+    if did_object["type"] == "group":
+        fig, ax = plt.subplots(figsize=(10, 5))
+        p = splot(results, ax, ylim, xlab, ylab, title, legend, ref_line, theming)
+        plt.tight_layout()
+        plt.show()
+
     else:
-        p = gplot(results, ylim, xlab, ylab, title, xgap, legend, ref_line, theming)
-    # p
-    # print(p) 
+        fig, ax = plt.subplots(figsize=(10, 5))
+        p = gplot(results, ax, ylim, xlab, ylab, title, xgap, legend, ref_line, theming)
+        plt.tight_layout()
+        plt.show() 
+        
     return p
