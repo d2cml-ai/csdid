@@ -120,18 +120,18 @@ Summary table
 out.summ_attgt().summary2
 ```
 
-plots
+In the graphs, a semicolon `;` should be added to prevent printing the class and the graph information.
 
 ```{python}
-out.plot_attgt()
+out.plot_attgt();
 ```
 
 
 ```{python}
-out.aggte(typec='calendar')
+out.aggte(typec='calendar');
 ```
 
 
 ```{python}
-out.plot_aggte()
+out.plot_aggte();
 ```

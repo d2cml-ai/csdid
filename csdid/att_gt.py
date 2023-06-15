@@ -160,20 +160,13 @@ class ATTgt:
     results['year'] = results['year']
     results['c'] = did_object['c']
 
+    self.results_plot_df_attgt = results
+
     if group is None:
       group = g
       if any(group not in g for group in group):
         raise ValueError("Some of the specified groups do not exist in the data. Reporting all available groups.")
 
-
-    # results = results.query(
-    #   'group in @group'
-    #   )
-    
-    # self.data_plot_attgt = results
-
-    # mplots = gplot(results, ylim, xlab, ylab, title, xgap, legend, ref_line, theming) + \
-    #           facet_wrap('~ grtitle', ncol=ncol, scales='free')
 
     legend_1 = False    # for multiple subplots, legend outside 
     fig, axes = plt.subplots(nrows=len(group), ncols=1, figsize=(10, 5))  # Adjust the figsize as needed
@@ -216,6 +209,7 @@ class ATTgt:
     }
     
     results = pd.DataFrame(results)
+    self.results_plot_df_aggte = results
     
     if did_object['crit_val_egt'] is None:
         results['c'] = abs(norm.ppf(0.025))
@@ -227,11 +221,7 @@ class ATTgt:
           did_object["type"] == "group" else\
             "Average Effect by Length of Exposure"
 
-    # if did_object['type'] == 'group':
-    #     p = splot(results, ylim, xlab, ylab, title, legend, ref_line, theming)
-    # else:
-    #     p = gplot(results, ylim, xlab, ylab, title, xgap, legend, ref_line, theming)
-    
+
     if did_object["type"] == "group":
         fig, ax = plt.subplots(figsize=(10, 5))
         p = splot(results, ax, ylim, xlab, ylab, title, legend, ref_line, theming)
