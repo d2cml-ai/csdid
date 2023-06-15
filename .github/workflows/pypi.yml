@@ -25,4 +25,4 @@ jobs:
           TWINE_USERNAME: tjhonk
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          ls /home/runner/work/csdid
+          ls /home/runner/work/csdid/csdid
