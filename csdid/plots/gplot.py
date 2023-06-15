@@ -5,99 +5,102 @@ Created on Sun Jun 11 16:17:07 2023
 @author: Carlos Guevara
 """
 
-from plotnine import ggplot, aes, geom_point, geom_errorbar, scale_y_continuous, scale_x_continuous, \
-    scale_color_manual, labs, geom_hline, theme, element_text, element_rect, element_line, \
-    scale_x_discrete
+import matplotlib.pyplot as plt
 
 # get_ipython().run_line_magic('matplotlib', 'qt') # To aopen separate window
 # get_ipython().run_line_magic('matplotlib', 'inline') # In line graph
 
-def gplot(ssresults, ylim=None, xlab=None, ylab=None, title="Group", xgap=1,
+def gplot(ssresults, ax, ylim=None, xlab=None, ylab=None, title="Group", xgap=1,
            legend=True, ref_line=0, theming=True):
     if ylab is None:
         ylab = 'ATT'
-    dabreaks = ssresults['year'][::xgap]
-    ssresults['post'] = ssresults['post'].astype('category')
+    
+    ssresults = ssresults[ssresults['year'].notnull()].copy()
+    ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
+    
+    pre_points = ssresults.loc[ssresults['post'] == 0]
+    post_points = ssresults.loc[ssresults['post'] == 1]
+    
+    ax.errorbar(pre_points['year'], pre_points['att'], yerr=pre_points['c']*pre_points['att_se'],
+                 fmt='o', markersize=5, color='#e87d72', ecolor='#e87d72', capsize=5, label='Pre')   
+    
+    ax.errorbar(post_points['year'], post_points['att'], yerr=post_points['c']*post_points['att_se'],
+                 fmt='o', markersize=5, color='#56bcc2', ecolor='#56bcc2', capsize=5, label='Post')  
+    
+    ax.set_ylim(ylim)
+    ax.set_title(title)
+    ax.set_xlabel(xlab)    
+    ax.set_ylabel(ylab)    
 
-    post_levels = list(ssresults['post'].unique().categories)
+    handles, labels = ax.get_legend_handles_labels()    
     
-    if 0 in post_levels:
-        color_values = ["#e87d72", "#56bcc2"]
-        label_values = ['Pre', 'Post']
-    else:
-        color_values = ["#56bcc2"]
-        label_values = ['Post']
-    
-    p = ggplot(ssresults,
-               aes(x='year', y='att', ymin='att - c * att_se', ymax='att + c * att_se')) + \
-        geom_point(aes(colour='post'), size=2) + \
-        geom_errorbar(aes(colour='post'), width=0.15 , size=0.8 ) + \
-        scale_y_continuous(limits=ylim) + \
-        scale_x_continuous(breaks=list(dabreaks), labels=list(map(str, dabreaks))) + \
-        scale_color_manual(drop=False, values=color_values, breaks=post_levels, labels=label_values) + \
-        labs(x=xlab, y=ylab, title=title, color='') 
-        
     if ref_line is not None:
-        p += geom_hline(aes(yintercept=ref_line), linetype='dashed')
-
+        ax.axhline(ref_line, linestyle='dashed', color='#1F1F1F')
     if theming:
-        p += theme(
-                panel_background=element_rect(fill='white'),
-                plot_title=element_text(color='#1F1F1F', fontweight='bold', size=10),
-                axis_text=element_text(color='#1F1F1F'),
-                axis_line=element_line(color='#1F1F1F'),
-                strip_background=element_rect(fill='white'),
-                legend_position=(.55, -.025),
-                strip_text=element_text(color='#1F1F1F', fontweight='bold', size=9)
-        ) 
-
+        ax.set_facecolor('white')
+        ax.set_title(title, color="#1F1F1F", fontweight="bold", fontsize=10)
+        ax.spines['bottom'].set_color('#1F1F1F')
+        ax.spines['left'].set_color('#1F1F1F')
+        ax.tick_params(axis='x', colors='#1F1F1F')
+        ax.tick_params(axis='y', colors='#1F1F1F')
+        if not pre_points.empty and not post_points.empty:
+            ax.legend(handles[0:2], labels[0:2], loc='lower center',fontsize='small', ncol=2, bbox_to_anchor=(0.5,-0.27))
+        elif not pre_points.empty:
+            ax.legend(handles[:1], labels[:1], loc='lower center',fontsize='small', ncol=2, bbox_to_anchor=(0.5,-0.27))
+        elif not post_points.empty:
+            ax.legend(handles[1:2], labels[1:2], loc='lower center',fontsize='small', ncol=2, bbox_to_anchor=(0.5,-0.27))     
     if not legend:
-        p += theme(legend_position='none')
+        ax.legend().set_visible(False)
+        
+    return ax
 
-    return p
 
-
-def splot(ssresults, ylim=None, xlab=None, ylab=None, title="Group",
+def splot(ssresults, ax, ylim=None, xlab=None, ylab=None, title="Group",
           legend=True, ref_line=0, theming=True):
-    if ylab is None:
-        ylab = 'ATT'
+    
     if xlab is None:
         xlab = 'Group'
-    ssresults['year'] = ssresults['year'].astype('category')
-    ssresults['post'] = ssresults['post'].astype('category')
-    
-    post_levels = list(ssresults['post'].unique().categories)  
-   
-    if 0 in post_levels:
-        color_values = ["#e87d72", "#56bcc2"]
-        label_values = ['Pre', 'Post']
-    else:
-        color_values = ["#56bcc2"]
-        label_values = ['Post']
+    if ylab is None:
+        ylab = 'ATT'
 
-    p = ggplot(ssresults,
-               aes(y='att', x='year', ymin='att - c * att_se', ymax='att + c * att_se')) + \
-        geom_point(aes(colour='post'), size=2) + \
-        geom_errorbar(aes(colour='post'), width=0.15 , size=0.8) + \
-        scale_y_continuous(limits=ylim) + \
-        scale_x_discrete(breaks=list(ssresults['year']))  + \
-        scale_color_manual(drop=False, values=color_values,breaks=list(post_levels) , labels=label_values) + \
-        labs(x=xlab, y=ylab, title=title, color='')
+    ssresults['year'] = ssresults['year'].copy().astype(str)
+    
+    pre_points = ssresults.loc[ssresults['post'] == 0]
+    post_points = ssresults.loc[ssresults['post'] == 1]
+    
+    ax.errorbar(pre_points['year'], pre_points['att'], yerr=pre_points['c']*pre_points['att_se'],
+                 fmt='o', markersize=5, color='#e87d72', ecolor='#e87d72', capsize=5, label='Pre')   
+    
+    ax.errorbar(post_points['year'], post_points['att'], yerr=post_points['c']*post_points['att_se'],
+                 fmt='o', markersize=5, color='#56bcc2', ecolor='#56bcc2', capsize=5, label='Post') 
+    
+    ax.set_xlabel(xlab)
+    ax.set_ylabel(ylab)
+    ax.set_title(title)
+
+    handles, labels = ax.get_legend_handles_labels()    
+    
+    if ylim is not None:
+        ax.set_ylim(ylim)
     
     if ref_line is not None:
-        p += geom_hline(aes(yintercept=ref_line), linetype='dashed')
+        ax.axhline(ref_line, linestyle='dashed', color='#1F1F1F')
     
     if theming:
-        p += theme(
-                panel_background=element_rect(fill='white'),
-                plot_title=element_text(color='#1F1F1F', fontweight='bold', size=10),
-                axis_text=element_text(color='#1F1F1F'),
-                axis_line=element_line(color='#1F1F1F'),
-                strip_background=element_rect(fill='white'),
-                legend_position=(.55, -.025)
-            )
-    
+        ax.set_facecolor('white')
+        ax.set_title(title, color="#1F1F1F", fontweight="bold", fontsize=12)
+        ax.spines['bottom'].set_color('#1F1F1F')
+        ax.spines['left'].set_color('#1F1F1F')
+        ax.tick_params(axis='x', colors='#1F1F1F')
+        ax.tick_params(axis='y', colors='#1F1F1F')
+        if not pre_points.empty and not post_points.empty:
+            ax.legend(handles[0:2], labels[0:2], loc='lower center',fontsize='small', ncol=2, bbox_to_anchor=(0.5,-0.27))
+        elif not pre_points.empty:
+            ax.legend(handles[:1], labels[:1], loc='lower center',fontsize='small', ncol=2, bbox_to_anchor=(0.5,-0.27))
+        elif not post_points.empty:
+            ax.legend(handles[1:2], labels[1:2], loc='lower center',fontsize='small', ncol=2, bbox_to_anchor=(0.5,-0.27))   
+            
     if not legend:
-        p += theme(legend_position='none')
+        ax.legend().set_visible(False)
     
-    return p
+    return ax
