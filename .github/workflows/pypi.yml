@@ -3,11 +3,13 @@ name: Publish to PyPI
 on:
   push:
     branches:
-      - main # Ajusta el nombre de la rama principal según corresponda
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Set up Python
