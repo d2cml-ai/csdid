@@ -25,5 +25,5 @@ jobs:
           TWINE_USERNAME: tjhonk
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          python ../setup.py sdist
+          python /home/runner/work/csdid/setup.py sdist
           twine upload dist/*
