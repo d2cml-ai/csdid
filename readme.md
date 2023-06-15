@@ -1,65 +1,187 @@
-# Library Creation Process
+# Difference in Difference in Python
 
-## R DID PACKAGE
+The **csdid** package contains tools for computing average treatment
+effect parameters in a Difference-in-Differences setup allowing for
 
-[DID](https://github.com/bcallaway11/did/blob/master/R/DIDparams.R)
+- More than two time periods
 
-## `agg_te`
+- Variation in treatment timing (i.e., units can become treated at
+  different points in time)
 
-- "`did/aggte/utils.py`" file
-  - `wif, get_agg_inf_func, getSE -> compute_aggte`
-    - [R ref](https://github.com/bcallaway11/did/blob/master/R/compute.aggte.R)
-    - [Python ref](https://github.com/bernardodionisi/differences/blob/2b6acc94cd37105893ba9dc1f9a48e37fb916c4f/differences/attgt/aggregate.py#L258)
-      - R `wif` -> Python `get_wif`
-      - R `get_agg_inf_func` -> Python `get_agg_influence_func`
-- "`did/aggte/mboot.py`" file
-  - `sum_multiplier_bootstrap`, `mboot`
-    - [R ref](https://github.com/bcallaway11/did/blob/master/R/mboot.R)
-    - [python ref](https://github.com/bernardodionisi/differences/blob/2b6acc94cd37105893ba9dc1f9a48e37fb916c4f/differences/attgt/mboot.py#L15)
-- "`did/aggte/aggte.py`" file
-  - `aggte`
-    - [R ref](https://github.com/bcallaway11/did/blob/master/R/aggte.R)
-    - [Python ref]
+- Treatment effect heterogeneity (i.e, the effect of participating in
+  the treatment can vary across units and exhibit potentially complex
+  dynamics, selection into treatment, or time effects)
 
-![](did/aggte/aggte.png)
+- The parallel trends assumption holds only after conditioning on
+  covariates
 
-## `agg_gt`
+The main parameters are **group-time average treatment effects**. These
+are the average treatment effect for a particular group (group is
+defined by treatment timing) in a particular time period. These
+parameters are a natural generalization of the average treatment effect
+on the treated (ATT) which is identified in the textbook case with two
+periods and two groups to the case with multiple periods.
 
-- `pre_process_did`:
-  - [R ref](https://github.com/bcallaway11/did/blob/master/R/pre_process_did.R)
-- `process_att_gt`:
-  - [R ref](https://github.com/bcallaway11/did/blob/master/R/process_attgt.R)
-- `compute_att_gt`"
-  - [R ref](https://github.com/bcallaway11/did/blob/master/R/compute.att_gt.R)
-- `att_gt`:
-  - [R ref](https://github.com/bcallaway11/did/blob/master/R/att_gt.R)
+Group-time average treatment effects are also natural building blocks
+for more aggregated treatment effect parameters such as overall
+treatment effects or event-study-type estimands.
 
-### `DRDID` package
+## Getting Started
 
-[DRDID](https://github.com/pedrohcgs/DRDID/tree/master)
+There has been some recent work on DiD with multiple time periods. The
+**did** package implements the framework put forward in
 
-To Build o adapt:
+- [Callaway, Brantly and Pedro H.C. Sant’Anna.
+  “Difference-in-Differences with Multiple Time Periods.” Journal of
+  Econometrics, Vol. 225, No. 2, pp. 200-230,
+  2021.](https://doi.org/10.1016/j.jeconom.2020.12.001) or
+  \[arXiv\](https://arxiv.org/abs/1803.09015
 
-- `std_ipw_did_panel`:
-  - [R ref](https://github.com/pedrohcgs/DRDID/blob/master/R/std_ipw_did_rc.R)
-- `reg_did_panel`:
-  - [R ref](https://github.com/pedrohcgs/DRDID/blob/master/R/reg_did_panel.R)
-  - [Python `Difference` package](https://github.com/bernardodionisi/differences/blob/main/differences/did/did_cal.py)
-- `drdid_panel`:
-  - [R ref](https://github.com/pedrohcgs/DRDID/blob/master/R/drdid_panel.R)
-  - [Python `Difference` package](https://github.com/bernardodionisi/differences/blob/main/differences/did/did_cal.py)
-- `std_ipw_did_rc`:
-  - [R ref](https://github.com/pedrohcgs/DRDID/blob/master/R/std_ipw_did_rc.R)
-  - [Python `Difference` package](https://github.com/bernardodionisi/differences/blob/main/differences/did/did_cal.py)
-- `reg_did_rc`:
-  - [R ref](https://github.com/pedrohcgs/DRDID/blob/master/R/reg_did_rc.R)
-  - [Python `Difference` package](https://github.com/bernardodionisi/differences/blob/main/differences/did/did_cal.py)
-- `drdid_rc`:
-  - [R ref](https://github.com/pedrohcgs/DRDID/blob/master/R/drdid.R)
-  - [Python `Difference` package](https://github.com/bernardodionisi/differences/blob/main/differences/did/did_cal.py)
+This project is based on the original [did R
+package](https://github.com/bcallaway11/did).
 
-![](did/att_gt/att_gt.png)
+## Instalation
 
-## `simulate data`
+You can install **csdid** from `pypi` with:
 
-![](did/sim_data/sim.png)
+    pip install csdid
+
+or via github:
+
+    pip install git+https://github.com/d2cml-ai/csdid/
+
+### Dependencies
+
+Additionally, I have created an additional library called `drdid`, which
+can be installed via GitHub.
+
+    pip install git+https://github.com/d2cml-ai/DRDID
+
+## Basic Example
+
+The following is a simplified example of the effect of states increasing
+their minimum wages on county-level teen employment rates which comes
+from [Callaway and Sant’Anna
+(2021)](https://authors.elsevier.com/a/1cFzc15Dji4pnC).
+
+- [More detailed examples are also
+  available](https://bcallaway11.github.io/did/articles/did-basics.html)
+
+A subset of the data is available in the package and can be loaded by
+
+``` python
+from csdid.att_gt import ATTgt
+import pandas as pd
+data = pd.read_csv("https://raw.githubusercontent.com/d2cml-ai/csdid/function-aggte/data/mpdta.csv")
+```
+
+The dataset contains 500 observations of county-level teen employment
+rates from 2003-2007. Some states are first treated in 2004, some in
+2006, and some in 2007 (see the paper for more details). The important
+variables in the dataset are
+
+- **lemp** This is the log of county-level teen employment. It is the
+  outcome variable
+
+- **first.treat** This is the period when a state first increases its
+  minimum wage. It can be 2004, 2006, or 2007. It is the variable that
+  defines *group* in this application
+
+- **year** This is the year and is the *time* variable
+
+- **countyreal** This is an id number for each county and provides the
+  individual identifier in this panel data context
+
+To estimate group-time average treatment effects, use the
+**ATTgt().fit()** method
+
+``` python
+out = ATTgt(yname = "lemp",
+              gname = "first.treat",
+              idname = "countyreal",
+              tname = "year",
+              xformla = f"lemp~1",
+              data = data,
+              ).fit(est_method = 'dr')
+```
+
+Summary table
+
+``` python
+out.summ_attgt().summary2
+```
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+&#10;    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+&#10;    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+|     | Group | Time | ATT(g, t) | Post | Std. Error | \[95% Pointwise | Conf. Band\] |     |
+|-----|-------|------|-----------|------|------------|-----------------|--------------|-----|
+| 0   | 2004  | 2004 | -0.0105   | 1    | 0.0307     | -0.0917         | 0.0707       |     |
+| 1   | 2004  | 2005 | -0.0704   | 1    | 0.0429     | -0.1841         | 0.0433       |     |
+| 2   | 2004  | 2006 | -0.1373   | 1    | 0.0491     | -0.2673         | -0.0072      | \*  |
+| 3   | 2004  | 2007 | -0.1008   | 1    | 0.0461     | -0.2229         | 0.0213       |     |
+| 4   | 2006  | 2004 | 0.0065    | 0    | 0.0324     | -0.0792         | 0.0923       |     |
+| 5   | 2006  | 2005 | -0.0028   | 0    | 0.0271     | -0.0746         | 0.0691       |     |
+| 6   | 2006  | 2006 | -0.0046   | 1    | 0.0243     | -0.0690         | 0.0598       |     |
+| 7   | 2006  | 2007 | -0.0412   | 1    | 0.0299     | -0.1203         | 0.0379       |     |
+| 8   | 2007  | 2004 | 0.0305    | 0    | 0.0270     | -0.0410         | 0.1021       |     |
+| 9   | 2007  | 2005 | -0.0027   | 0    | 0.0285     | -0.0783         | 0.0728       |     |
+| 10  | 2007  | 2006 | -0.0311   | 0    | 0.0315     | -0.1145         | 0.0523       |     |
+| 11  | 2007  | 2007 | -0.0261   | 1    | 0.0288     | -0.1023         | 0.0502       |     |
+
+</div>
+
+plots
+
+``` python
+out.plot_attgt(ylim=(-.25, .1))
+```
+
+    C:\Users\Jhon\AppData\Local\Programs\Python\Python38\lib\site-packages\plotnine\layer.py:364: PlotnineWarning: geom_errorbar : Removed 2 rows containing missing values.
+
+![](README_files/figure-commonmark/cell-5-output-2.png)
+
+    <Figure Size: (640 x 480)>
+
+``` python
+out.aggte(typec='calendar')
+```
+
+
+
+    Overall summary of ATT's based on calendar time aggregation:
+        ATT Std. Error  [95.0%  Conf. Int.] 
+    -0.0417      0.022 -0.0849       0.0015 
+
+
+    Time Effects (calendar):
+       Time  Estimate  Std. Error  [95.0% Simult.   Conf. Band  
+    0  2004   -0.0105      0.0313          -0.0719      0.0509  
+    1  2005   -0.0704      0.0410          -0.1507      0.0099  
+    2  2006   -0.0488      0.0266          -0.1009      0.0033  
+    3  2007   -0.0371      0.0231          -0.0824      0.0083  
+    ---
+    Signif. codes: `*' confidence band does not cover 0
+    Control Group:  Never Treated , 
+    Anticipation Periods:  0
+    Estimation Method:  Doubly Robust
+
+    <csdid.att_gt.ATTgt at 0x27d39c122e0>
+
+``` python
+out.plot_aggte()
+```
+
+![](README_files/figure-commonmark/cell-7-output-1.png)
+
+    <Figure Size: (640 x 480)>
