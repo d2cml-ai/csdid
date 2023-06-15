@@ -21,7 +21,14 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Topic :: Scientific/Engineering",
     ],
-  # install_requires=requi,
+  install_requires=[
+        'pandas',
+        'numpy<=1.24.3',
+        'scipy',
+        'patsy',
+        'plotnine',
+        'twine'
+  ],
   packages=find_packages(),
   package_data={
     'data': ['data/*'],

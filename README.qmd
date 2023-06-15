@@ -123,7 +123,7 @@ out.summ_attgt().summary2
 plots
 
 ```{python}
-out.plot_attgt(ylim=(-.25, .1))
+out.plot_attgt()
 ```
 
 
