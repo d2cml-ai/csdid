@@ -22,10 +22,15 @@ jobs:
           cache: "pip"
       - run: pip install -r requirements.txt
 
-      - name: Build and publish
-        # env:
-        #   TWINE_USERNAME: tjhonk
-        #   TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      - name: Build Package
+        run: |
+          python setup.py sdist bdist_wheel
+
+      - name: Upload to PyPi
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USER}}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           sudo apt-get install tree
           tree /home/runner/work/csdid
+          twine upload dist/*
