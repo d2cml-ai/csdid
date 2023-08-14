@@ -16,7 +16,7 @@ import numpy as np, pandas as pd
 
 # class ATTgt(AGGte):
 class ATTgt:
-  def __init__(self, yname, tname, idname, gname, data, control_group = ['nevertreated', 'notyertreated'], 
+  def __init__(self, yname, tname, idname, gname, data, control_group = ['nevertreated', 'notyettreated'], 
   xformla: str = None, panel = True, allow_unbalanced_panel = True, 
   clustervar = None, weights_name = None, anticipation = 0, 
   cband = False, biters = 1000, alp = 0.05
