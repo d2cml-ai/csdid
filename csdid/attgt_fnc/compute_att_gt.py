@@ -79,7 +79,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
 
       if not never_treated:
         n1 = data[gname] == 0
-        n2 = (data[gname] > (tlist[np.max([t, pret]) + tfac]) + anticipation)
+        n2 = (data[gname] > (tlist[np.max([t_i, pret]) + tfac]) + anticipation)
         n3 = np.where(data[gname] != glist[g], True, False)
         row_eval = n1 | n2 & n3
         data = data.assign(C = 1 * row_eval)
@@ -88,8 +88,6 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
       disdat = data[(data[tname] == tn) | (data[tname] == tlist[pret])]
 
       if panel: 
-        #! delete
-        est_method = "reg"
         disdat = panel2cs2(disdat, yname, idname, tname)
         disdat = disdat.dropna()
         n = len(disdat)
