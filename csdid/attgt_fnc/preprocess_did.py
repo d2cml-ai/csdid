@@ -28,9 +28,18 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
 
   if xformla is None:
     xformla = f'{yname} ~ 1'
-  _, x_cov = fml(xformla, data = data, return_type='dataframe')
-  _, n_cov = x_cov.shape
 
+  # if xformla is None:
+  try:
+    xformla = f'{yname} ~ 1'
+    _, x_cov = fml(xformla, data = data, return_type='dataframe')
+    _, n_cov = x_cov.shape
+  except:
+    data_spark = data.withColumn("intercept", lit(1))
+    n_cov = len(data_spark.columns)
+    # patsy dont work with pyspark
+
+    pass
 
   data = pd.concat([data[columns], x_cov], axis=1)
   data = data.assign(w = w)
