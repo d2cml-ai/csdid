@@ -131,7 +131,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
         G = disdat.G_m.to_numpy()
         C = disdat.C.to_numpy()
         Y = disdat[yname].to_numpy()
-        post = 1 * (disdat[tname] == tlist[t_i + tfac])
+        post = 1 * (disdat[tname] == tlist[t_i + tfac]).to_numpy()
         w = disdat.w.to_numpy()
 
         # G, C, Y, post, w = map(np.array, [G, C, Y, post, w])
