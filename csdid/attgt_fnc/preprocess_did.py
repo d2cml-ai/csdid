@@ -34,14 +34,15 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     xformla = f'{yname} ~ 1'
     _, x_cov = fml(xformla, data = data, return_type='dataframe')
     _, n_cov = x_cov.shape
+    data = pd.concat([data[columns], x_cov], axis=1)
   except:
-    data_spark = data.withColumn("intercept", lit(1))
+    data = data.assign(intercept = 1)
+    clms = columns + ['intercept']
     n_cov = len(data_spark.columns)
     # patsy dont work with pyspark
+    data = data[clms]
 
-    pass
 
-  data = pd.concat([data[columns], x_cov], axis=1)
   data = data.assign(w = w)
   data = data.dropna()
   ndiff = n - len(data) 
