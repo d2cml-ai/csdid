@@ -38,7 +38,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
   except:
     data = data.assign(intercept = 1)
     clms = columns + ['intercept']
-    n_cov = len(data_spark.columns)
+    n_cov = len(data.columns)
     # patsy dont work with pyspark
     data = data[clms]
 
