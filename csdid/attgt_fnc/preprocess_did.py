@@ -82,8 +82,13 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
   treated_fp = (data[gname] <= fp) & ~(data[gname] == 0)
   treated_fp.fillna(False, inplace=True)
 
-  nfirst_period = np.sum(treated_fp) if panel \
-    else len(data.loc[treated_fp, idname].unique())
+  try:
+
+    nfirst_period = np.sum(treated_fp) if panel \
+      else len(data.loc[treated_fp, idname].unique())
+  except:
+    nfirst_period = treated_fp.sum() if panel \
+      else len(data.loc[treated_fp, idname].unique())
 
   if nfirst_period > 0:
     warning_message = f"Dropped {nfirstperiod} units that were already treated in the first period."
