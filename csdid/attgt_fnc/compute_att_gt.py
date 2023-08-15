@@ -121,7 +121,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
         add_att_data(att_gt, inf_f=inf_zeros)
 
       if not panel:
-        right_ids = np.array(disdat.query('(G_m == 1) or (C == 1)').rowid)
+        right_ids = np.array(disdat.query('(G_m == 1) or (C == 1)').rowid.to_numpy())
         dis_idx = (data['rowid'].isin(right_ids)) &\
           ((data[tname] == tlist[t_i + tfac]) |\
             (data[tname] == tlist[pret]))
