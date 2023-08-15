@@ -131,7 +131,10 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
       n = len(data.query(f'{tname} == @tn'))
   # add rowid
   if not panel:
-    keepers = data.dropna().index
+    try:
+      keepers = data.dropna().index
+    except:
+      keepers = data.dropna().index.to_numpy()
     ndiff = len(data.loc[keepers]) - len(data)
     if len(keepers) == 0:
       raise "All observations dropped due to missing data problems."
