@@ -53,8 +53,8 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
   if ndiff != 0: 
     print(f'dropped, {ndiff}, rows from original data due to missing data')
 
-  tlist = np.sort(data[tname].unique())
-  glist = np.sort(data[gname].unique())
+  tlist = np.sort(data[tname].unique().to_numpy())
+  glist = np.sort(data[gname].unique().to_numpy())
 
   asif_nev_treated = data[gname] > np.max(tlist)
   asif_nev_treated.fillna(False, inplace=True)
