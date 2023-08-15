@@ -144,13 +144,14 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
       data = data.assign(rowid = range(len(data)))
       idname = 'rowid'
     else:
-      r_id = np.array(data[idname])
-      data = data.assign(rowid = r_id)
+      # r_id = np.array(data[idname])
+      data = data.assign(rowid = lambda x: x[idname] * 1)
     
     n = len(data[idname].unique())
 
   data = data.sort_values([idname, tname])
-  data.loc[:, ".w"] = data['w']
+  data = data.assign(w1 = lambda x: x['w'] * 1)
+  # data.loc[:, ".w"] = data['w']
   if len(glist) == 0:
     raise f"No valid groups. The variable in '{gname}' should be expressed as the time a unit is first treated (0 if never-treated)."
   if len(tlist) == 2:
@@ -165,7 +166,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     gpaste = ",".join(map(str, gsize[gname]))
     warnings.warn(f"Be aware that there are some small groups in your dataset.\n  Check groups: {gpaste}.")
 
-    if 0 in gsize[gname].tolist() and control_group == "nevertreated":
+    if 0 in gsize[gname].to_numpy() and control_group == "nevertreated":
       raise "Never-treated group is too small, try setting control_group='notyettreated'."
   nT, nG = map(len, [tlist, glist])
   did_params = {
