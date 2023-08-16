@@ -38,6 +38,7 @@ class ATTgt:
     dp = self.dp
     result, inffunc = compute_att_gt(dp)
     att = result['att']
+    crit_val, se, V = 0, 0, 0
     if bstrap:
       ref_se = mboot(inffunc.T, dp)
       crit_val, se = ref_se['crit_val'], ref_se['se']
