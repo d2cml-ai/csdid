@@ -159,8 +159,15 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
         if skip_this_att_gt:
           add_att_data()
 
-        _, covariates = fml(xformla, data = disdat, return_type = 'dataframe')
-        covariates = np.array(covariates)
+        try:
+          _, covariates = fml(xformla, data = disdat, return_type = 'dataframe')
+          covariates = np.array(covariates)
+        except:
+          y_str, x_str = xformla.split("~")
+          xs1 = x_str.split('+')
+          xs1_col_names = [x.strip() for x in xs1 if x.strip() != '1']
+          covariates = disdat[xs1_col_names].to_numpy()
+        
         #! todo estmedho
 
         if callable(est_method):
