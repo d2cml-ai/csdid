@@ -167,8 +167,12 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
           xs1 = x_str.split('+')
           xs1_col_names = [x.strip() for x in xs1 if x.strip() != '1']
           n_dis = len(disdat)
-          covariates = disdat[xs1_col_names].to_numpy()
-          print(n_dis, covariates)
+          ones = np.ones((n_dis, 1))
+          try:
+            covariates = disdat[xs1_col_names].to_numpy()
+            covariates = np.append(covariates, ones, axis=1)
+          except:
+            covariates = ones
 
         
         #! todo estmedho
