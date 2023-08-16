@@ -193,7 +193,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
         )
         inf_zeros = np.zeros(n)
         aggte_infffuc = inf_func_df.groupby('right_ids').inf_func.sum()
-        dis_idx1 = np.isin(data['rowid'].unique(), aggte_infffuc.index)
+        dis_idx1 = np.isin(data['rowid'].unique().to_numpy(), aggte_infffuc.index)
         inf_zeros[dis_idx1] = np.array(aggte_infffuc)
 
         add_att_data(att_gt, pst = post_treat, inf_f=inf_zeros)
