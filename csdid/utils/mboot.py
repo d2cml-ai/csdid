@@ -12,7 +12,7 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
     clustervars     = DIDparams['clustervars']
     biters          = DIDparams['biters']
     tname           = DIDparams['tname']
-    tlist           = np.sort( np.unique(data[tname]) )
+    tlist           = np.sort(data[tname].unique().to_numpy())
     alp             = DIDparams['alp']
     panel           = DIDparams['panel']
     true_repeated_cross_sections = DIDparams['true_repeated_cross_sections']
