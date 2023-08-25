@@ -7,7 +7,7 @@ from csdid.utils.bmisc import multiplier_bootstrap
 
 def mboot(inf_func, DIDparams, pl=False, cores=1):
     # Setup needed variables
-    data            = pd.DataFrame( DIDparams['data'] )
+    data            = DIDparams['data'] 
     idname          = DIDparams['idname']
     clustervars     = DIDparams['clustervars']
     biters          = DIDparams['biters']
