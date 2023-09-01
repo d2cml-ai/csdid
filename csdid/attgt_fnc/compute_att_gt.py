@@ -175,7 +175,6 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
             covariates = ones
 
         
-        #! todo estmedho
 
         if callable(est_method):
           est_att_f = est_method
