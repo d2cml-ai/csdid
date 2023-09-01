@@ -17,7 +17,8 @@ def wif(keepers, pg, weights_ind, G, group):
         numerator = (weights_ind * 1 * TorF(G == group[k])) - pg[k]
         # denominator = sum(np.array(pg)[keepers]) )[:, None]  
         denominator = np.sum(pg[keepers])
-        result = numerator.to_numpy()[:, None]  / denominator
+
+        result = numerator[:, None]  / denominator
         if1[:, i] = result.squeeze()
     
     # effect of estimating weights in the denominator
