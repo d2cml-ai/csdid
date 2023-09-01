@@ -136,11 +136,11 @@ def compute_aggte(MP,
         
     # Set the weights
     # return data.columns
-    weights_ind = dta['w1']
+    weights_ind = dta['w1'].to_numpy()
     
     # We can work in overall probabilities because conditioning will cancel out
     # since it shows up in numerator and denominator
-    pg = np.array([np.mean(weights_ind * (dta[gname] == g)) for g in originalglist])
+    pg = np.array([np.mean(weights_ind * (dta[gname].to_numpy() == g)) for g in originalglist])
     
     # Length of this is equal to the number of groups
     pgg = pg
