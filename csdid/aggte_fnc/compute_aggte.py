@@ -152,7 +152,7 @@ def compute_aggte(MP,
     keepers = [i for i in range(len(group)) if group[i] <= t[i] <= (group[i] + max_e)] ### added second condition to allow for limit on longest period included in att
     
     # n x 1 vector of group variable
-    G = [orig2t(g) for g in dta[gname]]
+    G = [orig2t(g) for g in dta[gname].to_numpy()]
 
 # =============================================================================
 #  simple
