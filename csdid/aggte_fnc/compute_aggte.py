@@ -30,7 +30,7 @@ def compute_aggte(MP,
     dp          = MP['DIDparams']
     tlist       = np.array( dp['tlist'] )
     glist       = np.array( dp['glist'] )
-    data        = pd.DataFrame( dp['data'] )    
+    data        = dp['data']     
     inffunc     = MP['inffunc']['inffunc']
     n           = MP['n']
     gname       = dp['gname']
@@ -100,6 +100,8 @@ def compute_aggte(MP,
         dta = data[data[tname] == tlist[0]]
     else:
         print(idname)
+        # da
+        # return 
         dta = data.groupby([idname]).mean().reset_index()
         dta = dta.iloc[:, 1:]
 
