@@ -135,6 +135,7 @@ def compute_aggte(MP,
     maxT  = max(t)
         
     # Set the weights
+    return data.columns
     weights_ind = dta['.w']
     
     # We can work in overall probabilities because conditioning will cancel out
