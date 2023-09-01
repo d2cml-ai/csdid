@@ -30,7 +30,7 @@ def compute_aggte(MP,
     dp          = MP['DIDparams']
     tlist       = np.array( dp['tlist'] )
     glist       = np.array( dp['glist'] )
-    data        = dp['data']     
+    data        = pd.DataFrame(dp['data'])
     inffunc     = MP['inffunc']['inffunc']
     n           = MP['n']
     gname       = dp['gname']
