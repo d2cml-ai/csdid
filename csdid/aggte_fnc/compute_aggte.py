@@ -136,7 +136,7 @@ def compute_aggte(MP,
         
     # Set the weights
     # return data.columns
-    weights_ind = dta['.w']
+    weights_ind = dta['w1']
     
     # We can work in overall probabilities because conditioning will cancel out
     # since it shows up in numerator and denominator
