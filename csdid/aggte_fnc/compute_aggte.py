@@ -30,7 +30,7 @@ def compute_aggte(MP,
     dp          = MP['DIDparams']
     tlist       = np.array( dp['tlist'] )
     glist       = np.array( dp['glist'] )
-    data        = pd.DataFrame( dp['data'] )    
+    data        = dp['data']
     inffunc     = MP['inffunc']['inffunc']
     n           = MP['n']
     gname       = dp['gname']
@@ -132,11 +132,12 @@ def compute_aggte(MP,
     maxT  = max(t)
         
     # Set the weights
-    weights_ind = dta['.w']
+    # return data.columns
+    weights_ind = dta['w1'].to_numpy()
     
     # We can work in overall probabilities because conditioning will cancel out
     # since it shows up in numerator and denominator
-    pg = np.array([np.mean(weights_ind * (dta[gname] == g)) for g in originalglist])
+    pg = np.array([np.mean(weights_ind * (dta[gname].to_numpy() == g)) for g in originalglist])
     
     # Length of this is equal to the number of groups
     pgg = pg
@@ -148,7 +149,7 @@ def compute_aggte(MP,
     keepers = [i for i in range(len(group)) if group[i] <= t[i] <= (group[i] + max_e)] ### added second condition to allow for limit on longest period included in att
     
     # n x 1 vector of group variable
-    G = [orig2t(g) for g in dta[gname]]
+    G = [orig2t(g) for g in dta[gname].to_numpy()]
 
 # =============================================================================
 #  simple

@@ -7,12 +7,15 @@ from csdid.utils.bmisc import multiplier_bootstrap
 
 def mboot(inf_func, DIDparams, pl=False, cores=1):
     # Setup needed variables
-    data            = pd.DataFrame( DIDparams['data'] )
+    data            = DIDparams['data'] 
     idname          = DIDparams['idname']
     clustervars     = DIDparams['clustervars']
     biters          = DIDparams['biters']
     tname           = DIDparams['tname']
-    tlist           = np.sort( np.unique(data[tname]) )
+    try:
+        tlist           = np.sort(data[tname].unique())
+    except:
+        tlist           = np.sort(data[tname].unique().to_numpy())
     alp             = DIDparams['alp']
     panel           = DIDparams['panel']
     true_repeated_cross_sections = DIDparams['true_repeated_cross_sections']

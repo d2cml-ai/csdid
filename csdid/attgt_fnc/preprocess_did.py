@@ -28,19 +28,37 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
 
   if xformla is None:
     xformla = f'{yname} ~ 1'
-  _, x_cov = fml(xformla, data = data, return_type='dataframe')
-  _, n_cov = x_cov.shape
+
+  # if xformla is None:
+  try:
+    xformla = f'{yname} ~ 1'
+    _, x_cov = fml(xformla, data = data, return_type='dataframe')
+    _, n_cov = x_cov.shape
+    data = pd.concat([data[columns], x_cov], axis=1)
+    data = data.assign(w = w)
+  except:
+    data = data.assign(intercept = 1)
+    clms = columns + ['intercept']
+    n_cov = len(data.columns)
+    # patsy dont work with pyspark
+    data = data[clms]
+    if weights_name is None:
+      data = data.assign(w = 1)
+    else:
+      data = data.assign(w = lambda x: x[weights_name] * 1)
 
 
-  data = pd.concat([data[columns], x_cov], axis=1)
-  data = data.assign(w = w)
   data = data.dropna()
   ndiff = n - len(data) 
   if ndiff != 0: 
     print(f'dropped, {ndiff}, rows from original data due to missing data')
+  try:
 
-  tlist = np.sort(data[tname].unique())
-  glist = np.sort(data[gname].unique())
+    tlist = np.sort(data[tname].unique())
+    glist = np.sort(data[gname].unique())
+  except:
+    tlist = np.sort(data[tname].unique().to_numpy())
+    glist = np.sort(data[gname].unique().to_numpy())
 
   asif_nev_treated = data[gname] > np.max(tlist)
   asif_nev_treated.fillna(False, inplace=True)
@@ -64,8 +82,13 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
   treated_fp = (data[gname] <= fp) & ~(data[gname] == 0)
   treated_fp.fillna(False, inplace=True)
 
-  nfirst_period = np.sum(treated_fp) if panel \
-    else len(data.loc[treated_fp, idname].unique())
+  try:
+
+    nfirst_period = np.sum(treated_fp) if panel \
+      else len(data.loc[treated_fp, idname].unique())
+  except:
+    nfirst_period = treated_fp.sum() if panel \
+      else len(data.loc[treated_fp, idname].unique())
 
   if nfirst_period > 0:
     warning_message = f"Dropped {nfirst_period} units that were already treated in the first period."
@@ -108,7 +131,8 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
       n = len(data.query(f'{tname} == @tn'))
   # add rowid
   if not panel:
-    keepers = data.dropna().index
+
+    keepers = data.dropna().index.to_numpy()
     ndiff = len(data.loc[keepers]) - len(data)
     if len(keepers) == 0:
       raise "All observations dropped due to missing data problems."
@@ -116,16 +140,18 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
       mssg = f"Dropped {ndiff} observations that had missing data."
       data = data.loc[keepers]
     if true_rep_cross_section: 
+      # fix: posible error
       data = data.assign(rowid = range(len(data)))
       idname = 'rowid'
     else:
-      r_id = np.array(data[idname])
-      data = data.assign(rowid = r_id)
+      # r_id = np.array(data[idname])
+      data = data.assign(rowid = lambda x: x[idname] * 1)
     
     n = len(data[idname].unique())
 
   data = data.sort_values([idname, tname])
-  data.loc[:, ".w"] = data['w']
+  data = data.assign(w1 = lambda x: x['w'] * 1)
+  # data.loc[:, ".w"] = data['w']
   if len(glist) == 0:
     raise f"No valid groups. The variable in '{gname}' should be expressed as the time a unit is first treated (0 if never-treated)."
   if len(tlist) == 2:
@@ -140,7 +166,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     gpaste = ",".join(map(str, gsize[gname]))
     warnings.warn(f"Be aware that there are some small groups in your dataset.\n  Check groups: {gpaste}.")
 
-    if 0 in gsize[gname].tolist() and control_group == "nevertreated":
+    if 0 in gsize[gname].to_numpy() and control_group == "nevertreated":
       raise "Never-treated group is too small, try setting control_group='notyettreated'."
   nT, nG = map(len, [tlist, glist])
   did_params = {

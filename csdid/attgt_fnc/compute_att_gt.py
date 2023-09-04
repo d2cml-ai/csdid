@@ -121,20 +121,21 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
         add_att_data(att_gt, inf_f=inf_zeros)
 
       if not panel:
-        right_ids = np.array(disdat.query('(G_m == 1) or (C == 1)').rowid)
+        right_ids = np.array(disdat.query('(G_m == 1) or (C == 1)').rowid.to_numpy())
         dis_idx = (data['rowid'].isin(right_ids)) &\
           ((data[tname] == tlist[t_i + tfac]) |\
             (data[tname] == tlist[pret]))
 
         disdat = data.loc[dis_idx]
 
-        G = disdat.G_m
-        C = disdat.C
-        Y = disdat[yname]
-        post = 1 * (disdat[tname] == tlist[t_i + tfac])
-        w = disdat.w
+        G = disdat.G_m.to_numpy()
+        C = disdat.C.to_numpy()
+        Y = disdat[yname].to_numpy()
+        post = 1 * (disdat[tname] == tlist[t_i + tfac]).to_numpy()
+        w = disdat.w.to_numpy()
 
-        G, C, Y, post, w = map(np.array, [G, C, Y, post, w])
+        # G, C, Y, post, w = map(np.array, [G, C, Y, post, w])
+
 
         n1 = sum(G + C)
 
@@ -158,9 +159,22 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
         if skip_this_att_gt:
           add_att_data()
 
-        _, covariates = fml(xformla, data = disdat, return_type = 'dataframe')
-        covariates = np.array(covariates)
-        #! todo estmedho
+        try:
+          _, covariates = fml(xformla, data = disdat, return_type = 'dataframe')
+          covariates = np.array(covariates)
+        except:
+          y_str, x_str = xformla.split("~")
+          xs1 = x_str.split('+')
+          xs1_col_names = [x.strip() for x in xs1 if x.strip() != '1']
+          n_dis = len(disdat)
+          ones = np.ones((n_dis, 1))
+          try:
+            covariates = disdat[xs1_col_names].to_numpy()
+            covariates = np.append(covariates, ones, axis=1)
+          except:
+            covariates = ones
+
+        
 
         if callable(est_method):
           est_att_f = est_method
@@ -178,7 +192,10 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
         )
         inf_zeros = np.zeros(n)
         aggte_infffuc = inf_func_df.groupby('right_ids').inf_func.sum()
-        dis_idx1 = np.isin(data['rowid'].unique(), aggte_infffuc.index)
+        try:
+          dis_idx1 = np.isin(data['rowid'].unique(), aggte_infffuc.index.to_numpy())
+        except:
+          dis_idx1 = np.isin(data['rowid'].unique().to_numpy(), aggte_infffuc.index.to_numpy())
         inf_zeros[dis_idx1] = np.array(aggte_infffuc)
 
         add_att_data(att_gt, pst = post_treat, inf_f=inf_zeros)
