@@ -52,8 +52,8 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     else:
       value = np.max(glist) - anticipation
       data = data.query(f'{tname} < @value')
-      tlist = np.sort(data_nona[tname].unique())
-      glist = np.sort(data_nona[gname].unique())
+      tlist = np.sort(data[tname].unique())
+      glist = np.sort(data[gname].unique())
       glist = glist[glist < np.max(glist)]
 
   glist = glist[glist > 0]
@@ -72,8 +72,8 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     print(warning_message)
     glist_in = np.append(glist, [0])
     data = data.query(f'{gname} in @glist_in')
-    tlist = np.sort(data_nona[tname].unique())
-    glist = np.sort(data_nona[gname].unique())
+    tlist = np.sort(data[tname].unique())
+    glist = np.sort(data[gname].unique())
     glist = glist[glist > 0]
     fp = tlist[0]
     glist = glist[glist > fp + anticipation]
