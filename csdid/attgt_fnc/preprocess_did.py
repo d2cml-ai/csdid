@@ -68,7 +68,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     else len(data.loc[treated_fp, idname].unique())
 
   if nfirst_period > 0:
-    warning_message = f"Dropped {nfirstperiod} units that were already treated in the first period."
+    warning_message = f"Dropped {nfirst_period} units that were already treated in the first period."
     print(warning_message)
     glist_in = np.append(glist, [0])
     data = data.query(f'{gname} in @glist_in')
