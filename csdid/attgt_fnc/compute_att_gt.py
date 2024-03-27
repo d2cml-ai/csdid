@@ -145,7 +145,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
           skip_this_att_gt = True 
 
         if np.sum(G * (1 - post)) == 0:
-          print(f"No units in group {g} in time period {t}")
+          print(f"No units in group {g} in time period {tn}")
           skip_this_att_gt = True 
 
         if np.sum(C * post) == 0:
@@ -153,7 +153,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
           skip_this_att_gt = True 
 
         if np.sum(C * (1 - post)) == 0:
-          print(f"No available control units for group {g} in time period {t}")
+          print(f"No available control units for group {g} in time period {tn}")
           skip_this_att_gt = True 
 
         if skip_this_att_gt:
