@@ -38,7 +38,11 @@ class ATTgt:
     dp = self.dp
     result, inffunc = compute_att_gt(dp)
     att = result['att']
-    crit_val, se, V = np.zeros(len(att)), np.zeros(len(att)), np.zeros(len(att))
+    crit_val, se, V = (
+            1.96,
+            np.std(inffunc, axis=1) / np.sqrt(n_len),
+            np.zeros(len(att)),
+        )
     if bstrap:
       ref_se = mboot(inffunc.T, dp)
       crit_val, se = ref_se['crit_val'], ref_se['se']
