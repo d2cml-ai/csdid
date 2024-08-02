@@ -31,12 +31,13 @@ class ATTgt:
     dp['alp'] = alp
     dp['true_repeated_cross_sections'] = dp['true_rep_cross_section']
     dp['cband'] = cband
+    dp['panel'] = panel
     self.dp = dp
 
   def fit(self, est_method = 'dr', base_period = 'varying', bstrap = True):
     # print(self.dp)
     dp = self.dp
-    result, inffunc = compute_att_gt(dp)
+    result, inffunc = compute_att_gt(dp, est_method = est_method, base_period = base_period)
     att = result['att']
     n_len = list(map(len, inffunc))
     crit_val, se, V = (
