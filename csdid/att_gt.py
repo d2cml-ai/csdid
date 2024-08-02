@@ -42,7 +42,7 @@ class ATTgt:
     n_len = list(map(len, inffunc))
     crit_val, se, V = (
             1.96,
-            np.std(inffunc, axis=1) / np.sqrt(n_len),
+            np.std(inffunc, axis=1, ddof = 1) / np.sqrt(n_len),
             np.zeros(len(att)),
         )
     if bstrap:
