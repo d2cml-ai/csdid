@@ -1,6 +1,6 @@
 import numpy as np, pandas as pd
 import patsy 
-from drdid import drdid, reg_did
+from drdid import drdid, reg_did, ipwd_did
 
 from csdid.utils.bmisc import panel2cs2
 
@@ -109,6 +109,8 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
           est_att_f = est_method
         elif est_method == "reg":
           est_att_f = reg_did.reg_did_panel
+        elif est_method == "ipw":
+          est_att_f = ipwd_did.std_ipw_did_panel
         elif est_method == "dr":
           est_att_f = drdid.drdid_panel
 
@@ -180,6 +182,8 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
           est_att_f = est_method
         elif est_method == "reg":
           est_att_f = reg_did.reg_did_rc
+        elif est_method == "ipw":
+          est_att_f = ipwd_did.std_ipw_did_rc
         elif est_method == "dr":
           est_att_f = drdid.drdid_rc
         att_gt, att_inf_func = est_att_f(y=Y, post=post, D = G, i_weights=w, covariates=covariates)
