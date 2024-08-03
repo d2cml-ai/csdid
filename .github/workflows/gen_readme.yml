@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: "3.10"
           cache: "pip"
-      - run: pip uninstall csdid; pip install git+https://github.com/d2cml-ai/csdid/; pip install nbclient nbformat PyYAML
+      - run: pip uninstall csdid; pip install git+https://github.com/d2cml-ai/csdid/; pip install nbclient nbformat PyYAML; pip install git+https://github.com/d2cml-ai/DRDID
       - name: Install Dependencies
         run: pip install -r requirements.txt
 
