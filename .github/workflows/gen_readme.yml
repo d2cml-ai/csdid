@@ -39,7 +39,7 @@ jobs:
           git config --local user.email "actions@github.com"
           git add -A
           git commit -m "Update Readme"
-          git push origin test
+          git push origin main
         env:
           REPO_KEY: ${{ secrets.GITHUB_TOKEN }}
           username: github-actions
