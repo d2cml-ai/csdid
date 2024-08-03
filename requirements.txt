@@ -4,4 +4,5 @@ scipy
 patsy
 plotnine
 ipykernel
+joblib
 twine
