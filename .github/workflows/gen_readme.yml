@@ -3,7 +3,7 @@ name: Actualizar Readme
 on:
   push:
     branches:
-      - main
+      - run_readme
     # - cron: "40 15 * * 1,3,5"
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
           git config --local user.email "actions@github.com"
           git add -A
           git commit -m "Update Readme"
-          git push origin main
+          git push origin run_readme
         env:
           REPO_KEY: ${{ secrets.GITHUB_TOKEN }}
           username: github-actions
