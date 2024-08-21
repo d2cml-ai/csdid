@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&lt;no title&gt; &mdash; CSDID  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CSDID
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Example Notebooks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/csdid_basic.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/csdid_basic.html#Examples-with-simulated-data">Examples with simulated data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/csdid_basic.html#An-example-with-real-data">An example with real data</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CSDID</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">&lt;no title&gt;</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/test/python_results.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span><span class="o">,</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span><span class="o">,</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+<span class="n">lm</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">WLS</span>
+<span class="kn">from</span> <span class="nn">csdid.att_gt</span> <span class="kn">import</span> <span class="n">ATTgt</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;../data/r_cohort.csv&#39;</span><span class="p">)</span>
+<span class="n">r_inf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;../data/r_inf.csv&#39;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>customer_id</th>
+      <th>ttm_gms</th>
+      <th>wplus</th>
+      <th>prime</th>
+      <th>time_period</th>
+      <th>treatment</th>
+      <th>ln_gms</th>
+      <th>first.treat</th>
+      <th>cohort</th>
+      <th>customer_id_num</th>
+      <th>post</th>
+      <th>treat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Pa0jpC-Dv2fTYelpx8erNpaYw</td>
+      <td>1643.55</td>
+      <td>wp_never</td>
+      <td>npa</td>
+      <td>1</td>
+      <td>0</td>
+      <td>7.404614</td>
+      <td>0</td>
+      <td>0</td>
+      <td>8681</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Pa0E0tPLH1dQ6qalsrWJ8lpxA</td>
+      <td>1405.19</td>
+      <td>wp_never</td>
+      <td>npa</td>
+      <td>1</td>
+      <td>0</td>
+      <td>7.247928</td>
+      <td>0</td>
+      <td>0</td>
+      <td>5683</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Pa0mRRL9DhSRqOah4yOYKMpaw</td>
+      <td>46839.30</td>
+      <td>wp_never</td>
+      <td>npa</td>
+      <td>1</td>
+      <td>0</td>
+      <td>10.754478</td>
+      <td>0</td>
+      <td>0</td>
+      <td>10307</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Pa0_dznuzjsRv6GDlIw1pLTsQ</td>
+      <td>631.88</td>
+      <td>wp_never</td>
+      <td>npa</td>
+      <td>1</td>
+      <td>0</td>
+      <td>6.448700</td>
+      <td>0</td>
+      <td>0</td>
+      <td>367</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Pa05HYdf_XvTb-aN6Mx2ws4iA</td>
+      <td>134.95</td>
+      <td>wp_never</td>
+      <td>npa</td>
+      <td>1</td>
+      <td>0</td>
+      <td>4.904904</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2128</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">reg_did_panel</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">covariates</span><span class="p">,</span> <span class="n">i_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">D</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+    <span class="n">deltaY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">int_cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">covariates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">covariates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">covariates</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">covariates</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">int_cov</span> <span class="o">=</span> <span class="n">covariates</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">int_cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">covariates</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">i_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">i_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">i_weights</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;i_weights must be non-negative&quot;</span><span class="p">)</span>
+
+    <span class="n">i_weights</span> <span class="o">=</span> <span class="n">i_weights</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">i_weights</span><span class="p">)</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">D</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">int_cov</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">deltaY</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">i_weights</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+    <span class="c1"># reg_coeff = np.linalg.lstsq(X * w[:, np.newaxis], y * w, rcond=None)[0]</span>
+    <span class="n">reg_coeff</span> <span class="o">=</span> <span class="n">lm</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span><span class="o">.</span><span class="n">params</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">reg_coeff</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">reg_coeff</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Outcome regression model coefficients have NA components. </span><span class="se">\n</span><span class="s2"> Multicollinearity (or lack of variation) of covariates is probably the reason for it.&quot;</span><span class="p">)</span>
+
+    <span class="n">out_delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">int_cov</span><span class="p">,</span> <span class="n">reg_coeff</span><span class="p">)</span>
+    <span class="n">w_treat</span> <span class="o">=</span> <span class="n">i_weights</span> <span class="o">*</span> <span class="n">D</span>
+    <span class="n">w_cont</span> <span class="o">=</span> <span class="n">i_weights</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">D</span><span class="p">)</span>
+    <span class="n">reg_att_treat</span> <span class="o">=</span> <span class="n">w_treat</span> <span class="o">*</span> <span class="n">deltaY</span>
+    <span class="n">reg_att_cont</span> <span class="o">=</span> <span class="n">w_cont</span> <span class="o">*</span> <span class="n">out_delta</span>
+    <span class="n">eta_treat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">reg_att_treat</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">w_treat</span><span class="p">)</span>
+    <span class="n">eta_cont</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">reg_att_cont</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">w_cont</span><span class="p">)</span>
+    <span class="n">reg_att</span> <span class="o">=</span> <span class="n">eta_treat</span> <span class="o">-</span> <span class="n">eta_cont</span>
+
+    <span class="n">weights_ols</span> <span class="o">=</span> <span class="n">i_weights</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">D</span><span class="p">)</span>
+    <span class="n">wols_x</span> <span class="o">=</span> <span class="n">weights_ols</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">int_cov</span>
+    <span class="n">wols_eX</span> <span class="o">=</span> <span class="n">weights_ols</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">deltaY</span> <span class="o">-</span> <span class="n">out_delta</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">int_cov</span>
+    <span class="n">XpX_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">wols_x</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">int_cov</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">asy_lin_rep_ols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">wols_eX</span><span class="p">,</span> <span class="n">XpX_inv</span><span class="p">)</span>
+
+    <span class="n">inf_treat</span> <span class="o">=</span> <span class="p">(</span><span class="n">reg_att_treat</span> <span class="o">-</span> <span class="n">w_treat</span> <span class="o">*</span> <span class="n">eta_treat</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">w_treat</span><span class="p">)</span>
+    <span class="c1"># print(np.sum(w_treat * eta_treat))</span>
+
+    <span class="n">inf_cont_1</span> <span class="o">=</span> <span class="p">(</span><span class="n">reg_att_cont</span> <span class="o">-</span> <span class="n">w_cont</span> <span class="o">*</span> <span class="n">eta_cont</span><span class="p">)</span>
+    <span class="n">M1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">w_cont</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">*</span> <span class="n">int_cov</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">inf_cont_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">asy_lin_rep_ols</span><span class="p">,</span> <span class="n">M1</span><span class="p">)</span>
+    <span class="n">inf_control</span> <span class="o">=</span> <span class="p">(</span><span class="n">inf_cont_1</span> <span class="o">+</span> <span class="n">inf_cont_2</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">w_cont</span><span class="p">)</span>
+
+    <span class="n">reg_att_inf_func</span> <span class="o">=</span> <span class="p">(</span><span class="n">inf_treat</span> <span class="o">-</span> <span class="n">inf_control</span><span class="p">)</span>
+    <span class="n">se_reg_att</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">reg_att_inf_func</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">reg_att</span><span class="p">,</span> <span class="n">reg_att_inf_func</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">ATTgt</span><span class="p">(</span><span class="n">yname</span><span class="o">=</span><span class="s2">&quot;ln_gms&quot;</span><span class="p">,</span><span class="n">gname</span><span class="o">=</span><span class="s2">&quot;first.treat&quot;</span><span class="p">,</span> <span class="n">idname</span><span class="o">=</span><span class="s2">&quot;customer_id_num&quot;</span><span class="p">,</span>
+     <span class="n">tname</span><span class="o">=</span><span class="s2">&quot;time_period&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">est_method</span><span class="o">=</span><span class="n">reg_did_panel</span><span class="p">)</span>
+<span class="c1"># Display the results</span>
+<span class="n">out</span><span class="o">.</span><span class="n">summ_attgt</span><span class="p">()</span><span class="o">.</span><span class="n">summary2</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[-0.07668271]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Group</th>
+      <th>Time</th>
+      <th>ATT(g, t)</th>
+      <th>Post</th>
+      <th>Std. Error</th>
+      <th>[95% Pointwise</th>
+      <th>Conf. Band]</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2</td>
+      <td>2</td>
+      <td>-0.0746</td>
+      <td>0</td>
+      <td>0.0316</td>
+      <td>-0.134</td>
+      <td>-0.0153</td>
+      <td>*</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inf_py</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">inf_f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1"># len(r_inf), len(inf_py)</span>
+<span class="n">r_inf</span><span class="p">[</span><span class="s1">&#39;py&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inf_py</span>
+<span class="n">r_inf</span><span class="p">[</span><span class="s1">&#39;diff_2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r_inf</span><span class="p">[</span><span class="s1">&#39;inf1&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">r_inf</span><span class="p">[</span><span class="s1">&#39;py&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">r_inf</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(17497, 3)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">r_inf</span><span class="p">[</span><span class="s1">&#39;inf1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">py</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">inf_f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">py</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.collections.PathCollection at 0x234cb706fb0&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/test_python_results_5_1.png" src="../_images/test_python_results_5_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">py</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/test_python_results_6_0.png" src="../_images/test_python_results_6_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">r_inf</span><span class="p">[</span><span class="s1">&#39;diff_2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+count    1.749700e+04
+mean     1.000000e+00
+std      3.329477e-14
+min      1.000000e+00
+25%      1.000000e+00
+50%      1.000000e+00
+75%      1.000000e+00
+max      1.000000e+00
+Name: diff_2, dtype: float64
+</pre></div></div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Quispe Rojas; Jhon Kevin Flores Rojas.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

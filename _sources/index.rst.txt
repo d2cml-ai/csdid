@@ -10,7 +10,7 @@ CSDID documentation
 
 .. toctree::
    :maxdepth: 2
-   :caption: Example Notebooks
+   :caption: CSDID Basic
 
    examples/csdid_basic.ipynb
 
