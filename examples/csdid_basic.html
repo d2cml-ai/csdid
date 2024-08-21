@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; CSDID  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="CSDID documentation" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            CSDID
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Example Notebooks</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#Examples-with-simulated-data">Examples with simulated data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Estimating-Group-Time-Average-Treatment-Effects">Estimating Group-Time Average Treatment Effects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Other-features-of-the-csdid-package">Other features of the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Adjustments-for-Multiple-Hypothesis-Testing">Adjustments for Multiple Hypothesis Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Aggregating-group-time-average-treatment-effects">Aggregating group-time average treatment effects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Simple-Aggregation">Simple Aggregation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Group-Specific-Effects">Group-Specific Effects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Calendar-Time-Effects">Calendar Time Effects</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Small-Group-Sizes">Small Group Sizes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Selecting-Alternative-Control-Groups">Selecting Alternative Control Groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Repeated-cross-sections">Repeated cross sections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Unbalanced-Panel-Data">Unbalanced Panel Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Alternative-Estimation-Methods">Alternative Estimation Methods</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#An-example-with-real-data">An example with real data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Common-Issues-with-the-csdid-package">Common Issues with the csdid package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Bugs">Bugs</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CSDID</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/csdid_basic.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Introduction">
+<h1>Introduction<a class="headerlink" href="#Introduction" title="Link to this heading"></a></h1>
+<p>This vignette discusses the basics of using Difference-in-Differences (DiD) designs to identify and estimate the average effect of participating in a treatment with a particular focus on tools from the <strong>csdid</strong> package. The background article for it is <a class="reference external" href="https://doi.org/10.1016/j.jeconom.2020.12.001">Callaway and Sant’Anna (2021), “Difference-in-Differences with Multiple Time Periods”</a>.</p>
+<ul class="simple">
+<li><p>The <strong>csdid</strong> package allows for multiple periods and variation in treatment timing</p></li>
+<li><p>The <strong>csdid</strong> package allows the parallel trends assumption to hold conditional on covariates</p></li>
+<li><p>Treatment effect estimates coming from the <strong>csdid</strong> package do not suffer from any of the drawbacks associated with two-way fixed effects regressions or event study regressions when there are multiple periods / variation in treatment timing</p></li>
+<li><p>The <strong>csdid</strong> package can deliver disaggregated <em>group-time average treatment effects</em> as well as event-study type estimates (treatment effects parameters corresponding to different lengths of exposure to the treatment) and overall treatment effect estimates.</p></li>
+</ul>
+</section>
+<section id="Examples-with-simulated-data">
+<h1>Examples with simulated data<a class="headerlink" href="#Examples-with-simulated-data" title="Link to this heading"></a></h1>
+<p>Let’s start with a really simple example with simulated data. Here, there are going to be 4 time periods. There are 4000 units in the treated group that are randomly (with equal probability) assigned to first participate in the treatment (a <em>group</em>) in each time period. And there are 4000 ``never treated’’ units. The data generating process for untreated potential outcomes</p>
+<div class="math notranslate nohighlight">
+\[Y_{it}(0) = \theta_t + \eta_i + X_i'\beta_t + v_{it}\]</div>
+<p>This is an example of a very simple model for untreated potential outcomes that is compatible with a conditional parallel trends assumption. In particular,</p>
+<ul>
+<li><p>We consider the case where <span class="math notranslate nohighlight">\(\eta_i\)</span> can be distributed differently across groups. This means that comparisons of outcomes in levels between treated and untreated units will not deliver an average treatment effect parameter.</p></li>
+<li><p>Next, notice that</p>
+<div class="math notranslate nohighlight">
+\[\Delta Y_{it}(0) = (\theta_t - \theta_{t-1}) + X_i'(\beta_t - \beta_{t-1}) + \Delta v_{it}\]</div>
+<p>so that the path of outcomes depends on covariates. And, in general, unconditional parallel trends is not valid in this setup unless either (i) the mean of the covariates is the same across groups (e.g., when treatment groups are independent of covariates), or (ii) <span class="math notranslate nohighlight">\(\beta_t = \beta_{t-1} = \cdots = \beta_{1}\)</span> (this is the case when the path of untreated potential outcomes doesn’t actually depend on covariates).</p>
+</li>
+<li><p>In order to think about treatment effects, we also use the following stylized model for treated potential outcomes</p>
+<div class="math notranslate nohighlight">
+\[Y_{it}(g) = Y_{it}(0)  + \mathbf{1}\{t \geq g\} (e+1) + ( u_{it} - v_{it})\]</div>
+<p>where <span class="math notranslate nohighlight">\(e := t-g\)</span> is the event time (i.e., the difference between the current time period and the time when a unit becomes treated), and the last term just allows for the error terms to be different for treated and untreated potential outcomes. It immediately follows that, in this particular example,</p>
+<div class="math notranslate nohighlight">
+\[ATT(g,t) = e+1\]</div>
+<p>for all post-treatment periods <span class="math notranslate nohighlight">\(t \ge g\)</span>.</p>
+<p>In other words, the average effect of participating in the treatment for units in group <span class="math notranslate nohighlight">\(g\)</span> is equal to their length of exposure plus one. Note that, for simplicity, we are considering the case where treatment effects are homogeneous across groups. Also, in this setup, units do not anticipate their treatment status, so the <em>no-anticipation assumption</em> is also satisfied.</p>
+</li>
+<li><p>For the simulations, we also set</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\theta_t = \beta_t = t\)</span> for <span class="math notranslate nohighlight">\(t=1,\ldots,4\)</span></p>
+<ul>
+<li><p><span class="math notranslate nohighlight">\(\eta_i \sim N(G_i, 1)\)</span> where <span class="math notranslate nohighlight">\(G_i\)</span> is which group an individual belongs to,</p></li>
+<li><p><span class="math notranslate nohighlight">\(X_i \sim N( \mu_{D_i}, 1)\)</span> where <span class="math notranslate nohighlight">\(\mu_{D_i} = 1\)</span> for never treated units and 0 otherwise,</p></li>
+<li><p><span class="math notranslate nohighlight">\(v_{it} \sim N(0,1)\)</span>, and <span class="math notranslate nohighlight">\(u_{it} \sim N(0,1)\)</span>.</p></li>
+<li><p>Also, all random variables are drawn independently of each other.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<section id="Estimating-Group-Time-Average-Treatment-Effects">
+<h2>Estimating Group-Time Average Treatment Effects<a class="headerlink" href="#Estimating-Group-Time-Average-Treatment-Effects" title="Link to this heading"></a></h2>
+<p><strong>Using the R Simulated dataset</strong></p>
+<p>See <code class="docutils literal notranslate"><span class="pre">`R</span> <span class="pre">-</span> <span class="pre">Getting</span> <span class="pre">Started</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">did</span> <span class="pre">Package</span></code> &lt;<a class="reference external" href="https://bcallaway11.github.io/did/articles/did-basics.html">https://bcallaway11.github.io/did/articles/did-basics.html</a>&gt;`__</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># pip install git+https://github.com/d2cml-ai/csdid/
+# pip install git+https://github.com/d2cml-ai/DRDID
+from csdid.att_gt import ATTgt
+import pandas as pd
+import warnings
+warnings.filterwarnings(&#39;ignore&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>dta = pd.read_csv(&quot;https://raw.githubusercontent.com/d2cml-ai/csdid/main/data/sim_data.csv&quot;)
+dta.head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Unnamed: 0</th>
+      <th>G</th>
+      <th>X</th>
+      <th>id</th>
+      <th>period</th>
+      <th>Y</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>4</td>
+      <td>-0.876233</td>
+      <td>1</td>
+      <td>1</td>
+      <td>3.248701</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>4</td>
+      <td>-0.876233</td>
+      <td>1</td>
+      <td>2</td>
+      <td>2.266837</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>4</td>
+      <td>-0.876233</td>
+      <td>1</td>
+      <td>3</td>
+      <td>3.990885</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>4</td>
+      <td>-0.876233</td>
+      <td>1</td>
+      <td>4</td>
+      <td>4.653489</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>4</td>
+      <td>0.974974</td>
+      <td>2</td>
+      <td>1</td>
+      <td>5.880457</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p><strong>Estimating Group-Time Average Treatment Effects</strong></p>
+<p>The main function to estimate group-time average treatment effects is the <code class="docutils literal notranslate"><span class="pre">ATTgt(...).fit()</span></code> function. The most basic call to <code class="docutils literal notranslate"><span class="pre">att_gt</span></code> is given in the following</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>example_attgt = ATTgt(
+    yname=&quot;Y&quot;,
+    tname=&quot;period&quot;,
+    idname=&quot;id&quot;,
+    gname=&quot;G&quot;,
+    xformla=&quot;Y~X&quot;,
+    data=dta
+).fit()
+example_attgt.summ_attgt().summary2
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Group</th>
+      <th>Time</th>
+      <th>ATT(g, t)</th>
+      <th>Post</th>
+      <th>Std. Error</th>
+      <th>[95% Pointwise</th>
+      <th>Conf. Band]</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2</td>
+      <td>2</td>
+      <td>0.8363</td>
+      <td>0</td>
+      <td>0.4415</td>
+      <td>-0.3122</td>
+      <td>1.9848</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>3</td>
+      <td>2.1813</td>
+      <td>0</td>
+      <td>0.5231</td>
+      <td>0.8204</td>
+      <td>3.5422</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>4</td>
+      <td>3.7465</td>
+      <td>0</td>
+      <td>0.5493</td>
+      <td>2.3175</td>
+      <td>5.1755</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>2</td>
+      <td>-0.6523</td>
+      <td>0</td>
+      <td>0.3400</td>
+      <td>-1.5367</td>
+      <td>0.2321</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>3</td>
+      <td>3</td>
+      <td>1.6078</td>
+      <td>0</td>
+      <td>0.3168</td>
+      <td>0.7837</td>
+      <td>2.4320</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>3</td>
+      <td>4</td>
+      <td>3.0984</td>
+      <td>0</td>
+      <td>0.4053</td>
+      <td>2.0442</td>
+      <td>4.1526</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>4</td>
+      <td>2</td>
+      <td>-0.1077</td>
+      <td>0</td>
+      <td>0.4071</td>
+      <td>-1.1668</td>
+      <td>0.9514</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>4</td>
+      <td>3</td>
+      <td>0.2512</td>
+      <td>0</td>
+      <td>0.3995</td>
+      <td>-0.7881</td>
+      <td>1.2906</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>4</td>
+      <td>4</td>
+      <td>1.4397</td>
+      <td>0</td>
+      <td>0.4384</td>
+      <td>0.2992</td>
+      <td>2.5801</td>
+      <td>*</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The summary of <code class="docutils literal notranslate"><span class="pre">example_attgt</span></code> provides estimates of the group-time average treatment effects in the column labeled <code class="docutils literal notranslate"><span class="pre">att</span></code>, and the corresponding bootstrapped-based standard errors are given in the column <code class="docutils literal notranslate"><span class="pre">se</span></code>. The corresponding groups and times are given in the columns <code class="docutils literal notranslate"><span class="pre">group</span></code> and <code class="docutils literal notranslate"><span class="pre">time</span></code>. Under the no-anticipation and parallel trends assumptions, group-time average treatment effects are identified in periods when <span class="math notranslate nohighlight">\(t \geq g\)</span> (i.e., post-treatment periods for each group). The table
+also reports pseudo group-time average treatment effects when <span class="math notranslate nohighlight">\(t &lt; g\)</span> (i.e., pre-treatment periods for group <span class="math notranslate nohighlight">\(g\)</span>). These can be used as a pre-test for the parallel trends assumption (as long as we assume that the no-anticipation assumption indeed holds). In addition, the results of a Wald pre-test of the parallel trends assumption is reported in the summary of the results.</p>
+<p>Next, we’ll demonstrate how to plot group-time average treatment effects.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># plot the results
+example_attgt.plot_attgt();
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_csdid_basic_6_0.png" src="../_images/examples_csdid_basic_6_0.png" />
+</div>
+</div>
+<p>The resulting figure is one that contains separate plots for each group. Notice in the figure above, the first plot is labeled “Group 2”, the second “Group 3”, etc. Then, the figure contains estimates of group-time average treatment effects for each group in each time period along with a simultaneous confidence interval. The red dots in the plots are pre-treatment pseudo group-time average treatment effects and are most useful for pre-testing the parallel trends assumption. The blue dots are
+post-treatment group-time average treatment effects and should be interpreted as the average effect of participating in the treatment for units in a particular group at a particular point in time.</p>
+</section>
+<section id="Other-features-of-the-csdid-package">
+<h2>Other features of the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package<a class="headerlink" href="#Other-features-of-the-csdid-package" title="Link to this heading"></a></h2>
+<p>The above discussion covered only the most basic case for using the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package. There are a number of simple extensions that are useful in applications.</p>
+<section id="Adjustments-for-Multiple-Hypothesis-Testing">
+<h3>Adjustments for Multiple Hypothesis Testing<a class="headerlink" href="#Adjustments-for-Multiple-Hypothesis-Testing" title="Link to this heading"></a></h3>
+<p>By default, the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package reports simultaneous confidence bands in plots of group-time average treatment effects with multiple time periods – these are confidence bands that are robust to multiple hypothesis testing. You can turn this off and compute analytical standard errors and corresponding figures with <em>pointwise</em> confidence intervals by setting <code class="docutils literal notranslate"><span class="pre">bstrap=False</span></code> in the call to <code class="docutils literal notranslate"><span class="pre">att_gt</span></code>…<strong>but we don’t recommend it</strong>!</p>
+</section>
+<section id="Aggregating-group-time-average-treatment-effects">
+<h3>Aggregating group-time average treatment effects<a class="headerlink" href="#Aggregating-group-time-average-treatment-effects" title="Link to this heading"></a></h3>
+<p>In many applications, there can be a large number of groups and time periods. In this case, it may be infeasible to interpret plots of group-time average treatment effects. The <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package provides a number of ways to aggregate group-time average treatment effects using the <code class="docutils literal notranslate"><span class="pre">aggte</span></code> function.</p>
+<section id="Simple-Aggregation">
+<h4>Simple Aggregation<a class="headerlink" href="#Simple-Aggregation" title="Link to this heading"></a></h4>
+<p>One idea that is likely to immediately come to mind is to just return a weighted average of all group-time average treatment effects with weights proportional to the group size. This is available by calling the <code class="docutils literal notranslate"><span class="pre">aggte</span></code> function with <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">=</span> <span class="pre">simple</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>example_attgt.aggte(&quot;simple&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+
+   ATT Std. Error [95.0%  Conf. Int.]
+2.1061      0.235 1.6455       2.5668 *
+
+
+---
+Signif. codes: `*&#39; confidence band does not cover 0
+Control Group:  Never Treated ,
+Anticipation Periods:  0
+Estimation Method:  Doubly Robust
+
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;csdid.att_gt.ATTgt at 0x2523c911930&gt;
+</pre></div></div>
+</div>
+<p>This sort of aggregation immediately avoids the negative weights issue that two-way fixed effects regressions can suffer from, but we often think that <em>there are better alternatives</em>. In particular, this <code class="docutils literal notranslate"><span class="pre">simple</span></code> aggregation tends to overweight the effect of early-treated groups simply because we observe more of them during post-treatment periods. We think there are likely to be better alternatives in most applications.</p>
+</section>
+<section id="Group-Specific-Effects">
+<h4>Group-Specific Effects<a class="headerlink" href="#Group-Specific-Effects" title="Link to this heading"></a></h4>
+<p>Another idea is to look at average effects specific to each group. It is also straightforward to aggregate group-time average treatment effects into group-specific average treatment effects using the following code:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>example_attgt.aggte(&quot;group&quot;)
+example_attgt.plot_aggte();
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+
+Overall summary of ATT&#39;s based on group/cohort aggregation:
+   ATT Std. Error [95.0%  Conf. Int.]
+1.9512     0.2369 1.4868       2.4155 *
+
+
+Group Effects:
+   Group  Estimate  Std. Error  [95.0% Simult.   Conf. Band
+0      2    2.2547      0.4221           1.4274      3.0820  *
+1      3    2.3531      0.2704           1.8232      2.8830  *
+2      4    1.4397      0.4674           0.5236      2.3557  *
+---
+Signif. codes: `*&#39; confidence band does not cover 0
+Control Group:  Never Treated ,
+Anticipation Periods:  0
+Estimation Method:  Doubly Robust
+
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_csdid_basic_11_1.png" src="../_images/examples_csdid_basic_11_1.png" />
+</div>
+</div>
+<p>In this figure, the y-axis is categorized by group. The x-axis provides estimates of the average effect of participating in the treatment for units in each group averaged across all time periods after that group becomes treated. In our example, the average effect of participating in the treatment is largest for group 2 – this is because the effect of treatment here increases with length of exposure to the treatment, and they are the group that is exposed to the treatment for the longest.</p>
+<p>The Overall ATT averages the group-specific treatment effects across groups. In our view, <em>this parameter is a leading choice as an overall summary effect of participating in the treatment</em>. It is the average effect of participating in the treatment that was experienced across all units that participate in the treatment in any period. In this sense, it has a similar interpretation to the ATT in the textbook case where there are exactly two periods and two groups.</p>
+</section>
+<section id="Calendar-Time-Effects">
+<h4>Calendar Time Effects<a class="headerlink" href="#Calendar-Time-Effects" title="Link to this heading"></a></h4>
+<p>Finally, the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package allows aggregations across different time periods. To do this</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>example_attgt.aggte(&#39;calendar&#39;)
+example_attgt.plot_aggte();
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+
+Overall summary of ATT&#39;s based on calendar time aggregation:
+   ATT Std. Error [95.0%  Conf. Int.]
+1.7349     0.2418 1.2611       2.2088 *
+
+
+Time Effects (calendar):
+   Time  Estimate  Std. Error  [95.0% Simult.   Conf. Band
+0     2    0.8363      0.4292          -0.0049      1.6775
+1     3    1.8209      0.3137           1.2060      2.4357  *
+2     4    2.5477      0.3231           1.9144      3.1810  *
+---
+Signif. codes: `*&#39; confidence band does not cover 0
+Control Group:  Never Treated ,
+Anticipation Periods:  0
+Estimation Method:  Doubly Robust
+
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_csdid_basic_13_1.png" src="../_images/examples_csdid_basic_13_1.png" />
+</div>
+</div>
+<p>In this figure, the x-axis is the time period and the estimates along the y-axis are the average effect of participating in the treatment in a particular time period for all groups that participated in the treatment in that time period.</p>
+</section>
+</section>
+<section id="Small-Group-Sizes">
+<h3>Small Group Sizes<a class="headerlink" href="#Small-Group-Sizes" title="Link to this heading"></a></h3>
+<p>Small group sizes can sometimes cause estimation problems in the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package. To give an example, if there are any groups that have fewer observations than the number of covariates in the model, the code will error. The <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package reports a warning if there are any groups that have fewer than 5 observations.</p>
+<p>In addition, statistical inference, particularly on group-time average treatment may become more tenuous with small groups. For example, the effective sample size for estimating the change in outcomes over time for individuals in a particular group is equal to the number of observations in that group and asymptotic results are unlikely to provide good approximations to the sampling distribution of group-time average treatment effects when the number of units in a group is small. In these cases,
+one should be very cautious about interpreting the <span class="math notranslate nohighlight">\(ATT(g,t)\)</span> results for these small groups.</p>
+<p>A reasonable alternative approach in this case is to just focus on aggregated treatment effect parameters (i.e., to run <code class="docutils literal notranslate"><span class="pre">aggte(...,</span> <span class="pre">type</span> <span class="pre">=</span> <span class="pre">&quot;group&quot;)</span></code> or <code class="docutils literal notranslate"><span class="pre">aggte(...,type</span> <span class="pre">=</span> <span class="pre">&quot;dynamic&quot;)</span></code>). For each of these cases, the effective sample size is the total number of units that are ever treated. As long as the total number of ever treated units is “large” (which should be the case for many DiD application), then the statistical inference results provided by the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package should be more stable.</p>
+</section>
+<section id="Selecting-Alternative-Control-Groups">
+<h3>Selecting Alternative Control Groups<a class="headerlink" href="#Selecting-Alternative-Control-Groups" title="Link to this heading"></a></h3>
+<p>By default, the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package uses the group of units that never participate in the treatment as the control group. In this case, if there is no group that never participates, then the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package will drop the last period and set units that do not become treated until the last period as the control group (this will also throw a warning). The other option for the control group is to use the “not yet treated”. The “not yet treated” include the never treated as well as those units that,
+for a particular point in time, have not been treated yet (though they eventually become treated). This group is at least as large as the never treated group though it changes across time periods. To use the “not yet treated” as the control, set the option <code class="docutils literal notranslate"><span class="pre">control_group=&quot;notyettreated&quot;</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">example_attgt_altcontrol</span> <span class="o">=</span> <span class="n">ATTgt</span><span class="p">(</span>
+    <span class="n">yname</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span>
+    <span class="n">tname</span><span class="o">=</span><span class="s2">&quot;period&quot;</span><span class="p">,</span>
+    <span class="n">idname</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">,</span>
+    <span class="n">gname</span><span class="o">=</span><span class="s2">&quot;G&quot;</span><span class="p">,</span>
+    <span class="n">xformla</span><span class="o">=</span><span class="s2">&quot;Y~X&quot;</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">dta</span><span class="p">,</span>
+    <span class="n">control_group</span><span class="o">=</span><span class="s2">&quot;notyettreated&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="n">example_attgt_altcontrol</span><span class="o">.</span><span class="n">summ_attgt</span><span class="p">()</span><span class="o">.</span><span class="n">summary2</span>
+</pre></div>
+</div>
+</section>
+<section id="Repeated-cross-sections">
+<h3>Repeated cross sections<a class="headerlink" href="#Repeated-cross-sections" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package can also work with repeated cross section rather than panel data. If the data is repeated cross sections, simply set the option <code class="docutils literal notranslate"><span class="pre">panel</span> <span class="pre">=</span> <span class="pre">False</span></code>. In this case, <code class="docutils literal notranslate"><span class="pre">idname</span></code> is also ignored. From a usage standpoint, everything else is identical to the case with panel data.</p>
+</section>
+<section id="Unbalanced-Panel-Data">
+<h3>Unbalanced Panel Data<a class="headerlink" href="#Unbalanced-Panel-Data" title="Link to this heading"></a></h3>
+<p>By default, the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package takes in panel data and, if it is not balanced, coerces it into being a balanced panel by dropping units with observations that are missing in any time period. However, if the user specifies the option <code class="docutils literal notranslate"><span class="pre">allow_unbalanced_panel</span> <span class="pre">=</span> <span class="pre">True</span></code>, then the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package will not coerce the data into being balanced. Practically, the main cost here is that the computation time will increase in this case. We also recommend that users think carefully about why they have an
+unbalanced panel before proceeding this direction.</p>
+</section>
+<section id="Alternative-Estimation-Methods">
+<h3>Alternative Estimation Methods<a class="headerlink" href="#Alternative-Estimation-Methods" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package implements all the <span class="math notranslate nohighlight">\(2 \times 2\)</span> DiD estimators that are in the <code class="docutils literal notranslate"><span class="pre">DRDID</span></code> package. By default, the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package uses “doubly robust” estimators that are based on first step linear regressions for the outcome variable and logit for the generalized propensity score. The other options are “ipw” for inverse probability weighting and “reg” for regression.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>example_attgt_reg = ATTgt(
+    yname=&quot;Y&quot;,
+    tname=&quot;period&quot;,
+    idname=&quot;id&quot;,
+    gname=&quot;G&quot;,
+    xformla=&quot;Y~X&quot;,
+    data=dta
+
+).fit(est_method=&quot;reg&quot;)
+example_attgt_reg.summ_attgt().summary2
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Group</th>
+      <th>Time</th>
+      <th>ATT(g, t)</th>
+      <th>Post</th>
+      <th>Std. Error</th>
+      <th>[95% Pointwise</th>
+      <th>Conf. Band]</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2</td>
+      <td>2</td>
+      <td>0.8373</td>
+      <td>0</td>
+      <td>0.4518</td>
+      <td>-0.3013</td>
+      <td>1.9759</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>3</td>
+      <td>2.1842</td>
+      <td>0</td>
+      <td>0.5602</td>
+      <td>0.7721</td>
+      <td>3.5962</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>4</td>
+      <td>3.7435</td>
+      <td>0</td>
+      <td>0.5300</td>
+      <td>2.4077</td>
+      <td>5.0793</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>2</td>
+      <td>-0.6504</td>
+      <td>0</td>
+      <td>0.3889</td>
+      <td>-1.6305</td>
+      <td>0.3298</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>3</td>
+      <td>3</td>
+      <td>1.6110</td>
+      <td>0</td>
+      <td>0.3247</td>
+      <td>0.7926</td>
+      <td>2.4294</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>3</td>
+      <td>4</td>
+      <td>3.0909</td>
+      <td>0</td>
+      <td>0.4031</td>
+      <td>2.0749</td>
+      <td>4.1070</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>4</td>
+      <td>2</td>
+      <td>-0.1072</td>
+      <td>0</td>
+      <td>0.4419</td>
+      <td>-1.2210</td>
+      <td>1.0065</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>4</td>
+      <td>3</td>
+      <td>0.2528</td>
+      <td>0</td>
+      <td>0.4324</td>
+      <td>-0.8371</td>
+      <td>1.3426</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>4</td>
+      <td>4</td>
+      <td>1.4357</td>
+      <td>0</td>
+      <td>0.4816</td>
+      <td>0.2217</td>
+      <td>2.6496</td>
+      <td>*</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The argument <code class="docutils literal notranslate"><span class="pre">est_method</span></code> is also available to pass in a custom function for estimating DiD with 2 periods and 2 groups. <strong>Fair Warning:</strong> this is very advanced use of the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package and should be done with caution.</p>
+</section>
+</section>
+</section>
+<section id="An-example-with-real-data">
+<h1>An example with real data<a class="headerlink" href="#An-example-with-real-data" title="Link to this heading"></a></h1>
+<p>Next, we use a subset of data that comes from <a class="reference external" href="https://doi.org/10.1016/j.jeconom.2020.12.001">Callaway and Sant’Anna (2020)</a>. This is a dataset that contains county-level teen employment rates from 2003-2007. The data can be loaded by</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>mpdta = pd.read_csv(&quot;https://raw.githubusercontent.com/d2cml-ai/csdid/function-aggte/data/mpdta.csv&quot;)
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">mpdta</span></code> is a balanced panel and the dataset looks like</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>mpdta.head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>year</th>
+      <th>countyreal</th>
+      <th>lpop</th>
+      <th>lemp</th>
+      <th>first.treat</th>
+      <th>treat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2003</td>
+      <td>8001</td>
+      <td>5.896761</td>
+      <td>8.461469</td>
+      <td>2007</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2004</td>
+      <td>8001</td>
+      <td>5.896761</td>
+      <td>8.336870</td>
+      <td>2007</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2005</td>
+      <td>8001</td>
+      <td>5.896761</td>
+      <td>8.340217</td>
+      <td>2007</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2006</td>
+      <td>8001</td>
+      <td>5.896761</td>
+      <td>8.378161</td>
+      <td>2007</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2007</td>
+      <td>8001</td>
+      <td>5.896761</td>
+      <td>8.487352</td>
+      <td>2007</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p><strong>Data Requirements</strong></p>
+<p>In particular applications, the dataset should look like this with the key parts being:</p>
+<ul class="simple">
+<li><p>The dataset should be in <em>long</em> format – each row corresponds to a particular unit at a particular point in time. Sometimes panel data is in <em>wide</em> format – each row contains all the information about a particular unit in all time periods.</p></li>
+<li><p>There needs to be an id variable. In <code class="docutils literal notranslate"><span class="pre">mpdta</span></code>, it is the variable <code class="docutils literal notranslate"><span class="pre">countyreal</span></code>. This should not vary over time for particular units. The name of this variable is passed to methods in the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package by setting, for example, <code class="docutils literal notranslate"><span class="pre">idname</span> <span class="pre">=</span> <span class="pre">&quot;countyreal&quot;</span></code></p></li>
+<li><p>There needs to be a time variable. In <code class="docutils literal notranslate"><span class="pre">mpdta</span></code>, it is the variable <code class="docutils literal notranslate"><span class="pre">year</span></code>. The name of this variable is passed to methods in the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package by setting, for example, <code class="docutils literal notranslate"><span class="pre">tname</span> <span class="pre">=</span> <span class="pre">&quot;year&quot;</span></code></p></li>
+<li><p>In this application, the outcome is <code class="docutils literal notranslate"><span class="pre">lemp</span></code>. The name of this variable is passed to methods in the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package by setting, for example, <code class="docutils literal notranslate"><span class="pre">yname</span> <span class="pre">=</span> <span class="pre">&quot;lemp&quot;</span></code></p></li>
+<li><p>There needs to be a group variable. In <code class="docutils literal notranslate"><span class="pre">mpdta</span></code>, it is the variable <code class="docutils literal notranslate"><span class="pre">first.treat</span></code>. This is the time period when an individual first becomes treated. <em>For individuals that are never treated, this variable should be set equal to 0.</em> The name of this variable is passed to methods in the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package by setting, for example, <code class="docutils literal notranslate"><span class="pre">gname</span> <span class="pre">=</span> <span class="pre">&quot;first.treat&quot;</span></code></p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package allows for incorporating covariates so that the parallel trends assumption holds only after conditioning on these covariates. In <code class="docutils literal notranslate"><span class="pre">mpdta</span></code>, <code class="docutils literal notranslate"><span class="pre">lpop</span></code> is the log of county population. The <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package requires that covariates be time-invariant. For time varying covariates, the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package sets the value of the covariate to be equal to the value of the covariate in the “base period” where, in post-treatment periods the base period is the period immediately before
+observations in a particular group become treated (when there is anticipation, it is before anticipation effects start too), and in pre-treatment periods the base period is the period right before the current period. Covariates are passed as a formula to the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package by setting, for example, <code class="docutils literal notranslate"><span class="pre">xformla</span> <span class="pre">=</span> <span class="pre">&quot;lemp~lpop&quot;</span></code>. For estimators under unconditional parallel trends, the <code class="docutils literal notranslate"><span class="pre">xformla</span></code> argument can be left blank or can be set as <code class="docutils literal notranslate"><span class="pre">xformla</span> <span class="pre">=</span> <span class="pre">&quot;lemp~1&quot;</span></code> to only include a constant.</p></li>
+</ul>
+<p>Next, we walk through a straightforward, but realistic way to use the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package to carry out an application.</p>
+<p><strong>Side Comment:</strong> This is just an example of how to use our method in a real-world setup. To really evaluate the effect of the minimum wage on teen employment, one would need to be more careful along a number of dimensions. Thus, results displayed here should be interpreted as illustrative only.</p>
+<p>We’ll consider two cases. For the first case, we will not condition on any covariates. For the second, we will condition on the log of county population (in a “real” application, one might want to condition on more covariates).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># estimate group-time average treatment effects without covariates
+mw_attgt = ATTgt(yname = &quot;lemp&quot;,
+              gname = &quot;first.treat&quot;,
+              idname = &quot;countyreal&quot;,
+              tname = &quot;year&quot;,
+              xformla = f&quot;lemp~1&quot;,
+              data = mpdta,
+              panel = True,
+
+              ).fit(est_method = &#39;reg&#39;)
+mw_attgt.summ_attgt(n = 4).summary2
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Group</th>
+      <th>Time</th>
+      <th>ATT(g, t)</th>
+      <th>Post</th>
+      <th>Std. Error</th>
+      <th>[95% Pointwise</th>
+      <th>Conf. Band]</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2004</td>
+      <td>2004</td>
+      <td>-0.0105</td>
+      <td>0</td>
+      <td>0.0237</td>
+      <td>-0.0732</td>
+      <td>0.0522</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2004</td>
+      <td>2005</td>
+      <td>-0.0704</td>
+      <td>0</td>
+      <td>0.0323</td>
+      <td>-0.1559</td>
+      <td>0.0150</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2004</td>
+      <td>2006</td>
+      <td>-0.1373</td>
+      <td>0</td>
+      <td>0.0380</td>
+      <td>-0.2376</td>
+      <td>-0.0369</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2004</td>
+      <td>2007</td>
+      <td>-0.1008</td>
+      <td>0</td>
+      <td>0.0362</td>
+      <td>-0.1966</td>
+      <td>-0.0050</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2006</td>
+      <td>2004</td>
+      <td>0.0065</td>
+      <td>0</td>
+      <td>0.0241</td>
+      <td>-0.0572</td>
+      <td>0.0702</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2006</td>
+      <td>2005</td>
+      <td>-0.0028</td>
+      <td>0</td>
+      <td>0.0202</td>
+      <td>-0.0562</td>
+      <td>0.0507</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2006</td>
+      <td>2006</td>
+      <td>-0.0046</td>
+      <td>0</td>
+      <td>0.0181</td>
+      <td>-0.0525</td>
+      <td>0.0433</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2006</td>
+      <td>2007</td>
+      <td>-0.0412</td>
+      <td>0</td>
+      <td>0.0206</td>
+      <td>-0.0956</td>
+      <td>0.0131</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2007</td>
+      <td>2004</td>
+      <td>0.0305</td>
+      <td>0</td>
+      <td>0.0149</td>
+      <td>-0.0088</td>
+      <td>0.0698</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>2007</td>
+      <td>2005</td>
+      <td>-0.0027</td>
+      <td>0</td>
+      <td>0.0169</td>
+      <td>-0.0474</td>
+      <td>0.0420</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>2007</td>
+      <td>2006</td>
+      <td>-0.0311</td>
+      <td>0</td>
+      <td>0.0175</td>
+      <td>-0.0774</td>
+      <td>0.0152</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>2007</td>
+      <td>2007</td>
+      <td>-0.0261</td>
+      <td>0</td>
+      <td>0.0184</td>
+      <td>-0.0746</td>
+      <td>0.0225</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>mw_attgt.plot_attgt();
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_csdid_basic_24_0.png" src="../_images/examples_csdid_basic_24_0.png" />
+</div>
+</div>
+<p>There are a few things to notice in this case</p>
+<ul class="simple">
+<li><p>There is some evidence of negative effects of the minimum wage on employment. Two group-time average treatment effects are negative and statistically different from 0. These results also suggest that it may be helpful to aggregate the group-time average treatment effects.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>mw_attgt.aggte(&#39;calendar&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+
+Overall summary of ATT&#39;s based on calendar time aggregation:
+    ATT Std. Error [95.0%  Conf. Int.]
+-0.0417     0.0175 -0.076      -0.0074 *
+
+
+Time Effects (calendar):
+   Time  Estimate  Std. Error  [95.0% Simult.   Conf. Band
+0  2004   -0.0105      0.0253          -0.0602      0.0392
+1  2005   -0.0704      0.0313          -0.1318     -0.0090  *
+2  2006   -0.0488      0.0208          -0.0895     -0.0081  *
+3  2007   -0.0371      0.0147          -0.0659     -0.0082  *
+---
+Signif. codes: `*&#39; confidence band does not cover 0
+Control Group:  Never Treated ,
+Anticipation Periods:  0
+Estimation Method:  Outcome Regression
+
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;csdid.att_gt.ATTgt at 0x2523eb8cc70&gt;
+</pre></div></div>
+</div>
+<p>Finally, we can run all the same results including a covariate. In this application the results turn out to be nearly identical, and here we provide just the code for estimating the group-time average treatment effects while including covariates. The other steps are otherwise the same.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>mw_attgt_X = ATTgt(yname = &quot;lemp&quot;,
+              gname = &quot;first.treat&quot;,
+              idname = &quot;countyreal&quot;,
+              tname = &quot;year&quot;,
+              xformla = f&quot;lemp~lpop&quot;,
+              data = mpdta,
+              panel = True,
+
+              ).fit(est_method = &#39;reg&#39;)
+mw_attgt_X.summ_attgt(n = 4).summary2
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Group</th>
+      <th>Time</th>
+      <th>ATT(g, t)</th>
+      <th>Post</th>
+      <th>Std. Error</th>
+      <th>[95% Pointwise</th>
+      <th>Conf. Band]</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2004</td>
+      <td>2004</td>
+      <td>-0.0149</td>
+      <td>0</td>
+      <td>0.0236</td>
+      <td>-0.0783</td>
+      <td>0.0484</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2004</td>
+      <td>2005</td>
+      <td>-0.0770</td>
+      <td>0</td>
+      <td>0.0301</td>
+      <td>-0.1576</td>
+      <td>0.0036</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2004</td>
+      <td>2006</td>
+      <td>-0.1411</td>
+      <td>0</td>
+      <td>0.0377</td>
+      <td>-0.2420</td>
+      <td>-0.0401</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2004</td>
+      <td>2007</td>
+      <td>-0.1075</td>
+      <td>0</td>
+      <td>0.0319</td>
+      <td>-0.1932</td>
+      <td>-0.0219</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2006</td>
+      <td>2004</td>
+      <td>-0.0021</td>
+      <td>0</td>
+      <td>0.0214</td>
+      <td>-0.0594</td>
+      <td>0.0552</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2006</td>
+      <td>2005</td>
+      <td>-0.0070</td>
+      <td>0</td>
+      <td>0.0192</td>
+      <td>-0.0585</td>
+      <td>0.0445</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2006</td>
+      <td>2006</td>
+      <td>0.0008</td>
+      <td>0</td>
+      <td>0.0206</td>
+      <td>-0.0545</td>
+      <td>0.0560</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2006</td>
+      <td>2007</td>
+      <td>-0.0415</td>
+      <td>0</td>
+      <td>0.0196</td>
+      <td>-0.0941</td>
+      <td>0.0110</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2007</td>
+      <td>2004</td>
+      <td>0.0264</td>
+      <td>0</td>
+      <td>0.0136</td>
+      <td>-0.0100</td>
+      <td>0.0627</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>2007</td>
+      <td>2005</td>
+      <td>-0.0048</td>
+      <td>0</td>
+      <td>0.0160</td>
+      <td>-0.0478</td>
+      <td>0.0383</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>2007</td>
+      <td>2006</td>
+      <td>-0.0285</td>
+      <td>0</td>
+      <td>0.0182</td>
+      <td>-0.0772</td>
+      <td>0.0202</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>2007</td>
+      <td>2007</td>
+      <td>-0.0288</td>
+      <td>0</td>
+      <td>0.0160</td>
+      <td>-0.0717</td>
+      <td>0.0142</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<section id="Common-Issues-with-the-csdid-package">
+<h2>Common Issues with the csdid package<a class="headerlink" href="#Common-Issues-with-the-csdid-package" title="Link to this heading"></a></h2>
+<p>We update this section with common issues that people run into when using the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package. Please feel free to contact us with questions or comments.</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package is only built to handle staggered treatment adoption designs. This means that once an individual becomes treated, they remain treated in all subsequent periods.</p></li>
+</ul>
+</section>
+<section id="Bugs">
+<h2>Bugs<a class="headerlink" href="#Bugs" title="Link to this heading"></a></h2>
+<p>We also welcome (and encourage) users to report any bugs / difficulties they have using our code.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="CSDID documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Alexander Quispe Rojas; Jhon Kevin Flores Rojas.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

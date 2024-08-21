@@ -1,9 +1,0 @@
-﻿pandas
-numpy==1.24.3
-scipy
-patsy
-plotnine
-statsmodels
-ipykernel
-joblib
-twine
