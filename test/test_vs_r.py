@@ -24,6 +24,10 @@ def check_absolute_diff(x1, x2, tol, msg=None):
     msg = "" if msg is None else msg
     assert np.all(np.abs(x1 - x2) < tol), msg
 
+def check_relative_diff(x1, x2, tol, msg=None):
+    msg = "" if msg is None else msg
+    assert np.all(np.abs(x1 - x2) / np.abs(x1) < tol), msg
+
 def test_ate(data):
 
   "Test simple ATE via Py vs R."
@@ -34,7 +38,7 @@ def test_ate(data):
     idname = "countyreal",
     tname = "year",
     data = data,
-    biters = 10_000,
+    biters = 20_000,
   ).fit(est_method = 'dr')
 
   py_res = py_did.aggte("simple")
@@ -47,11 +51,11 @@ def test_ate(data):
     idname = "countyreal",
     tname = "year",
     data = data,
-    biters = 10_000
+    biters = 20_000
   )
 
   r_coef = did.aggte(r_did, type = "simple").rx2('overall.att')
   r_se = did.aggte(r_did, type = "simple").rx2('overall.se')
 
-  check_absolute_diff(py_coef, r_coef, 1e-5, "ATEs are not equal.")
-  check_absolute_diff(py_se, r_se, 1e-3, "SEs are not equal.")
+  check_absolute_diff(py_coef, r_coef, 1e-8, "ATEs are not equal.")
+  check_relative_diff(py_se, r_se, 0.01, "SEs are not equal.")
