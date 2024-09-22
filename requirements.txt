@@ -7,3 +7,5 @@ statsmodels
 ipykernel
 joblib
 twine
+pytest
+rpy2==3.5.15
