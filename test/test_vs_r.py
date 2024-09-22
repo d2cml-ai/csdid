@@ -39,7 +39,7 @@ def test_ate(data):
 
   py_res = py_did.aggte("simple")
   py_coef = py_res.atte.get("overall_att")
-  py_ses = py_res.atte.get("overall_se")
+  py_se = py_res.atte.get("overall_se")
 
   r_did = did.att_gt(
     yname = "lemp",
