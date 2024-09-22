@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    name: "Tests Core"
+    name: "Test vs R::did"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
