@@ -20,6 +20,10 @@ def data():
 
   return pd.read_csv("https://raw.githubusercontent.com/d2cml-ai/csdid/function-aggte/data/mpdta.csv")
 
+def check_absolute_diff(x1, x2, tol, msg=None):
+    msg = "" if msg is None else msg
+    assert np.all(np.abs(x1 - x2) < tol), msg
+
 def test_ate(data):
 
   "Test simple ATE via Py vs R."
@@ -49,5 +53,5 @@ def test_ate(data):
   r_coef = did.aggte(r_did, type = "simple").rx2('overall.att')
   r_se = did.aggte(r_did, type = "simple").rx2('overall.se')
 
-  assert np.testing.assert_allclose(py_coef, r_coef, atol = 1e-5), "ATEs are not equal."
-  assert np.testing.assert_allclose(py_se, r_se, atol = 1e-3), "SEs are not equal."
+  check_absolute_diff(py_coef, r_coef, 1e-5, "ATEs are not equal.")
+  check_absolute_diff(py_se, r_se, 1e-3, "SEs are not equal.")
