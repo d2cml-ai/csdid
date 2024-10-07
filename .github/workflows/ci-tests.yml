@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: "Test vs R::did"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest"]
+        python-version: ["3.8"]
+        pytest_opts: ["--workers 4 --tests-per-worker 1"]
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt; pip install git+https://github.com/d2cml-ai/DRDID
+
+      - name: Install package
+        run: pip install .
+
+      - name: Setup r2u
+        uses: eddelbuettel/github-actions/r2u-setup@master
+
+      - name: install R packages
+        run: Rscript -e 'install.packages(c("did"))'
+        shell: bash
+
+      - name: Run tests
+        run: |
+          pytest test/test_vs_r.py
+
+
+
