@@ -44,4 +44,16 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
 
   att_est, group, year, post_array = [], [], [], []
 
-  return dp
+  def add_att_data(att = 0, pst = 0, inf_f = []):
+    inf_func.append(inf_f)
+    att_est.append(att)
+    group.append(g)
+    year.append(tn)
+    post_array.append(pst)
+
+  never_treated = control_group == 'nevertreated'
+  if never_treated:
+    data = data.assign(C = 1 * (data[gname] == 0))
+  data = data.assign(y_main = data[yname])
+
+  return (dp,inf_func)
