@@ -50,6 +50,8 @@ class ATTgt:
       crit_val, se = ref_se['crit_val'], ref_se['se']
       V = ref_se['V']
     
+    return dp
+"""
     ############# aggte input
     group = result['group']
     att = result['att']
@@ -242,3 +244,5 @@ class ATTgt:
         plt.show() 
         
     return p
+
+"""
