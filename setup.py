@@ -27,7 +27,9 @@ setup(
         'scipy',
         'patsy',
         'plotnine',
-        'twine'
+        'twine',
+        'joblib',
+        'drdid @ git+https://github.com/d2cml-ai/DRDID'
   ],
   packages=find_packages(),
   package_data={
