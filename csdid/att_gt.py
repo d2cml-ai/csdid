@@ -50,9 +50,6 @@ class ATTgt:
       crit_val, se = ref_se['crit_val'], ref_se['se']
       V = ref_se['V']
 
-    return dp
-  
-"""
     ############# aggte input
     group = result['group']
     att = result['att']
@@ -72,6 +69,9 @@ class ATTgt:
     }
     self.MP = mp
 
+    return dp
+  
+"""
 
     cband_lower = att - crit_val * se
     cband_upper = att + crit_val * se
