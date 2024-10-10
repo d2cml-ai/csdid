@@ -1,6 +1,5 @@
 # Difference in Difference in Python
 
-
 The **csdid** package contains tools for computing average treatment
 effect parameters in a Difference-in-Differences setup allowing for
 
@@ -127,18 +126,18 @@ out.summ_attgt().summary2
 
 |     | Group | Time | ATT(g, t) | Post | Std. Error | \[95% Pointwise | Conf. Band\] |     |
 |-----|-------|------|-----------|------|------------|-----------------|--------------|-----|
-| 0   | 2004  | 2004 | -0.0105   | 0    | 0.0241     | -0.0781         | 0.0571       |     |
-| 1   | 2004  | 2005 | -0.0704   | 0    | 0.0324     | -0.1612         | 0.0204       |     |
-| 2   | 2004  | 2006 | -0.1373   | 0    | 0.0393     | -0.2476         | -0.0269      | \*  |
-| 3   | 2004  | 2007 | -0.1008   | 0    | 0.0360     | -0.2017         | 0.0001       |     |
-| 4   | 2006  | 2004 | 0.0065    | 0    | 0.0238     | -0.0601         | 0.0732       |     |
-| 5   | 2006  | 2005 | -0.0028   | 0    | 0.0188     | -0.0554         | 0.0499       |     |
-| 6   | 2006  | 2006 | -0.0046   | 0    | 0.0172     | -0.0528         | 0.0437       |     |
-| 7   | 2006  | 2007 | -0.0412   | 0    | 0.0201     | -0.0976         | 0.0152       |     |
-| 8   | 2007  | 2004 | 0.0305    | 0    | 0.0147     | -0.0108         | 0.0719       |     |
-| 9   | 2007  | 2005 | -0.0027   | 0    | 0.0160     | -0.0476         | 0.0421       |     |
-| 10  | 2007  | 2006 | -0.0311   | 0    | 0.0173     | -0.0796         | 0.0174       |     |
-| 11  | 2007  | 2007 | -0.0261   | 0    | 0.0171     | -0.0740         | 0.0219       |     |
+| 0   | 2004  | 2004 | -0.0105   | 1    | 0.0337     | -0.1009         | 0.0799       |     |
+| 1   | 2004  | 2005 | -0.0704   | 1    | 0.0427     | -0.1851         | 0.0442       |     |
+| 2   | 2004  | 2006 | -0.1373   | 1    | 0.0477     | -0.2653         | -0.0092      | \*  |
+| 3   | 2004  | 2007 | -0.1008   | 1    | 0.0469     | -0.2267         | 0.0251       |     |
+| 4   | 2006  | 2004 | 0.0065    | 0    | 0.0334     | -0.0831         | 0.0961       |     |
+| 5   | 2006  | 2005 | -0.0028   | 0    | 0.0289     | -0.0804         | 0.0749       |     |
+| 6   | 2006  | 2006 | -0.0046   | 1    | 0.0265     | -0.0758         | 0.0666       |     |
+| 7   | 2006  | 2007 | -0.0412   | 1    | 0.0295     | -0.1205         | 0.0380       |     |
+| 8   | 2007  | 2004 | 0.0305    | 0    | 0.0285     | -0.0459         | 0.1069       |     |
+| 9   | 2007  | 2005 | -0.0027   | 0    | 0.0300     | -0.0832         | 0.0778       |     |
+| 10  | 2007  | 2006 | -0.0311   | 0    | 0.0316     | -0.1160         | 0.0539       |     |
+| 11  | 2007  | 2007 | -0.0261   | 1    | 0.0311     | -0.1096         | 0.0575       |     |
 
 </div>
 
@@ -149,14 +148,7 @@ class and the graph information.
 out.plot_attgt();
 ```
 
-    /home/runner/work/csdid/csdid/csdid/plots/gplot.py:19: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value '['2004' '2005' '2006' '2007']' has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-      ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
-    /home/runner/work/csdid/csdid/csdid/plots/gplot.py:19: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value '['2004' '2005' '2006' '2007']' has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-      ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
-    /home/runner/work/csdid/csdid/csdid/plots/gplot.py:19: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value '['2004' '2005' '2006' '2007']' has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-      ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
-
-![](README_files/figure-commonmark/cell-5-output-2.png)
+![](README_files/figure-commonmark/cell-5-output-1.png)
 
 ``` python
 out.aggte(typec='calendar');
@@ -165,16 +157,16 @@ out.aggte(typec='calendar');
 
 
     Overall summary of ATT's based on calendar time aggregation:
-        ATT Std. Error  [95.0%  Conf. Int.]  
-    -0.0417     0.0169 -0.0748      -0.0086 *
+        ATT Std. Error  [95.0%  Conf. Int.] 
+    -0.0417     0.0231 -0.0869       0.0035 
 
 
     Time Effects (calendar):
-       Time  Estimate  Std. Error  [95.0% Simult.   Conf. Band   
-    0  2004   -0.0105      0.0244          -0.0584      0.0374   
-    1  2005   -0.0704      0.0307          -0.1305     -0.0103  *
-    2  2006   -0.0488      0.0210          -0.0900     -0.0076  *
-    3  2007   -0.0371      0.0136          -0.0637     -0.0105  *
+       Time  Estimate  Std. Error  [95.0% Simult.   Conf. Band  
+    0  2004   -0.0105      0.0333          -0.0758      0.0548  
+    1  2005   -0.0704      0.0412          -0.1512      0.0104  
+    2  2006   -0.0488      0.0274          -0.1025      0.0048  
+    3  2007   -0.0371      0.0238          -0.0837      0.0096  
     ---
     Signif. codes: `*' confidence band does not cover 0
     Control Group:  Never Treated , 
@@ -185,7 +177,4 @@ out.aggte(typec='calendar');
 out.plot_aggte();
 ```
 
-    /home/runner/work/csdid/csdid/csdid/plots/gplot.py:19: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value '['2004' '2005' '2006' '2007']' has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-      ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
-
-![](README_files/figure-commonmark/cell-7-output-2.png)
+![](README_files/figure-commonmark/cell-7-output-1.png)
