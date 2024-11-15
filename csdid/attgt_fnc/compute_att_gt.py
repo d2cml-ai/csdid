@@ -57,7 +57,9 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
 
   # g, t = glist[0], tlist[0]
 
-  for _, g, in enumerate(glist):
+  # for _, g, in enumerate(glist):
+  for g_index, g in enumerate(glist):
+
     # g = glist[1]
     G_main = (data[gname] == g)
     data = data.assign(G_m = 1 * G_main)
@@ -80,7 +82,9 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
       if not never_treated:
         n1 = data[gname] == 0
         n2 = (data[gname] > (tlist[np.max([t_i, pret]) + tfac]) + anticipation)
-        n3 = np.where(data[gname] != glist[g], True, False)
+        #n3 = np.where(data[gname] != glist[g], True, False)
+        n3 = np.where(data[gname] != glist[g_index], True, False)
+
         row_eval = n1 | n2 & n3
         data = data.assign(C = 1 * row_eval)
 
