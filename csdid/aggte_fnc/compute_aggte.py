@@ -359,18 +359,18 @@ def compute_aggte(MP,
             if dynamic_crit_val >= 7:
                 print("Simultaneous critical value is arguably 'too large' to be reliable. This usually happens when the number of observations per group is small and/or there is not much variation in outcomes.")
 
-            epos = eseq >= 0
-            dynamic_att = np.mean(np.array(dynamic_att_e)[epos])
-            dynamic_inf_func = get_agg_inf_func(att         = np.array(dynamic_att_e)[epos],
-                                                inffunc     = np.array(dynamic_inf_func_e[:, epos]),
-                                                whichones   = np.arange(1, np.sum(epos)+1)-1,
-                                                weights_agg = np.repeat(1 / np.sum(epos), np.sum(epos)),
-                                                wif=None)[:, None]
-            
-            dynamic_se = get_se(dynamic_inf_func, dp)
-            if not np.isnan(dynamic_se):
-                if dynamic_se <= np.sqrt(np.finfo(float).eps) * 10:
-                    dynamic_se = np.nan
+        epos = eseq >= 0
+        dynamic_att = np.mean(np.array(dynamic_att_e)[epos])
+        dynamic_inf_func = get_agg_inf_func(att         = np.array(dynamic_att_e)[epos],
+                                            inffunc     = np.array(dynamic_inf_func_e[:, epos]),
+                                            whichones   = np.arange(1, np.sum(epos)+1)-1,
+                                            weights_agg = np.repeat(1 / np.sum(epos), np.sum(epos)),
+                                            wif=None)[:, None]
+        
+        dynamic_se = get_se(dynamic_inf_func, dp)
+        if not np.isnan(dynamic_se):
+            if dynamic_se <= np.sqrt(np.finfo(float).eps) * 10:
+                dynamic_se = np.nan
 
         AGGTEobj_print = AGGTEobj(overall_att=dynamic_att,
                                 overall_se=dynamic_se,
