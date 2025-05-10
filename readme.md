@@ -1,5 +1,12 @@
 # Difference in Difference in Python
 
+[![PyPI version](https://img.shields.io/pypi/v/csdid.svg?color=blue)](https://pypi.org/project/csdid/)
+[![Downloads](https://static.pepy.tech/personalized-badge/csdid?period=total&units=international_system&left_color=blue&right_color=grey&left_text=Downloads)](https://pepy.tech/project/csdid)
+[![Last commit](https://img.shields.io/github/last-commit/d2cml-ai/csdid.svg)](https://github.com/d2cml-ai/csdid/commits/main)
+[![GitHub stars](https://img.shields.io/github/stars/d2cml-ai/csdid.svg?style=social)](https://github.com/d2cml-ai/csdid/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/d2cml-ai/csdid.svg)](https://github.com/d2cml-ai/csdid/issues)
+[![License](https://img.shields.io/github/license/d2cml-ai/csdid.svg)](https://github.com/d2cml-ai/csdid/blob/main/LICENSE)
+
 
 The **csdid** package contains tools for computing average treatment
 effect parameters in a Difference-in-Differences setup allowing for
@@ -30,7 +37,7 @@ treatment effects or event-study-type estimands.
 ## Getting Started
 
 There has been some recent work on DiD with multiple time periods. The
-**did** package implements the framework put forward in
+**csdid** package implements the framework put forward in
 
 - [Callaway, Brantly and Pedro H.C. Sant’Anna.
   “Difference-in-Differences with Multiple Time Periods.” Journal of
@@ -189,3 +196,104 @@ out.plot_aggte();
       ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
 
 ![](README_files/figure-commonmark/cell-7-output-2.png)
+
+
+**Event Studies**
+
+Although in the current example it is pretty easy to directly interpret
+the group-time average treatment effects, there are many cases where it
+is convenient to aggregate the group-time average treatment effects into
+a small number of parameters. A main type of aggregation is into an
+*event study* plot.
+
+To make an event study plot in the **csdid** package, one can use the
+**aggte** function with **dynamic** option
+
+``` python
+out.aggte(typec='dynamic');
+```
+
+
+
+    Overall summary of ATT's based on event-study/dynamic aggregation:
+    ATT Std. Error  [95.0%  Conf. Int.]  
+    -0.0772     0.0207 -0.1179      -0.0366 *
+
+
+    Dynamic Effects:
+      Event time  Estimate  Std. Error  [95.0% Simult.   Conf. Band   
+    0          -3    0.0305      0.0146           0.0019      0.0591  *
+    1          -2   -0.0006      0.0129          -0.0259      0.0248   
+    2          -1   -0.0245      0.0141          -0.0521      0.0032   
+    3           0   -0.0199      0.0117          -0.0428      0.0030   
+    4           1   -0.0510      0.0154          -0.0811     -0.0208  *
+    5           2   -0.1373      0.0366          -0.2091     -0.0655  *
+    6           3   -0.1008      0.0337          -0.1669     -0.0347  *
+    ---
+    Signif. codes: `*' confidence band does not cover 0
+    Control Group:  Never Treated , 
+    Anticipation Periods:  0
+    Estimation Method:  Doubly Robust
+
+The column `event time` is for each group relative to when they first
+participate in the treatment. To give some examples, `event time=0`
+corresponds to the *on impact* effect, and `event time=-1` is the
+*effect* in the period before a unit becomes treated (checking that this
+is equal to 0 is potentially useful as a pre-test).
+
+To plot the event study, use **plot_aggte** method
+``` python
+out.plot_aggte();
+```
+
+    /home/runner/work/csdid/csdid/csdid/plots/gplot.py:19: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value '['2004' '2005' '2006' '2007']' has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
+      ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
+
+![](README_files/figure-commonmark/cell-8-output-2.png)
+
+The figure here is very similar to the group-time average treatment
+effects. Red dots are pre-treatment periods, blue dots are
+post-treatment periods. The difference is that the x-axis is in event
+time.
+
+**Overall Effect of Participating in the Treatment**
+
+The event study above reported an overall effect of participating in the
+treatment. This was computed by averaging the average effects computed
+at each length of exposure.
+
+In many cases, a more general purpose overall treatment effect parameter
+is give by computing the average treatment effect for each group, and
+then averaging across groups. This sort of procedure provides an average
+treatment effect parameter with a very similar interpretation to the
+Average Treatment Effect on the Treated (ATT) in the two period and two
+group case.
+
+To compute this overall average treatment effect parameter, use
+
+
+``` python
+out.aggte(typec='group');
+```
+
+
+
+    Overall summary of ATT's based on group/cohort aggregation:
+    ATT Std. Error  [95.0%  Conf. Int.]  
+    -0.031     0.0124 -0.0553      -0.0067 *
+
+
+    Group Effects:
+      Group  Estimate  Std. Error  [95.0% Simult.   Conf. Band   
+    0   2004   -0.0797      0.0301          -0.1387     -0.0208  *
+    1   2006   -0.0229      0.0172          -0.0567      0.0109   
+    2   2007   -0.0261      0.0174          -0.0601      0.0080   
+    ---
+    Signif. codes: `*' confidence band does not cover 0
+    Control Group:  Never Treated , 
+    Anticipation Periods:  0
+    Estimation Method:  Doubly Robust
+
+Of particular interest is the `Overall ATT` in the results. Here, we
+estimate that increasing the minimum wage decreased teen employment by
+3.1% and the effect is marginally statistically significant.
