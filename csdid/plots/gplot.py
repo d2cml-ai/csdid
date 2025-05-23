@@ -15,27 +15,42 @@ def gplot(ssresults, ax, ylim=None, xlab=None, ylab=None, title="Group", xgap=1,
     if ylab is None:
         ylab = 'ATT'
     
+    # drop any null years, then overwrite 'year' cleanly as integer
     ssresults = ssresults[ssresults['year'].notnull()].copy()
-    ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
+    ssresults = ssresults.assign(year=ssresults['year'].astype(int))
     
-    pre_points = ssresults.loc[ssresults['post'] == 0]
-    post_points = ssresults.loc[ssresults['post'] == 1]
+    pre_points  = ssresults[ssresults['post'] == 0]
+    post_points = ssresults[ssresults['post'] == 1]
     
-    ax.errorbar(pre_points['year'], pre_points['att'], yerr=pre_points['c']*pre_points['att_se'],
-                 fmt='o', markersize=5, color='#e87d72', ecolor='#e87d72', capsize=5, label='Pre')   
-    
-    ax.errorbar(post_points['year'], post_points['att'], yerr=post_points['c']*post_points['att_se'],
-                 fmt='o', markersize=5, color='#56bcc2', ecolor='#56bcc2', capsize=5, label='Post')  
+    # plot Pre
+    ax.errorbar(
+        pre_points['year'].to_numpy(),
+        pre_points['att'].to_numpy(),
+        yerr=(pre_points['c'] * pre_points['att_se']).to_numpy(),
+        fmt='o', markersize=5,
+        color='#e87d72', ecolor='#e87d72',
+        capsize=5, label='Pre'
+    )
+    # plot Post
+    ax.errorbar(
+        post_points['year'].to_numpy(),
+        post_points['att'].to_numpy(),
+        yerr=(post_points['c'] * post_points['att_se']).to_numpy(),
+        fmt='o', markersize=5,
+        color='#56bcc2', ecolor='#56bcc2',
+        capsize=5, label='Post'
+    )
     
     ax.set_ylim(ylim)
     ax.set_title(title)
-    ax.set_xlabel(xlab)    
-    ax.set_ylabel(ylab)    
+    ax.set_xlabel(xlab)
+    ax.set_ylabel(ylab)
 
-    handles, labels = ax.get_legend_handles_labels()    
+    handles, labels = ax.get_legend_handles_labels()
     
     if ref_line is not None:
         ax.axhline(ref_line, linestyle='dashed', color='#1F1F1F')
+
     if theming:
         ax.set_facecolor('white')
         ax.set_title(title, color="#1F1F1F", fontweight="bold", fontsize=10)
@@ -43,17 +58,25 @@ def gplot(ssresults, ax, ylim=None, xlab=None, ylab=None, title="Group", xgap=1,
         ax.spines['left'].set_color('#1F1F1F')
         ax.tick_params(axis='x', colors='#1F1F1F')
         ax.tick_params(axis='y', colors='#1F1F1F')
+
+        # draw legend below if both series exist
         if not pre_points.empty and not post_points.empty:
-            ax.legend(handles[0:2], labels[0:2], loc='lower center',fontsize='small', ncol=2, bbox_to_anchor=(0.5,-0.27))
+            ax.legend(handles[0:2], labels[0:2],
+                      loc='lower center', fontsize='small',
+                      ncol=2, bbox_to_anchor=(0.5, -0.27))
         elif not pre_points.empty:
-            ax.legend(handles[:1], labels[:1], loc='lower center',fontsize='small', ncol=2, bbox_to_anchor=(0.5,-0.27))
+            ax.legend(handles[:1], labels[:1],
+                      loc='lower center', fontsize='small',
+                      ncol=2, bbox_to_anchor=(0.5, -0.27))
         elif not post_points.empty:
-            ax.legend(handles[1:2], labels[1:2], loc='lower center',fontsize='small', ncol=2, bbox_to_anchor=(0.5,-0.27))     
+            ax.legend(handles[1:2], labels[1:2],
+                      loc='lower center', fontsize='small',
+                      ncol=2, bbox_to_anchor=(0.5, -0.27))
+
     if not legend:
         ax.legend().set_visible(False)
         
     return ax
-
 
 def splot(ssresults, ax, ylim=None, xlab=None, ylab=None, title="Group",
           legend=True, ref_line=0, theming=True):

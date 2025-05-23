@@ -261,7 +261,6 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
   n, t = data.shape
   control_group = control_group[0]
   columns = [idname, tname, yname, gname]
-  control_group = "nevertreated"
   # print(columns)
   # Columns
   if clustervar is not None:
