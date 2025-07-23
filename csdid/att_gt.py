@@ -33,11 +33,13 @@ class ATTgt:
     dp['true_repeated_cross_sections'] = dp['true_rep_cross_section']
     dp['cband'] = cband
     self.dp = dp
-
-  def fit(self, est_method = 'dr', base_period = 'varying', bstrap = True):
+    self.trim_level = trim_level
+    
+  def fit(self, est_method = 'dr', base_period = 'varying', bstrap = True, trim_level = None):
     # print(self.dp)
     dp = self.dp
-    trim_level = self.trim_level
+    if trim_level is None:
+            trim_level = self.trim_level
     result, inffunc = compute_att_gt(dp, est_method = est_method, base_period = base_period, trim_level = trim_level)
     att = result['att']
     n_len = list(map(len, inffunc))
