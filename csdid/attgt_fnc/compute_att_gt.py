@@ -10,7 +10,7 @@ fml = patsy.dmatrices
 # Initialize a list to store data for each iteration
 results_list = []
 
-def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
+def compute_att_gt(dp, est_method = "dr", base_period = 'varying', trim_level = 0.995):
     yname = dp['yname']
     tname = dp['tname']
     idname = dp['idname']
@@ -155,7 +155,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
                 elif est_method == "dr":
                     est_att_f = drdid.drdid_panel
 
-                att_gt, att_inf_func = est_att_f(ypost, ypre, G, i_weights=w, covariates=covariates)
+                att_gt, att_inf_func = est_att_f(ypost, ypre, G, i_weights=w, covariates=covariates, trim_level = trim_level )
 
                 inf_zeros = np.zeros(n)
                 att_inf = n / n1 * att_inf_func
@@ -254,7 +254,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
                 elif est_method == "dr":
                     est_att_f = drdid.drdid_rc
                 
-                att_gt, att_inf_func = est_att_f(y=Y, post=post, D = G, i_weights=w, covariates=covariates)
+                att_gt, att_inf_func = est_att_f(y=Y, post=post, D = G, i_weights=w, covariates=covariates, trim_level = trim_level )
                 # print(att_inf_func)
                 att_inf_func = (n/n1)*att_inf_func
                 

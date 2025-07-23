@@ -20,7 +20,7 @@ class ATTgt:
   def __init__(self, yname, tname, idname, gname, data, control_group = ['nevertreated', 'notyettreated'], 
   xformla: str = None, panel = True, allow_unbalanced_panel = True, 
   clustervar = None, weights_name = None, anticipation = 0, 
-  cband = False, biters = 1000, alp = 0.05
+  cband = False, biters = 1000, alp = 0.05, trim_level = 0.995
   ):
     dp = pre_process_did(
       yname=yname, tname = tname, idname=idname, gname = gname,
@@ -37,7 +37,7 @@ class ATTgt:
   def fit(self, est_method = 'dr', base_period = 'varying', bstrap = True):
     # print(self.dp)
     dp = self.dp
-    result, inffunc = compute_att_gt(dp, est_method = est_method, base_period = base_period)
+    result, inffunc = compute_att_gt(dp, est_method = est_method, base_period = base_period, trim_level = trim_level)
     att = result['att']
     n_len = list(map(len, inffunc))
     crit_val, se, V = (
