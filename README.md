@@ -304,7 +304,7 @@ If you want to cite CSDID, you can use the following BibTeX entry:
 ``` python
 @software{csdid,
   author  = {Callaway, Brantly and Sant'Anna, Pedro HC and Quispe, Alexander and Guevara, Carlos},
-  title   = {{pyfixest: Fast high-dimensional fixed effect estimation in Python}},
+  title   = {{csdid: Difference-in-Differences with Multiple Time Periods in Python}},
   year    = {2024},
   url     = {https://github.com/d2cml-ai/csdid}
 }
