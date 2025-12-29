@@ -297,3 +297,12 @@ out.aggte(typec='group');
 Of particular interest is the `Overall ATT` in the results. Here, we
 estimate that increasing the minimum wage decreased teen employment by
 3.1% and the effect is marginally statistically significant.
+
+# How to cite
+If you want to cite CSDID, you can use the following BibTeX entry:
+@software{csdid,
+  author  = {Callaway, Brantly and Sant'Anna, Pedro HC and Quispe, Alexander and Guevara, Carlos},
+  title   = {{pyfixest: Fast high-dimensional fixed effect estimation in Python}},
+  year    = {2024},
+  url     = {https://github.com/d2cml-ai/csdid}
+}
