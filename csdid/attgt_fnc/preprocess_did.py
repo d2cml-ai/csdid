@@ -259,7 +259,8 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
   ) -> dict:
 
   n, t = data.shape
-  control_group = control_group[0]
+  if isinstance(control_group, (list, tuple)):
+    control_group = control_group[0]
   columns = [idname, tname, yname, gname]
   # print(columns)
   # Columns
@@ -277,11 +278,14 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
 
   # if xformla is None:
   try:
-    _, x_cov = fml(xformla, data = data, return_type='dataframe')
+    try:
+      _, x_cov = fml(xformla, data=data, return_type='dataframe')
+    except Exception:
+      x_cov = patsy.dmatrix(xformla, data=data, return_type='dataframe')
     _, n_cov = x_cov.shape
     data = pd.concat([data[columns], x_cov], axis=1)
-    data = data.assign(w = w)
-  except:
+    data = data.assign(w=w)
+  except Exception:
     data = data.assign(intercept = 1)
     clms = columns + ['intercept']
     n_cov = len(data.columns)
@@ -352,9 +356,11 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     true_rep_cross_section = True
 
   if panel:
-    if allow_unbalanced_panel: 
-      panel = False
-      true_rep_cross_section = False
+    if allow_unbalanced_panel:
+      try:
+        n = data[idname].nunique()
+      except Exception:
+        n = len(pd.unique(data[idname]))
     else:
       keepers = data.dropna().index
       n = len(data[idname].unique)

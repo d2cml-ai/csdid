@@ -105,8 +105,9 @@ def AGGTEobj(overall_att=None,
     out1 = np.column_stack((out["overall_att"], out["overall_se"], overall_cband_lower, overall_cband_upper))
     out1 = np.round(out1, 4)
     overall_sig = (overall_cband_upper < 0) | (overall_cband_lower > 0)
-    overall_sig[np.isnan(overall_sig)] = False
-    overall_sig_text = np.where(overall_sig, "*", "")
+    overall_sig = np.asarray(overall_sig)
+    overall_sig = np.where(np.isnan(overall_sig), False, overall_sig)
+    overall_sig_text = np.atleast_1d(np.where(overall_sig, "*", ""))
     out1 = np.column_stack((out1, overall_sig_text))
     
     print("\n")
@@ -192,5 +193,4 @@ def AGGTEobj(overall_att=None,
         print("\n")
         
     return out
-
 
