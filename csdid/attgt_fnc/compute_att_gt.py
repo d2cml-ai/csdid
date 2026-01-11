@@ -1,6 +1,7 @@
 import numpy as np, pandas as pd
 import patsy 
-from drdid import drdid, reg_did, ipwd_did
+from drdid import reg_did
+from csdid.attgt_fnc import drdid_trim
 
 from csdid.utils.bmisc import panel2cs2
 import warnings
@@ -36,6 +37,26 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
     inf_func = []
 
     att_est, group, year, post_array = [], [], [], []
+
+    def build_covariates(formula, frame):
+        try:
+            _, cov = fml(formula, data=frame, return_type='dataframe')
+        except Exception as e:
+            try:
+                cov = patsy.dmatrix(formula, data=frame, return_type='dataframe')
+            except Exception as e2:
+                print(f"Warning: Formula processing failed: {e2}")
+                y_str, x_str = formula.split("~")
+                xs1 = x_str.split('+')
+                xs1_col_names = [x.strip() for x in xs1 if x.strip() != '1']
+                n_dis = len(frame)
+                ones = np.ones((n_dis, 1))
+                try:
+                    cov = frame[xs1_col_names].to_numpy()
+                    cov = np.append(cov, ones, axis=1)
+                except Exception:
+                    cov = ones
+        return np.array(cov)
 
     def add_att_data(att = 0, pst = 0, inf_f = []):
         inf_func.append(inf_f)
@@ -75,12 +96,6 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
                         f"There are no pre-treatment periods for the group first treated at {g}. Units from this group are dropped."
                     )
 
-            # If we are in the universal base period
-            if base_period == 'universal' and pret == tn:
-                # Normalize results to zero and skip computation
-                add_att_data(att=0, pst=0, inf_f=np.zeros(len(data)))
-                continue
-
             # For non-never treated groups, set up the control group indicator 'C'
             if not never_treated:
                 # Units that are either never treated (gname == 0) or treated in the future
@@ -113,13 +128,12 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
 
             # -----------------------------------------------------------------------------
             # Debugging and validation
-            if base_period == 'universal' and pret == tn:
-                # Normalize results to zero and break the loop
-                add_att_data(att=0, pst=post_treat, inf_f=np.zeros(len(data)))
-                continue
-            
             # Post-treatment dummy variable
+            pret_year = tlist[pret]
             post_treat = 1 * (g <= tn)
+            if base_period == 'universal' and pret_year == tn:
+                add_att_data(att=0, pst=post_treat, inf_f=np.zeros(n))
+                continue
 
             # Subset the data for the current and pretreatment periods
             disdat = data[(data[tname] == tn) | (data[tname] == tlist[pret])]
@@ -139,9 +153,9 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
                 C = disdat.C
                 w = disdat.w
 
-                ypre = disdat.y0 if tn > pret else disdat.y1
-                ypost = disdat.y0 if tn < pret else disdat.y1
-                _, covariates = fml(xformla, data = disdat, return_type = 'dataframe')
+                ypre = disdat.y0 if tn > pret_year else disdat.y1
+                ypost = disdat.y0 if tn < pret_year else disdat.y1
+                covariates = build_covariates(xformla, disdat)
 
                 G, C, w, ypre = map(np.array, [G, C, w, ypre])
                 ypost, covariates = map(np.array, [ypost, covariates])
@@ -151,9 +165,9 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
                 elif est_method == "reg":
                     est_att_f = reg_did.reg_did_panel
                 elif est_method == "ipw":
-                    est_att_f = ipwd_did.std_ipw_did_panel
+                    est_att_f = drdid_trim.std_ipw_did_panel
                 elif est_method == "dr":
-                    est_att_f = drdid.drdid_panel
+                    est_att_f = drdid_trim.drdid_panel
 
                 att_gt, att_inf_func = est_att_f(ypost, ypre, G, i_weights=w, covariates=covariates)
 
@@ -224,21 +238,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
                     continue
 
                 # return (inf_func)
-                try:
-                    _, covariates = fml(xformla, data = disdat, return_type = 'dataframe')
-                    covariates = np.array(covariates)
-                except Exception as e:
-                    print(f"Warning: Formula processing failed: {e}")
-                    y_str, x_str = xformla.split("~")
-                    xs1 = x_str.split('+')
-                    xs1_col_names = [x.strip() for x in xs1 if x.strip() != '1']
-                    n_dis = len(disdat)
-                    ones = np.ones((n_dis, 1))
-                    try:
-                        covariates = disdat[xs1_col_names].to_numpy()
-                        covariates = np.append(covariates, ones, axis=1)
-                    except:
-                        covariates = ones
+                covariates = build_covariates(xformla, disdat)
 
                 #-----------------------------------------------------------------------------
                 # code for actually computing att(g,t)
@@ -250,9 +250,9 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying'):
                 elif est_method == "reg":
                     est_att_f = reg_did.reg_did_rc
                 elif est_method == "ipw":
-                    est_att_f = ipwd_did.std_ipw_did_rc
+                    est_att_f = drdid_trim.std_ipw_did_rc
                 elif est_method == "dr":
-                    est_att_f = drdid.drdid_rc
+                    est_att_f = drdid_trim.drdid_rc
                 
                 att_gt, att_inf_func = est_att_f(y=Y, post=post, D = G, i_weights=w, covariates=covariates)
                 # print(att_inf_func)
