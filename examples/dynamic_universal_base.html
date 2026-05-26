@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Dynamic Effects with base_period = &#34;universal&#34; &#8212; CSDID  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=fb9458d3" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Reference" href="../reference.html" />
+    <link rel="prev" title="Introduction" href="csdid_basic.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="Dynamic-Effects-with-base_period-=-%22universal%22">
+<h1>Dynamic Effects with <code class="docutils literal notranslate"><span class="pre">base_period</span> <span class="pre">=</span> <span class="pre">&quot;universal&quot;</span></code><a class="headerlink" href="#Dynamic-Effects-with-base_period-=-%22universal%22" title="Link to this heading">¶</a></h1>
+<p>This notebook shows how to estimate <strong>dynamic</strong> (event-study) treatment effects with the <code class="docutils literal notranslate"><span class="pre">csdid</span></code> package using the <code class="docutils literal notranslate"><span class="pre">base_period</span> <span class="pre">=</span> <span class="pre">&quot;universal&quot;</span></code> option of <code class="docutils literal notranslate"><span class="pre">ATTgt.fit()</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">base_period</span></code> argument controls which pre-treatment period is used as the reference for each <span class="math notranslate nohighlight">\(ATT(g,t)\)</span>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">base_period</span> <span class="pre">=</span> <span class="pre">&quot;varying&quot;</span></code> (default) — the base period <strong>changes</strong> with <span class="math notranslate nohighlight">\(t\)</span>. For pre-treatment periods, the base is <span class="math notranslate nohighlight">\(t-1\)</span> (so pre-treatment <span class="math notranslate nohighlight">\(ATT(g,t)\)</span> resemble a <em>placebo</em> test in differences). For post-treatment periods, the base is the last period before <span class="math notranslate nohighlight">\(g\)</span> becomes treated.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">base_period</span> <span class="pre">=</span> <span class="pre">&quot;universal&quot;</span></code> — the base period is <strong>fixed</strong> to the last pre-treatment period for every group (with anticipation accounted for). The <span class="math notranslate nohighlight">\(ATT\)</span> at the base period itself is normalized to zero. This matches the standard event-study normalization that fixes the <em>level</em> at <span class="math notranslate nohighlight">\(e = -1\)</span>.</p></li>
+</ul>
+<p>Both options give the same <span class="math notranslate nohighlight">\(ATT(g,t)\)</span> for <strong>post</strong>-treatment periods. They differ only in how pre-treatment <span class="math notranslate nohighlight">\(ATT(g,t)\)</span> are reported, which in turn changes the look of the event-study plot.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># pip install git+https://github.com/d2cml-ai/csdid/</span>
+<span class="c1"># pip install git+https://github.com/d2cml-ai/DRDID</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">csdid.att_gt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ATTgt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Data">
+<h2>Data<a class="headerlink" href="#Data" title="Link to this heading">¶</a></h2>
+<p>We use the same <code class="docutils literal notranslate"><span class="pre">mpdta</span></code> dataset (county-level teen employment, 2003-2007) used elsewhere in this site.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mpdta</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;https://raw.githubusercontent.com/d2cml-ai/csdid/main/data/mpdta.csv&quot;</span><span class="p">)</span>
+<span class="n">mpdta</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>year</th>
+      <th>countyreal</th>
+      <th>lpop</th>
+      <th>lemp</th>
+      <th>first.treat</th>
+      <th>treat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2003</td>
+      <td>8001</td>
+      <td>5.896761</td>
+      <td>8.461469</td>
+      <td>2007</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2004</td>
+      <td>8001</td>
+      <td>5.896761</td>
+      <td>8.336870</td>
+      <td>2007</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2005</td>
+      <td>8001</td>
+      <td>5.896761</td>
+      <td>8.340217</td>
+      <td>2007</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2006</td>
+      <td>8001</td>
+      <td>5.896761</td>
+      <td>8.378161</td>
+      <td>2007</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2007</td>
+      <td>8001</td>
+      <td>5.896761</td>
+      <td>8.487352</td>
+      <td>2007</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Varying-base-period-(default)">
+<h2>Varying base period (default)<a class="headerlink" href="#Varying-base-period-(default)" title="Link to this heading">¶</a></h2>
+<p>First, the default. <code class="docutils literal notranslate"><span class="pre">base_period</span></code> does not need to be specified.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mw_varying</span> <span class="o">=</span> <span class="n">ATTgt</span><span class="p">(</span>
+    <span class="n">yname</span><span class="o">=</span><span class="s2">&quot;lemp&quot;</span><span class="p">,</span>
+    <span class="n">gname</span><span class="o">=</span><span class="s2">&quot;first.treat&quot;</span><span class="p">,</span>
+    <span class="n">idname</span><span class="o">=</span><span class="s2">&quot;countyreal&quot;</span><span class="p">,</span>
+    <span class="n">tname</span><span class="o">=</span><span class="s2">&quot;year&quot;</span><span class="p">,</span>
+    <span class="n">xformla</span><span class="o">=</span><span class="s2">&quot;lemp~1&quot;</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">mpdta</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">est_method</span><span class="o">=</span><span class="s2">&quot;dr&quot;</span><span class="p">,</span> <span class="n">base_period</span><span class="o">=</span><span class="s2">&quot;varying&quot;</span><span class="p">)</span>
+
+<span class="n">mw_varying</span><span class="o">.</span><span class="n">summ_attgt</span><span class="p">()</span><span class="o">.</span><span class="n">summary2</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Group</th>
+      <th>Time</th>
+      <th>ATT(g, t)</th>
+      <th>Post</th>
+      <th>Std. Error</th>
+      <th>[95% Pointwise</th>
+      <th>Conf. Band]</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2004</td>
+      <td>2004</td>
+      <td>-0.0105</td>
+      <td>1</td>
+      <td>0.0232</td>
+      <td>-0.0727</td>
+      <td>0.0517</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2004</td>
+      <td>2005</td>
+      <td>-0.0704</td>
+      <td>1</td>
+      <td>0.0321</td>
+      <td>-0.1565</td>
+      <td>0.0157</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2004</td>
+      <td>2006</td>
+      <td>-0.1373</td>
+      <td>1</td>
+      <td>0.0379</td>
+      <td>-0.2391</td>
+      <td>-0.0355</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2004</td>
+      <td>2007</td>
+      <td>-0.1008</td>
+      <td>1</td>
+      <td>0.0357</td>
+      <td>-0.1967</td>
+      <td>-0.0049</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2006</td>
+      <td>2004</td>
+      <td>0.0065</td>
+      <td>0</td>
+      <td>0.0245</td>
+      <td>-0.0594</td>
+      <td>0.0724</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2006</td>
+      <td>2005</td>
+      <td>-0.0028</td>
+      <td>0</td>
+      <td>0.0193</td>
+      <td>-0.0545</td>
+      <td>0.0490</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2006</td>
+      <td>2006</td>
+      <td>-0.0046</td>
+      <td>1</td>
+      <td>0.0172</td>
+      <td>-0.0507</td>
+      <td>0.0415</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2006</td>
+      <td>2007</td>
+      <td>-0.0412</td>
+      <td>1</td>
+      <td>0.0196</td>
+      <td>-0.0938</td>
+      <td>0.0113</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2007</td>
+      <td>2004</td>
+      <td>0.0305</td>
+      <td>0</td>
+      <td>0.0153</td>
+      <td>-0.0105</td>
+      <td>0.0716</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>2007</td>
+      <td>2005</td>
+      <td>-0.0027</td>
+      <td>0</td>
+      <td>0.0164</td>
+      <td>-0.0467</td>
+      <td>0.0412</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>2007</td>
+      <td>2006</td>
+      <td>-0.0311</td>
+      <td>0</td>
+      <td>0.0182</td>
+      <td>-0.0799</td>
+      <td>0.0177</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>2007</td>
+      <td>2007</td>
+      <td>-0.0261</td>
+      <td>1</td>
+      <td>0.0173</td>
+      <td>-0.0726</td>
+      <td>0.0205</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mw_varying</span><span class="o">.</span><span class="n">aggte</span><span class="p">(</span><span class="n">typec</span><span class="o">=</span><span class="s2">&quot;dynamic&quot;</span><span class="p">)</span>
+<span class="n">mw_varying</span><span class="o">.</span><span class="n">plot_aggte</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+
+Overall summary of ATT&#39;s based on event-study/dynamic aggregation:
+    ATT Std. Error  [95.0%  Conf. Int.]
+-0.0772     0.0221 -0.1205       -0.034 *
+
+
+Dynamic Effects:
+   Event time  Estimate  Std. Error  [95.0% Simult.   Conf. Band
+0          -3    0.0305      0.0155           0.0002      0.0608  *
+1          -2   -0.0006      0.0130          -0.0261      0.0250
+2          -1   -0.0245      0.0142          -0.0522      0.0033
+3           0   -0.0199      0.0132          -0.0458      0.0060
+4           1   -0.0510      0.0173          -0.0848     -0.0171  *
+5           2   -0.1373      0.0371          -0.2100     -0.0646  *
+6           3   -0.1008      0.0327          -0.1650     -0.0366  *
+---
+Signif. codes: `*&#39; confidence band does not cover 0
+Control Group:  Never Treated ,
+Anticipation Periods:  0
+Estimation Method:  Doubly Robust
+
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_dynamic_universal_base_6_1.png" src="../_images/examples_dynamic_universal_base_6_1.png" />
+</div>
+</div>
+</section>
+<section id="Universal-base-period">
+<h2>Universal base period<a class="headerlink" href="#Universal-base-period" title="Link to this heading">¶</a></h2>
+<p>Now set <code class="docutils literal notranslate"><span class="pre">base_period</span> <span class="pre">=</span> <span class="pre">&quot;universal&quot;</span></code> in the call to <code class="docutils literal notranslate"><span class="pre">fit</span></code>. Everything else stays the same.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mw_universal</span> <span class="o">=</span> <span class="n">ATTgt</span><span class="p">(</span>
+    <span class="n">yname</span><span class="o">=</span><span class="s2">&quot;lemp&quot;</span><span class="p">,</span>
+    <span class="n">gname</span><span class="o">=</span><span class="s2">&quot;first.treat&quot;</span><span class="p">,</span>
+    <span class="n">idname</span><span class="o">=</span><span class="s2">&quot;countyreal&quot;</span><span class="p">,</span>
+    <span class="n">tname</span><span class="o">=</span><span class="s2">&quot;year&quot;</span><span class="p">,</span>
+    <span class="n">xformla</span><span class="o">=</span><span class="s2">&quot;lemp~1&quot;</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">mpdta</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">est_method</span><span class="o">=</span><span class="s2">&quot;dr&quot;</span><span class="p">,</span> <span class="n">base_period</span><span class="o">=</span><span class="s2">&quot;universal&quot;</span><span class="p">)</span>
+
+<span class="n">mw_universal</span><span class="o">.</span><span class="n">summ_attgt</span><span class="p">()</span><span class="o">.</span><span class="n">summary2</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+No units in group 2004 in time period 1, e2
+No available control units for group 2004 in time period 1, e4
+No units in group 2006 in time period 3, e2
+No available control units for group 2006 in time period 3, e4
+No units in group 2007 in time period 4, e2
+No available control units for group 2007 in time period 4, e4
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Group</th>
+      <th>Time</th>
+      <th>ATT(g, t)</th>
+      <th>Post</th>
+      <th>Std. Error</th>
+      <th>[95% Pointwise</th>
+      <th>Conf. Band]</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2004</td>
+      <td>2003</td>
+      <td>NaN</td>
+      <td>0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2004</td>
+      <td>2004</td>
+      <td>-0.0105</td>
+      <td>1</td>
+      <td>0.0248</td>
+      <td>-0.0771</td>
+      <td>0.0561</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2004</td>
+      <td>2005</td>
+      <td>-0.0704</td>
+      <td>1</td>
+      <td>0.0334</td>
+      <td>-0.1599</td>
+      <td>0.0191</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2004</td>
+      <td>2006</td>
+      <td>-0.1373</td>
+      <td>1</td>
+      <td>0.0385</td>
+      <td>-0.2406</td>
+      <td>-0.0339</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2004</td>
+      <td>2007</td>
+      <td>-0.1008</td>
+      <td>1</td>
+      <td>0.0326</td>
+      <td>-0.1882</td>
+      <td>-0.0135</td>
+      <td>*</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2006</td>
+      <td>2003</td>
+      <td>-0.0038</td>
+      <td>0</td>
+      <td>0.0320</td>
+      <td>-0.0895</td>
+      <td>0.0820</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2006</td>
+      <td>2004</td>
+      <td>0.0028</td>
+      <td>0</td>
+      <td>0.0193</td>
+      <td>-0.0490</td>
+      <td>0.0545</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2006</td>
+      <td>2005</td>
+      <td>NaN</td>
+      <td>0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2006</td>
+      <td>2006</td>
+      <td>-0.0046</td>
+      <td>1</td>
+      <td>0.0189</td>
+      <td>-0.0552</td>
+      <td>0.0460</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>2006</td>
+      <td>2007</td>
+      <td>-0.0412</td>
+      <td>1</td>
+      <td>0.0201</td>
+      <td>-0.0952</td>
+      <td>0.0127</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>2007</td>
+      <td>2003</td>
+      <td>0.0033</td>
+      <td>0</td>
+      <td>0.0265</td>
+      <td>-0.0678</td>
+      <td>0.0744</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>2007</td>
+      <td>2004</td>
+      <td>0.0338</td>
+      <td>0</td>
+      <td>0.0217</td>
+      <td>-0.0243</td>
+      <td>0.0919</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>2007</td>
+      <td>2005</td>
+      <td>0.0311</td>
+      <td>0</td>
+      <td>0.0182</td>
+      <td>-0.0176</td>
+      <td>0.0798</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>2007</td>
+      <td>2006</td>
+      <td>NaN</td>
+      <td>0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>2007</td>
+      <td>2007</td>
+      <td>-0.0261</td>
+      <td>1</td>
+      <td>0.0166</td>
+      <td>-0.0706</td>
+      <td>0.0184</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mw_universal</span><span class="o">.</span><span class="n">aggte</span><span class="p">(</span><span class="n">typec</span><span class="o">=</span><span class="s2">&quot;dynamic&quot;</span><span class="p">)</span>
+<span class="n">mw_universal</span><span class="o">.</span><span class="n">plot_aggte</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+
+Overall summary of ATT&#39;s based on event-study/dynamic aggregation:
+    ATT Std. Error  [95.0%  Conf. Int.]
+-0.0772     0.0209 -0.1182      -0.0363 *
+
+
+Dynamic Effects:
+   Event time  Estimate  Std. Error  [95.0% Simult.   Conf. Band
+0          -4    0.0033      0.0233          -0.0424      0.0490
+1          -3    0.0250      0.0183          -0.0108      0.0608
+2          -2    0.0245      0.0139          -0.0028      0.0517
+3           0   -0.0199      0.0119          -0.0433      0.0035
+4           1   -0.0510      0.0182          -0.0865     -0.0154  *
+5           2   -0.1373      0.0397          -0.2150     -0.0595  *
+6           3   -0.1008      0.0326          -0.1646     -0.0370  *
+---
+Signif. codes: `*&#39; confidence band does not cover 0
+Control Group:  Never Treated ,
+Anticipation Periods:  0
+Estimation Method:  Doubly Robust
+
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_dynamic_universal_base_9_1.png" src="../_images/examples_dynamic_universal_base_9_1.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">CSDID</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="csdid_basic.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="csdid_basic.html#Examples-with-simulated-data">Examples with simulated data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="csdid_basic.html#An-example-with-real-data">An example with real data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dynamic Effects with <code class="docutils literal notranslate"><span class="pre">base_period</span> <span class="pre">=</span> <span class="pre">&quot;universal&quot;</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Varying-base-period-(default)">Varying base period (default)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Universal-base-period">Universal base period</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference.html">Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="csdid_basic.html" title="previous chapter">Introduction</a></li>
+      <li>Next: <a href="../reference.html" title="next chapter">Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, D2CML Team.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/examples/dynamic_universal_base.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

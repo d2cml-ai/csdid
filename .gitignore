@@ -1,0 +1,9 @@
+.DS_Store
+__pycache__/
+*.pyc
+_build/
+
+# Not part of the published docs (leftovers from running Python locally on this branch)
+/csdid/
+/tests/
+/comparison/
