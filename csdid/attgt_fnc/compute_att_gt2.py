@@ -15,6 +15,8 @@ and the influence-function bookkeeping are identical to ``compute_att_gt``.
 import numpy as np, pandas as pd
 from drdid import reg_did
 from csdid.attgt_fnc import drdid_trim
+from csdid.attgt_fnc.compute_att_gt_shared import (
+    select_estimators, last_pretreatment_index, plan_cell, BREAK, BASE_ZERO)
 import warnings
 
 
@@ -54,13 +56,7 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
         year.append(state['tn'])
         post_array.append(pst)
 
-    if callable(est_method):
-        est_panel = est_rc = est_method
-    else:
-        est_panel = {"reg": reg_did.reg_did_panel, "ipw": drdid_trim.std_ipw_did_panel,
-                     "dr": drdid_trim.drdid_panel}[est_method]
-        est_rc = {"reg": reg_did.reg_did_rc, "ipw": drdid_trim.std_ipw_did_rc,
-                  "dr": drdid_trim.drdid_rc}[est_method]
+    est_panel, est_rc = select_estimators(est_method)
 
     # ─── Precompute period-indexed structures ───────────────────────────────
     if panel:
@@ -86,42 +82,26 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
     # ─── Main loop over groups × periods ────────────────────────────────────
     for g_index, g in enumerate(glist):
         state['g'] = g
-        _pretg_idx = np.where((tlist + anticipation) < g)[0]
-        pret_g = int(_pretg_idx[-1]) if len(_pretg_idx) else 0
+        _pretg = last_pretreatment_index(g, tlist, anticipation)
+        pret_g = _pretg if _pretg is not None else 0
 
         if not panel:
             data = data.assign(G_m=1 * (data[gname] == g))
 
         for t_i in range(tlist_len):
-            pret = t_i
             tn = tlist[t_i + tfac]
             state['tn'] = tn
+            pret, action = plan_cell(g, t_i, tlist, anticipation, base_period, tfac)
+            if action == BREAK:
+                break
 
-            if base_period == 'universal':
-                try:
-                    pret = np.where((tlist + anticipation) < g)[0][-1]
-                except IndexError:
-                    raise ValueError(
-                        f"There are no pre-treatment periods for the group first treated at {g}. "
-                        f"Units from this group are dropped."
-                    )
-
-            if g <= tlist[t_i + tfac]:
-                pret_mask = (tlist + anticipation) < g
-                if not np.any(pret_mask):
-                    warnings.warn(
-                        f"There are no pre-treatment periods for the group first treated at {g}\n"
-                        f"Units from this group are dropped")
-                    break
-                pret = int(np.where(pret_mask)[0][-1])
-
-            pret_year = tlist[pret]
             tn_idx = t_i + tfac
             post_treat = 1 * (g <= tn)
-
-            if base_period == 'universal' and pret_year == tn:
+            if action == BASE_ZERO:
                 add_att_data(att=0, pst=post_treat, inf_f=np.zeros(n))
                 continue
+
+            pret_year = tlist[pret]
 
             if panel:
                 _att_gt_panel_cell(
@@ -136,7 +116,7 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
                     tlist, tfac, full_cov, rowid_unique, n, fix_weights,
                     est_rc, add_att_data, t_i)
 
-    output = {'group': group, 'year': year, "att": att_est, 'post ': post_array}
+    output = {'group': group, 'year': year, "att": att_est, 'post': post_array}
     if compute_inffunc:
         return (output, np.vstack(inf_func))
     return (output, None)

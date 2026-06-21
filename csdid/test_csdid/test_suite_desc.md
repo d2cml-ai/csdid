@@ -1,10 +1,10 @@
 # csdid Test Suite — Description & R-Reference Coverage
 
-_Suite: `csdid/test_csdid` · 555 collected · **555 passed**, 0 skipped, 0 failures._
+_Suite: `csdid/test_csdid` · 561 collected · **561 passed**, 0 skipped, 0 failures._
 
 ## How many tests use R reference values?
 
-**65 of the 555 passing tests (~12%) compare csdid output directly against
+**65 of the 561 passing tests (~12%) compare csdid output directly against
 numerical values produced by R `did`.** The rest are *translated from* R's
 `testthat` suite (or authored for csdid) and validated via simulated ground
 truth, internal consistency (incl. `faster_mode == standard`), or structure.
@@ -50,7 +50,7 @@ far looser than the true ~1e-10 agreement with R. This is now locked in as the
 | test_glance.py | 19 | R testthat `test-glance.R` | Structure | `glance`/DIDparams keys & values |
 | test_cluster_analytic.py | 18 | R testthat `test-cluster-analytic.R` | Consistency | analytical vs bootstrap clustered SE |
 | test_ggdid.py | 16 | R testthat `test-ggdid.R` | Structure | plotting returns a `Figure` |
-| test_review_fixes.py | 22 | csdid R-sync (review) | Regression | round-1/2 fixes, factor covariates, `allow_unbalanced_panel=False` |
+| test_review_fixes.py | 28 | csdid R-sync (review) | Regression | round-1/2 fixes, factor covariates, `allow_unbalanced_panel=False`, idname-numeric, universal-base NaN, `'post'` key alias |
 | test_tidy.py | 16 | R testthat `test-tidy.R` | Structure | `tidy` output columns/keys |
 | test_error_handling.py | 11 | R testthat `test-error-handling.R` | Error/validation | error/warn behavior (est_method, reversal, fix_weights) |
 | test_user_bug_fixes.py | 9 | R testthat `test-user_bug_fixes.R` | Regression + ground-truth | GitHub-issue regressions |
@@ -79,10 +79,10 @@ far looser than the true ~1e-10 agreement with R. This is now locked in as the
 |--------|------:|:------------:|
 | R testthat (translated from `test-*.R`) | 255 | No (logic only) |
 | csdid (authored: parametric grid, inference) | 163 | No |
-| csdid R-sync (Phase / review additions) | 72 | No |
+| csdid R-sync (Phase / review additions) | 78 | No |
 | Live R `did` 2.5.0 (parity CSVs) | 60 | ✅ Yes |
 | JEL article (R, published) | 5 | ✅ Yes |
-| **Total** | **555** | **65 reference** |
+| **Total** | **561** | **65 reference** |
 
 | Category | What it checks |
 |----------|----------------|

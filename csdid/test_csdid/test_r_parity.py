@@ -289,9 +289,12 @@ def test_gap_scenarios_match_r(scn):
             continue
         ra, rs = rkey[key]
         np.testing.assert_allclose(a, ra, atol=1e-6, err_msg=f"{scn} ATT g={key[0]} t={key[1]}")
-        if np.isfinite(s) and np.isfinite(rs):
+        if np.isfinite(rs):
             np.testing.assert_allclose(s, rs, rtol=0.03, atol=5e-4,
                 err_msg=f"{scn} SE g={key[0]} t={key[1]}")
+        else:
+            # R reports NA (e.g. the universal base cell); Python must match with NaN.
+            assert not np.isfinite(s), f"{scn} expected NaN SE at g={key[0]} t={key[1]}, got {s}"
         n_checked += 1
     assert n_checked == len(rkey)
 

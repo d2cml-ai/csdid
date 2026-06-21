@@ -100,7 +100,7 @@
 #     fp = tlist[0]
 #     glist = glist[glist > fp + anticipation]
 
-#   #todo: idname must be numeric
+#   # (idname numeric check now performed in _validate_inputs)
 #   true_rep_cross_section = False
 #   if not panel:
 #     true_rep_cross_section = True
@@ -301,6 +301,14 @@ def _validate_inputs(yname, tname, idname, gname, data, control_group,
   if not np.issubdtype(data[gname].dtype, np.number):
     raise ValueError(f"Group variable '{gname}' must be numeric, got dtype '{data[gname].dtype}'.")
 
+  # --- Non-numeric idname (R did v2.5.1: idname must be numeric so the
+  # influence function can be indexed by unit). ---
+  if not np.issubdtype(data[idname].dtype, np.number):
+    raise ValueError(
+      f"The id variable '{idname}' must be numeric, got dtype '{data[idname].dtype}'. "
+      f"Please convert it to numeric."
+    )
+
   # --- Negative gname ---
   if (data[gname] < 0).any():
     raise ValueError(
@@ -497,7 +505,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     if control_group != "nevertreated" and not (data[gname] == 0).any():
       glist = glist[glist < latest_g]
 
-  #todo: idname must be numeric
+  # idname is validated to be numeric in _validate_inputs (R did v2.5.1).
   true_rep_cross_section = False
   if not panel:
     true_rep_cross_section = True

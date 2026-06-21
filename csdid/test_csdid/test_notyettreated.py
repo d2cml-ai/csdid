@@ -124,7 +124,7 @@ class TestNotyettreatedLastCohort:
         )
         result = obj.fit(est_method='dr')
         att_values = np.array(result.results['att'])
-        post_mask = np.array(result.results['post ']) == 1
+        post_mask = np.array(result.results['post']) == 1
         post_atts = att_values[post_mask]
         # With n=30/group and effect=1.0, mean should be clearly positive
         assert np.nanmean(post_atts) > 0.3, \

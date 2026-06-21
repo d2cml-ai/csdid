@@ -350,3 +350,75 @@ class TestAnalyticalClusterSEScaling:
 
         np.testing.assert_allclose(se, expected_se, rtol=1e-10,
             err_msg="Analytical clustered SE formula mismatch")
+
+
+class TestPostKeyAlias:
+    """results dict exposes both 'post' (canonical) and legacy 'post ' (alias)."""
+
+    @staticmethod
+    def _fit(seed=7):
+        df = make_panel(seed=seed)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            return ATTgt(yname='y', tname='year', idname='id', gname='group',
+                         data=df, control_group='nevertreated').fit(bstrap=False)
+
+    def test_both_post_keys_present_and_equal(self):
+        res = self._fit()
+        assert 'post' in res.results, "canonical 'post' key missing"
+        assert 'post ' in res.results, "legacy 'post ' alias missing"
+        np.testing.assert_array_equal(
+            np.asarray(res.results['post']), np.asarray(res.results['post ']))
+
+    def test_summ_attgt_robust_to_alias(self):
+        res = self._fit(seed=8)
+        res.summ_attgt()
+        # 8 display columns regardless of the extra alias key in results.
+        assert res.summary2.shape[1] == 8
+        assert 'Post' in list(res.summary2.columns)
+
+
+class TestUniversalBaseNaN:
+    """Universal base period: base-cell SE is NaN (matches R `did`), not 0."""
+
+    @staticmethod
+    def _fit(base_period, seed=11):
+        df = make_panel(n_units=200, n_periods=5, treatment_period=3, seed=seed)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            return ATTgt(yname='y', tname='year', idname='id', gname='group',
+                         data=df, control_group='nevertreated').fit(
+                             base_period=base_period, bstrap=False)
+
+    def test_universal_base_cell_se_is_nan(self):
+        res = self._fit('universal')
+        att = np.asarray(res.results['att'], dtype=float)
+        se = np.asarray(res.results['se'], dtype=float)
+        base = (att == 0.0)  # base cells are inserted as exactly 0
+        assert base.any(), "expected at least one universal base cell"
+        assert np.all(np.isnan(se[base])), "universal base-cell SE must be NaN"
+        assert np.all(np.isfinite(se[~base])), "estimated-cell SE must be finite"
+
+    def test_varying_base_has_no_nan_se(self):
+        res = self._fit('varying')
+        se = np.asarray(res.results['se'], dtype=float)
+        assert np.all(np.isfinite(se)), "varying base period should have finite SEs"
+
+
+class TestIdnameNumericValidation:
+    """R did v2.5.1: idname must be numeric; csdid raises a clear error."""
+
+    def test_string_idname_raises(self):
+        df = make_panel(seed=3)
+        df['id'] = 'unit_' + df['id'].astype(str)  # non-numeric id
+        with pytest.raises(ValueError, match="must be numeric"):
+            ATTgt(yname='y', tname='year', idname='id', gname='group',
+                  data=df, control_group='nevertreated')
+
+    def test_numeric_idname_ok(self):
+        df = make_panel(seed=3)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            res = ATTgt(yname='y', tname='year', idname='id', gname='group',
+                        data=df, control_group='nevertreated').fit(bstrap=False)
+        assert len(res.results['att']) > 0

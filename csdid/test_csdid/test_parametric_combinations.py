@@ -72,7 +72,7 @@ class TestComboA:
         res = self._fit(panel_data, em, cg, bp)
         se = np.asarray(res.results["se"], dtype=float)
         att = np.asarray(res.results["att"], dtype=float)
-        # universal base period produces SE=0 for reference periods (expected)
+        # universal base period produces SE=NaN for reference periods (expected)
         valid = np.isfinite(att) & np.isfinite(se) & (se > 0)
         assert np.sum(valid) > 0
 

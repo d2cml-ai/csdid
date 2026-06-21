@@ -2,6 +2,8 @@ import numpy as np, pandas as pd
 import patsy 
 from drdid import reg_did
 from csdid.attgt_fnc import drdid_trim
+from csdid.attgt_fnc.compute_att_gt_shared import (
+    select_estimators, last_pretreatment_index, plan_cell, BREAK, BASE_ZERO)
 
 from csdid.utils.bmisc import panel2cs2
 import warnings
@@ -63,6 +65,9 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
         data['C'] = (data[gname] == 0).astype(int)
     data['y_main'] = data[yname]
 
+    # 2x2 estimators (panel + repeated cross sections), selected once.
+    est_panel, est_rc = select_estimators(est_method)
+
     # Loop over groups
     for g_index, g in enumerate(glist):  
         # Set up .G once
@@ -72,65 +77,36 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
 
         # Group's last pre-treatment period index (R's pret_g), used as the
         # fixed reference period for fix_weights='base_period'.
-        _pretg_idx = np.where((np.array(tlist) + anticipation) < g)[0]
-        pret_g = int(_pretg_idx[-1]) if len(_pretg_idx) else 0
+        _pretg = last_pretreatment_index(g, tlist, anticipation)
+        pret_g = _pretg if _pretg is not None else 0
 
         # Loop over time periods
         for t_i in range(tlist_len):
 
-            # Set pretreatment period
-            pret = t_i  # Initialize pretreatment period as current time period index
-            tn = tlist[t_i + tfac]  # Current time period (adjusted for tfac)
+            # Resolve the pretreatment period and control flow. This
+            # selection logic is shared with the faster_mode path
+            # (compute_att_gt2) via plan_cell so the two cannot drift.
+            tn = tlist[t_i + tfac]
+            pret, _action = plan_cell(g, t_i, tlist, anticipation, base_period, tfac)
+            if _action == BREAK:
+                break
 
-            # Universal base period
-            if base_period == 'universal':  # Check if using a universal base period
-                try:
-                    # Set pretreatment period as the last period before treatment
-                    pret = np.where((tlist + anticipation) < g)[0][-1]
-                except IndexError:
-                    # Handle cases where no pretreatment periods exist
-                    raise ValueError(
-                        f"There are no pre-treatment periods for the group first treated at {g}. Units from this group are dropped."
-                    )
-
-            # For non-never treated groups, set up the control group indicator 'C'
-            if not never_treated:
-                # Units that are either never treated (gname == 0) or treated in the future
-                n1 = (data[gname] == 0)
-                n2 = (data[gname] > (tlist[max(t_i, pret) + tfac] + anticipation))
-                n3 = (data[gname] != glist[g_index])  # Not in the current group
-                row_eval = n1 | (n2 & n3)  # Combine conditions
-                data = data.assign(C=1 * row_eval)  # Assign the control indicator
-
-        # -----------------------------------------------------------------------------
-  
-            
-            # Check if in post-treatment period
-            if glist[g_index] <= tlist[t_i + tfac]:
-                # Use same base period as for post-treatment periods
-                # This matches R's: tail(which((tlist+anticipation) < glist[g]), 1)
-                pret_mask = (np.array(tlist) + anticipation) < glist[g_index]
-                if not any(pret_mask):
-                    warnings.warn(f"There are no pre-treatment periods for the group first treated at {glist[g_index]}\nUnits from this group are dropped")
-                    break
-                
-                pret = np.where(pret_mask)[0][-1]  # Gets last element like R's tail(..., 1)
-                # print("this is alex", pret)
-
-
-            # Print details for debugging
-            # print(f"Current period: {tlist[t_i + tfac]}")
-            # print(f"Current group: {glist[g_index]}")
-            # print(f"Set pretreatment period to be: {tlist[pret]}")
-
-            # -----------------------------------------------------------------------------
-            # Debugging and validation
-            # Post-treatment dummy variable
             pret_year = tlist[pret]
             post_treat = 1 * (g <= tn)
-            if base_period == 'universal' and pret_year == tn:
+            if _action == BASE_ZERO:
                 add_att_data(att=0, pst=post_treat, inf_f=np.zeros(n))
                 continue
+
+            # Control-group indicator for not-yet-treated comparisons. Using
+            # the final pret matches the legacy ordering: max(t_i, pret)
+            # collapses to t_i for post-treatment cells, and pret is unchanged
+            # for pre-treatment cells.
+            if not never_treated:
+                n1 = (data[gname] == 0)
+                n2 = (data[gname] > (tlist[max(t_i, pret) + tfac] + anticipation))
+                n3 = (data[gname] != glist[g_index])
+                row_eval = n1 | (n2 & n3)
+                data = data.assign(C=1 * row_eval)
 
             # Subset the data for the current and pretreatment periods
             disdat = data[(data[tname] == tn) | (data[tname] == tlist[pret])]
@@ -166,14 +142,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 G, C, w, ypre = map(np.array, [G, C, w, ypre])
                 ypost, covariates = map(np.array, [ypost, covariates])
 
-                if callable(est_method):
-                    est_att_f = est_method
-                elif est_method == "reg":
-                    est_att_f = reg_did.reg_did_panel
-                elif est_method == "ipw":
-                    est_att_f = drdid_trim.std_ipw_did_panel
-                elif est_method == "dr":
-                    est_att_f = drdid_trim.drdid_panel
+                est_att_f = est_panel
 
                 try:
                     att_gt, att_inf_func = est_att_f(ypost, ypre, G, i_weights=w, covariates=covariates)
@@ -278,14 +247,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 # code for actually computing att(g,t)
                 #-----------------------------------------------------------------------------
                 
-                if callable(est_method):
-                    est_att_f = est_method
-                elif est_method == "reg":
-                    est_att_f = reg_did.reg_did_rc
-                elif est_method == "ipw":
-                    est_att_f = drdid_trim.std_ipw_did_rc
-                elif est_method == "dr":
-                    est_att_f = drdid_trim.drdid_rc
+                est_att_f = est_rc
                 
                 try:
                     att_gt, att_inf_func = est_att_f(y=Y, post=post, D = G, i_weights=w, covariates=covariates)
@@ -322,7 +284,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
     'group': group ,
     'year': year,
     "att" : att_est,
-    'post ': post_array
+    'post': post_array
     }
 
     if compute_inffunc:

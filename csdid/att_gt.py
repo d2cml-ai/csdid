@@ -138,6 +138,13 @@ class ATTgt:
         cl_se = _analytical_cluster_se(inffunc, dp)
         if cl_se is not None:
           se = cl_se
+      # Universal base period: the base cell has att=0 by construction and an
+      # all-zero influence function, so its SE is undefined. R `did` reports NA
+      # there, so set those SEs to NaN (instead of a misleading 0) to match.
+      if base_period == 'universal':
+        base_mask = np.all(np.asarray(inffunc) == 0, axis=1)
+        se = np.array(se, dtype=float)
+        se[base_mask] = np.nan
       inf_fnc = {'inffunc': inffunc.T}
     else:
       # No influence functions: no SEs, no bootstrap
@@ -181,6 +188,9 @@ class ATTgt:
        })
     
     self.results = result
+    # Backward-compatible alias for the legacy trailing-space key. The canonical
+    # key is now 'post'; 'post ' is kept so older code does not hit a KeyError.
+    result['post '] = result['post']
 
     rst = result
     did_object = {
@@ -194,8 +204,8 @@ class ATTgt:
     return self
   def summ_attgt(self, n = 4):
     result = self.results
-    att_gt = pd.DataFrame(result)
-    att_gt = att_gt.drop('c', axis=1)
+    cols = ['group', 'year', 'att', 'post', 'se', 'l_se', 'u_se', 'sig']
+    att_gt = pd.DataFrame({c: result[c] for c in cols})
     name_attgt_df = ['Group', 'Time', 'ATT(g, t)', 'Post', "Std. Error", "[95% Pointwise", 'Conf. Band]', '']
     att_gt.columns = name_attgt_df
     att_gt = att_gt.round(n)

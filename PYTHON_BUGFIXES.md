@@ -15,6 +15,7 @@ validation, `notyettreated`, clustered inference, `compute_inffunc`,
 | 3 | Panel global-`n` overwrite | High (latent) | corrupt influence functions | use a cell-local `n_cell` |
 | 4 | `allow_unbalanced_panel=False` branch | High | immediate `TypeError` | fix 3 typos |
 | 5 | `raise "<string>"` in error paths | Medium | `TypeError` masks the real message | `raise ValueError(...)` |
+| 6 | Results key `'post '` had a trailing space | Low | `results['post']` → `KeyError` | canonical `'post'` + back-compat `'post '` alias |
 
 ---
 
@@ -141,4 +142,33 @@ raise ValueError("Never-treated group is too small, try setting control_group='n
 
 ---
 
-_All fixes are covered by the suite (`csdid/test_csdid`, 550 passed)._
+## 6. Results key `'post '` had a trailing space
+
+**File:** `csdid/attgt_fnc/compute_att_gt.py`, `compute_att_gt2.py`, `csdid/att_gt.py`
+
+The per-(g,t) results dict stored the post-treatment indicator under the key
+`'post '` — **with a trailing space**. Anyone indexing the natural `'post'`
+(no space) on `ATTgt(...).fit().results` got a `KeyError`. The trailing space
+was an unintentional typo, not an API choice.
+
+```python
+# before  (producers)
+output = {'group': group, 'year': year, "att": att_est, 'post ': post_array}
+res.results['post']      # KeyError: 'post'
+
+# after
+output = {'group': group, 'year': year, "att": att_est, 'post': post_array}
+# att_gt.py also keeps a backward-compatible alias so old code keeps working:
+result['post '] = result['post']
+res.results['post']      # ok
+res.results['post ']     # still ok (deprecated alias)
+```
+
+`summ_attgt()` was hardened to select its display columns by name (instead of a
+positional `drop('c')` + rename), so the extra alias key can never shift the
+summary table. Regression tests:
+`test_review_fixes.py::TestPostKeyAlias`.
+
+---
+
+_All fixes are covered by the suite (`csdid/test_csdid`, 561 passed)._

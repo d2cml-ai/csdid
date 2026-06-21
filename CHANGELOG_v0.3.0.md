@@ -4,7 +4,7 @@
 
 This release brings the Python `csdid` package into full alignment with the R `did` package v2.5.x. Key additions: comprehensive input validation, critical bug fixes, proper clustered inference (bootstrap **and** analytical), a point-estimates-only mode, a ~10× faster bootstrap, the **`fix_weights`** parameter, and a vectorized **`faster_mode`** (~3× faster, bit-identical). Pre-existing Python defects fixed during this work (unrelated to the R sync) are tracked separately in **`PYTHON_BUGFIXES.md`**.
 
-**555 tests** (`csdid/test_csdid`, 0 skipped) cover all changes; **65 compare directly against live R `did` 2.5.0** (ATT(g,t) to ~1e-16, analytical SEs within ~0.1–1%, across all aggregations, `fix_weights` modes, and factor covariates) or published JEL values. See §10–§14 and `csdid/test_csdid/test_suite_desc.md`.
+**561 tests** (`csdid/test_csdid`, 0 skipped) cover all changes; **65 compare directly against live R `did` 2.5.0** (ATT(g,t) to ~1e-16, analytical SEs within ~0.1–1%, across all aggregations, `fix_weights` modes, and factor covariates) or published JEL values. See §10–§15 and `csdid/test_csdid/test_suite_desc.md`.
 
 ---
 
@@ -224,6 +224,34 @@ the standard path too).
 
 ---
 
+### 15. Polish: idname validation, universal-base SE, faster_mode dedup
+
+**Files:** `csdid/attgt_fnc/preprocess_did.py`, `csdid/att_gt.py`,
+`csdid/attgt_fnc/compute_att_gt.py`, `compute_att_gt2.py`,
+`compute_att_gt_shared.py` (new)  
+**Tests:** `test_review_fixes.py` (`TestIdnameNumericValidation`,
+`TestUniversalBaseNaN`, `TestPostKeyAlias`), `test_r_parity.py` (strengthened)
+
+- **`idname` numeric validation (R parity).** R `did` v2.5.1 requires the id
+  variable to be numeric (`stop("The id variable '…' must be numeric…")`). csdid
+  now validates this in `_validate_inputs` with the same message intent instead
+  of failing obscurely later. Removed the stale `#todo: idname must be numeric`.
+- **Universal base-period SE → `NaN` (R parity).** For `base_period="universal"`
+  the base cell has `att = 0` by construction and an all-zero influence function,
+  so its SE is undefined. R reports `NA`; csdid previously reported a misleading
+  `0`. It now reports `NaN`, matching R's `ref_gaps` reference exactly (e.g.
+  `universal, g=2004, t=2003 → att=0, se=NA`). `test_r_parity` was tightened to
+  assert csdid is non-finite wherever R is `NA`.
+- **`faster_mode` de-duplication (maintainability).** The estimator dispatch and
+  the per-(g,t) pretreatment-period / control-flow logic were copy-pasted across
+  the standard and `faster_mode` paths. They now live once in
+  `compute_att_gt_shared.py` (`select_estimators`, `last_pretreatment_index`,
+  `plan_cell`) and are consumed by both, so the cell-selection logic cannot
+  drift. Behavior is unchanged — the bit-identical consistency suite (72 configs)
+  and all R-parity tests still pass.
+
+---
+
 ## Pre-existing Python bug fixes
 
 Defects in the Python port itself (crashes / wrong output, independent of the R
@@ -246,7 +274,7 @@ masking error messages.
 
 ## Test suite
 
-**`csdid/test_csdid`: 555 passed, 0 skipped, 0 failures.** 65 tests compare
+**`csdid/test_csdid`: 561 passed, 0 skipped, 0 failures.** 65 tests compare
 directly to live/published R values (see `test_csdid/test_suite_desc.md`);
 `faster_mode` details in `test_csdid/FASTER_MODE.md`.
 
