@@ -14,7 +14,7 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
     tname           = DIDparams['tname']
     try:
         tlist           = np.sort(data[tname].unique())
-    except:
+    except Exception:
         tlist           = np.sort(data[tname].unique().to_numpy())
     alp             = DIDparams['alp']
     panel           = DIDparams['panel']
@@ -28,38 +28,64 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
 
     # Convert inf_func to matrix
     inf_func = np.asarray(inf_func)
+    if inf_func.ndim == 1:
+        inf_func = inf_func[:, np.newaxis]
 
     # Set correct number of units
     n = inf_func.shape[0]
 
-    # Drop idname if it is in clustervars
-    if clustervars is not None and idname in clustervars:
-        clustervars.remove(idname)
-
+    # Normalize clustervars: can be None, a string, or a list with one string
     if clustervars is not None:
-        if isinstance(clustervars, list) and isinstance(clustervars[0], str):
-            raise ValueError("clustervars need to be the name of the clustering variable.")
+        if isinstance(clustervars, str):
+            clustervars = clustervars  # already a string
+        elif isinstance(clustervars, (list, tuple)):
+            if len(clustervars) == 0:
+                clustervars = None
+            elif len(clustervars) > 1:
+                raise ValueError("Can't handle more than one cluster variable beyond idname.")
+            else:
+                clustervars = clustervars[0]
+        # Drop if same as idname (clustering at unit level = no extra clustering)
+        if clustervars == idname:
+            clustervars = None
 
-    # We can only handle up to 2-way clustering
-    if clustervars is not None and len(clustervars) > 1:
-        raise ValueError("Can't handle that many cluster variables")
-
+    # Validate cluster variable
     if clustervars is not None:
+        if clustervars not in data.columns:
+            raise ValueError(f"Cluster variable '{clustervars}' not found in data.")
         # Check that cluster variable does not vary over time within unit
-        clust_tv = dta.groupby(idname)[clustervars[0]].nunique() == 1
-        if not clust_tv.all():
-            raise ValueError("Can't handle time-varying cluster variables")
-    # clustervars='year'    
+        # Must check full data (not just first period) to catch time-varying clusters
+        clust_tv = data.groupby(idname)[clustervars].nunique()
+        if (clust_tv > 1).any():
+            raise ValueError(
+                f"Cluster variable '{clustervars}' varies over time within units. "
+                f"Cluster variables must be time-invariant."
+            )
+
     # Multiplier bootstrap
     n_clusters = n
-    if not clustervars:
+    if clustervars is None:
+        # Standard (non-clustered) bootstrap
         bres = np.sqrt(n) * run_multiplier_bootstrap(inf_func, biters, pl, cores)
     else:
-        n_clusters = len(data[clustervars].drop_duplicates())
-        cluster = dta[[idname, clustervars]].drop_duplicates().values[:, 1]
-        cluster_n = dta.groupby(cluster).size().values
-        cluster_mean_if = pd.DataFrame(inf_func).groupby(cluster).sum().values / cluster_n
-        bres = np.sqrt(n_clusters) * run_multiplier_bootstrap(cluster_mean_if, biters, pl, cores)
+        # Clustered bootstrap: draw one multiplier per cluster,
+        # apply to cluster sums of the influence function (Callaway & Sant'Anna 2021, Remark 10)
+        cluster_vec = dta[[idname, clustervars]].drop_duplicates().set_index(idname)[clustervars]
+        # Align cluster assignments with IF rows (which are in unit order)
+        unit_ids = dta[idname].unique()
+        cluster_labels = cluster_vec.reindex(unit_ids).values
+        
+        # Aggregate IF to cluster sums
+        cluster_ids = np.unique(cluster_labels)
+        n_clusters = len(cluster_ids)
+        
+        # Sum influence functions by cluster
+        cluster_if = np.zeros((n_clusters, inf_func.shape[1]))
+        for i, c in enumerate(cluster_ids):
+            mask = cluster_labels == c
+            cluster_if[i] = inf_func[mask].sum(axis=0)
+        
+        bres = np.sqrt(n_clusters) * run_multiplier_bootstrap(cluster_if, biters, pl, cores)
 
     # Handle vector and matrix case differently to get nxk matrix
     if isinstance(bres, np.ndarray) and bres.ndim == 1:
@@ -70,6 +96,11 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
     # Non-degenerate dimensions
     ndg_dim = np.logical_and(~np.isnan(np.sum(bres, axis=0)), np.sum(bres ** 2, axis=0) > np.sqrt(np.finfo(float).eps) * 10)
     bres = bres[:, ndg_dim]
+
+    # All dimensions degenerate: no finite bootstrap statistics (matches R's ncol==0 guard).
+    if bres.shape[1] == 0:
+        se = np.full(ndg_dim.shape, np.nan)
+        return {'bres': bres, 'V': np.nan, 'se': se, 'crit_val': np.nan}
 
     # Bootstrap variance matrix (this matrix can be defective because of degenerate cases)
     V = np.cov(bres, rowvar=False)
@@ -86,30 +117,38 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
     bT = bT[np.isfinite(bT)]
     crit_val = np.quantile(bT, 1 - alp, method="inverted_cdf")
     
-    # Standard error
+    # Standard error: R uses bSigma * sqrt(n_clusters) / n
+    # For non-clustered (n_clusters == n), this equals bSigma / sqrt(n).
+    # For clustered, the sqrt(n_clusters)/n scaling correctly accounts for
+    # cluster-sum influence functions.
     se = np.full(ndg_dim.shape, np.nan)
-    se[ndg_dim] = bSigma / np.sqrt(n_clusters)
+    se[ndg_dim] = bSigma * np.sqrt(n_clusters) / n
 
     return {'bres': bres, 'V': V, 'se': se, 'crit_val': crit_val}
 
 def run_multiplier_bootstrap(inf_func, biters, pl=False, cores=1):
-    ngroups = int(np.ceil(biters / cores))
-    chunks = [ngroups] * cores
-    chunks[0] += biters - sum(chunks)
+    biters = int(biters)
+    cores = max(1, int(cores))
+    # Split biters into per-core chunks that always sum to biters exactly,
+    # matching R's diff(round(seq(0, biters, length.out = cores + 1)))
+    boundaries = np.round(np.linspace(0, biters, cores + 1)).astype(int)
+    chunks = np.diff(boundaries)
+    chunks = chunks[chunks > 0]  # drop empty chunks
 
     n = inf_func.shape[0]
 
-    def parallel_function(biters):
-        return multiplier_bootstrap(inf_func, biters)
+    def parallel_function(b):
+        return multiplier_bootstrap(inf_func, b)
 
     if n > 2500 and pl and cores > 1:
         results = Parallel(n_jobs=cores)(
-            delayed(parallel_function)(biters) for biters in chunks
+            delayed(parallel_function)(b) for b in chunks if b > 0
         )
         results = np.vstack(results)
     else:
         results = multiplier_bootstrap(inf_func, biters)
 
     return results
+
 
 
