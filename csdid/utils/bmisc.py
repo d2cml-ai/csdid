@@ -38,18 +38,17 @@ def TorF(cond, use_isTRUE=False):
         cond[np.isnan(cond)] = False
     return cond
 
-def multiplier_bootstrap(inf_func, biters): # This function comes from c++
+def multiplier_bootstrap(inf_func, biters):
+    """Multiplier bootstrap using Rademacher weights (vectorized, chunked for large inputs)."""
     n, K = inf_func.shape
     biters = int(biters)
-    innerMat = np.zeros((n, K))
-    Ub = np.zeros(n)
-    outMat = np.zeros((biters,K))
-
-    for b in range(biters):
-        # draw Rademechar weights
-        # Ub = ( np.ones(n) - 2 * np.round(np.random.rand(n)) )[:, np.newaxis]
-        Ub = np.random.choice([1, -1], size=(n, 1))
-        innerMat = inf_func * Ub
-        outMat[b] = np.mean(innerMat, axis=0)
-
+    # Chunk to limit peak memory: each chunk allocates (chunk_size x n) array
+    max_chunk = max(1, min(biters, int(5e8 / max(n, 1))))  # ~500M elements max
+    outMat = np.empty((biters, K))
+    pos = 0
+    while pos < biters:
+        chunk = min(max_chunk, biters - pos)
+        Ub = np.random.choice([1, -1], size=(chunk, n))
+        outMat[pos:pos+chunk] = Ub @ inf_func / n
+        pos += chunk
     return outMat

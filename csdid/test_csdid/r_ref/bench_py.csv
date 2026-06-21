@@ -1,0 +1,4 @@
+dataset,rows,py_standard_ms,py_fast_ms,py_speedup
+tp8_dyn,16000,504.8,138.3,3.65
+tp10_const,10000,726.2,219.6,3.31
+big_tp10,80000,1386.6,423.2,3.28

@@ -1,0 +1,10 @@
+include readme.md
+include LICENSE
+include CHANGELOG_v0.3.0.md
+include PYTHON_BUGFIXES.md
+include requirements.txt
+
+# Exclude test fixtures / generated data from the sdist (they bloat the package).
+prune csdid/test_csdid
+global-exclude *.pyc
+global-exclude __pycache__

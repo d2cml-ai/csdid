@@ -64,7 +64,47 @@ def get_se(thisinffunc, DIDparams=None):
         bout = mboot(thisinffunc, DIDparams)
         return bout['se']
     else:
-        return np.sqrt(np.mean((thisinffunc)**2) / n)
+        # Analytical standard errors
+        thisinffunc = np.asarray(thisinffunc).flatten()
+        n = len(thisinffunc)
+        clustervars = DIDparams.get('clustervars') if DIDparams else None
+        
+        if clustervars is not None and DIDparams is not None:
+            # Cluster-robust analytical SEs:
+            # SE = sqrt(Var(cluster_sums) / n_clusters^2)
+            data = DIDparams['data']
+            idname = DIDparams['idname']
+            tname = DIDparams['tname']
+            panel = DIDparams['panel']
+            
+            # Get unit-to-cluster mapping
+            if panel:
+                tlist = np.sort(data[tname].unique())
+                dta = data[data[tname] == tlist[0]]
+            else:
+                dta = data.drop_duplicates(subset=[idname])
+            
+            if clustervars in dta.columns:
+                cluster_map = dta[[idname, clustervars]].drop_duplicates().set_index(idname)[clustervars]
+                unit_ids = dta[idname].unique()
+                cluster_labels = cluster_map.reindex(unit_ids).values
+                
+                # Sum IFs by cluster
+                unique_clusters = np.unique(cluster_labels)
+                n_clusters = len(unique_clusters)
+                cluster_sums = np.zeros(n_clusters)
+                for i, c in enumerate(unique_clusters):
+                    mask = cluster_labels == c
+                    cluster_sums[i] = np.sum(thisinffunc[mask])
+                
+                # Cluster-robust variance: SE = sqrt(sum(S_c^2)) / n
+                # where n is the total number of units (not clusters),
+                # matching R did v2.5.1
+                n_units = len(thisinffunc)
+                return np.sqrt(np.sum(cluster_sums**2)) / n_units
+            
+        # Standard (iid) analytical SE
+        return np.sqrt(np.mean(thisinffunc**2) / n)
 
 def AGGTEobj(overall_att=None,
              overall_se=None,

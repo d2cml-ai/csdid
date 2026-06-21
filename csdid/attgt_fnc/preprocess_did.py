@@ -251,16 +251,127 @@ import warnings
 
 fml = patsy.dmatrices
 
+# Internal column names that must not collide with user data
+_RESERVED_NAMES = {'w', 'w1', 'G_m', 'C', 'y_main', 'rowid', 'y0', 'y1', 'dy'}
+
+
+def _validate_inputs(yname, tname, idname, gname, data, control_group,
+                     anticipation, panel, clustervar, weights_name):
+  """Validate inputs to pre_process_did, raising clear errors on bad data."""
+
+  # --- Check columns exist ---
+  required = {
+    'yname': yname, 'tname': tname, 'idname': idname, 'gname': gname
+  }
+  if weights_name is not None:
+    required['weights_name'] = weights_name
+  if clustervar is not None:
+    required['clustervar'] = clustervar
+
+  missing = [f"{k}='{v}'" for k, v in required.items() if v not in data.columns]
+  if missing:
+    raise ValueError(
+      f"Column(s) not found in data: {', '.join(missing)}. "
+      f"Available columns: {list(data.columns)}"
+    )
+
+  # --- Reserved column name checks ---
+  # The weights column is read into the internal 'w' column before any internal
+  # columns are created, so a weights column named like an internal column (e.g. 'w')
+  # is safe and is allowed (matches R 'did', which stores weights in '.w').
+  user_cols = {yname, tname, idname, gname}
+  if clustervar:
+    user_cols.add(clustervar)
+  conflicts = user_cols & _RESERVED_NAMES
+  if conflicts:
+    raise ValueError(
+      f"Column name(s) {conflicts} conflict with names used internally by csdid. "
+      f"Please rename these columns before calling ATTgt."
+    )
+
+  # --- Non-numeric outcome (allow bool, which R treats as logical) ---
+  if not (np.issubdtype(data[yname].dtype, np.number) or np.issubdtype(data[yname].dtype, np.bool_)):
+    raise ValueError(
+      f"Outcome variable '{yname}' must be numeric, got dtype '{data[yname].dtype}'."
+    )
+
+  # --- Non-numeric tname / gname ---
+  if not np.issubdtype(data[tname].dtype, np.number):
+    raise ValueError(f"Time variable '{tname}' must be numeric, got dtype '{data[tname].dtype}'.")
+  if not np.issubdtype(data[gname].dtype, np.number):
+    raise ValueError(f"Group variable '{gname}' must be numeric, got dtype '{data[gname].dtype}'.")
+
+  # --- Negative gname ---
+  if (data[gname] < 0).any():
+    raise ValueError(
+      f"Group variable '{gname}' contains negative values. "
+      f"Values must be 0 (never-treated) or a positive treatment time."
+    )
+
+  # --- Duplicate (id, time) ---
+  if panel:
+    dups = data.duplicated(subset=[idname, tname], keep=False)
+    if dups.any():
+      n_dups = dups.sum()
+      raise ValueError(
+        f"Found {n_dups} duplicate (idname, tname) rows. "
+        f"Each unit must appear at most once per time period. "
+        f"Check for duplicate entries in your data."
+      )
+
+  # --- Treatment must be irreversible (gname time-invariant per unit) ---
+  if panel:
+    g_tv = data.groupby(idname)[gname].nunique()
+    if (g_tv > 1).any():
+      raise ValueError(
+        "The value of gname (treatment variable) must be the same across all "
+        "periods for each particular unit. The treatment must be irreversible."
+      )
+
+  # --- anticipation ---
+  if not isinstance(anticipation, (int, float)) or anticipation < 0:
+    raise ValueError(f"'anticipation' must be a non-negative number, got {anticipation}.")
+
+  # --- control_group ---
+  valid_cg = ['nevertreated', 'notyettreated']
+  if control_group not in valid_cg:
+    raise ValueError(
+      f"'control_group' must be one of {valid_cg}, got '{control_group}'."
+    )
+
+  # --- weights validation ---
+  if weights_name is not None:
+    w = data[weights_name]
+    if (w < 0).any():
+      raise ValueError(f"Weights column '{weights_name}' contains negative values.")
+    if w.mean() <= 0:
+      raise ValueError(f"Weights column '{weights_name}' has non-positive mean.")
+
+
 def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame, 
   control_group = ['nevertreated', 'notyettreated'], 
   anticipation = 0, xformla : str = None,
   panel = True, allow_unbalanced_panel = True, cband = False,
-  clustervar = None,  weights_name = None
+  clustervar = None,  weights_name = None, fix_weights = None
   ) -> dict:
 
   n, t = data.shape
   if isinstance(control_group, (list, tuple)):
     control_group = control_group[0]
+
+  # fix_weights = 'base_period'/'first_period' are not supported for true
+  # repeated cross sections (matches R `did`).
+  input_panel = panel
+  if (not input_panel) and fix_weights in ("base_period", "first_period"):
+    raise ValueError(
+      f"fix_weights = '{fix_weights}' is not supported for repeated cross sections. "
+      f"Use fix_weights = 'varying' or None instead."
+    )
+
+  # Validate inputs early with clear error messages
+  _validate_inputs(yname, tname, idname, gname, data, control_group,
+                   anticipation, panel, clustervar, weights_name)
+
   columns = [idname, tname, yname, gname]
   # print(columns)
   # Columns
@@ -283,10 +394,22 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     except Exception:
       x_cov = patsy.dmatrix(xformla, data=data, return_type='dataframe')
     _, n_cov = x_cov.shape
+    # Names of the (globally built, factor-consistent) design columns. These are
+    # selected directly in the (g,t) loop instead of re-running patsy per cell,
+    # which both fixes transformed/factor covariates and removes patsy from the
+    # inner loop (matches R `did`, which builds model.matrix() once).
+    xcov_cols = list(x_cov.columns)
     data = pd.concat([data[columns], x_cov], axis=1)
     data = data.assign(w=w)
-  except Exception:
+  except Exception as e:
+    if xformla is not None and xformla != f'{yname} ~ 1':
+      raise ValueError(
+        f"Error processing formula '{xformla}': {e}. "
+        f"Check that all formula variables exist in the data."
+      ) from e
+    # Only fall back to intercept for the default formula case
     data = data.assign(intercept = 1)
+    xcov_cols = ['intercept']
     clms = columns + ['intercept']
     n_cov = len(data.columns)
     # patsy dont work with pyspark
@@ -305,55 +428,85 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
 
     tlist = np.sort(data[tname].unique())
     glist = np.sort(data[gname].unique())
-  except:
+  except Exception:
     tlist = np.sort(data[tname].unique().to_numpy())
     glist = np.sort(data[gname].unique().to_numpy())
 
-  asif_nev_treated = data[gname] > np.max(tlist)
+  asif_nev_treated = data[gname] > np.max(tlist) + anticipation
   asif_nev_treated.fillna(False, inplace=True)
   data.loc[asif_nev_treated, gname] = 0
 
-  if len(glist[glist == 0]) == 0:
+  # Recompute glist after modifying gname (some cohorts may have been recoded to 0)
+  try:
+    glist = np.sort(data[gname].unique())
+  except Exception:
+    glist = np.sort(data[gname].unique().to_numpy())
+
+  # Handle the case with no never-treated group.
+  # R did v2.5.1 warns and coerces (does not error) when control_group='nevertreated'
+  # and no never-treated units exist: it coerces the last cohort to never-treated and
+  # truncates periods at/after that cohort.
+  latest_g = None
+  if not (glist == 0).any():
+    latest_g = np.max(glist)
+    cutoff_t = latest_g - anticipation
     if control_group == "nevertreated":
-      raise ValueError("There is no available never-treated group")
+      warnings.warn(
+        "No never-treated group is available. The last treated cohort is being "
+        "coerced as 'never-treated' units, and data from periods at/after that cohort "
+        "is being filtered out (no available comparison groups)."
+      )
+      data = data.query(f'{tname} < @cutoff_t')
+      data.loc[data[gname] == latest_g, gname] = 0
     else:
-      value = np.max(glist) - anticipation
-      data = data.query(f'{tname} < @value')
-      tlist = np.sort(data[tname].unique())
-      glist = np.sort(data[gname].unique())
-      glist = glist[glist < np.max(glist)]
+      # notyettreated: drop late periods; the last cohort stays in the data as the
+      # not-yet-treated comparison group.
+      data = data.query(f'{tname} < @cutoff_t')
+    tlist = np.sort(data[tname].unique())
+    glist = np.sort(data[gname].unique())
+    # The last cohort only serves as a comparison; exclude it from estimated groups.
+    if control_group != "nevertreated":
+      glist = glist[glist < latest_g]
 
   glist = glist[glist > 0]
-  # first prerios 
+  # first period
   fp = tlist[0]
   glist = glist[glist > fp + anticipation]
 
-  treated_fp = (data[gname] <= fp) & ~(data[gname] == 0)
-  treated_fp.fillna(False, inplace=True)
+  # Identify units already treated in the first period (accounting for anticipation).
+  treated_fp = (data[gname] <= fp + anticipation) & ~(data[gname] == 0)
+  treated_fp = treated_fp.fillna(False)
 
   try:
-
-    nfirst_period = np.sum(treated_fp) if panel \
-      else len(data.loc[treated_fp, idname].unique())
-  except:
-    nfirst_period = treated_fp.sum() if panel \
-      else len(data.loc[treated_fp, idname].unique())
+    nfirst_period = len(data.loc[treated_fp, idname].unique()) if panel \
+      else int(np.sum(treated_fp))
+  except Exception:
+    nfirst_period = len(data.loc[treated_fp, idname].unique()) if panel \
+      else int(treated_fp.sum())
 
   if nfirst_period > 0:
-    warning_message = f"Dropped {nfirst_period} units that were already treated in the first period."
-    print(warning_message)
-    glist_in = np.append(glist, [0])
-    data = data.query(f'{gname} in @glist_in')
+    warnings.warn(f"Dropped {nfirst_period} units that were already treated in the first period.")
+    # Drop ONLY the already-treated units, by row identity (R did v2.5.1). The previous
+    # cohort-membership filter could delete the last-treated cohort that serves as a
+    # not-yet-treated control.
+    data = data[~treated_fp]
     tlist = np.sort(data[tname].unique())
-    glist = np.sort(data[gname].unique())
     glist = glist[glist > 0]
     fp = tlist[0]
     glist = glist[glist > fp + anticipation]
+    if control_group != "nevertreated" and not (data[gname] == 0).any():
+      glist = glist[glist < latest_g]
 
   #todo: idname must be numeric
   true_rep_cross_section = False
   if not panel:
     true_rep_cross_section = True
+
+  # fix_weights="varying" with panel data: use the repeated-cross-section
+  # estimators with per-period weights (matches R `did`).
+  if fix_weights == "varying" and panel:
+    panel = False
+    true_rep_cross_section = False
 
   if panel:
     if allow_unbalanced_panel:
@@ -361,13 +514,19 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
         n = data[idname].nunique()
       except Exception:
         n = len(pd.unique(data[idname]))
+      # Detect imbalance exactly as R did v2.5.1: a panel is balanced iff
+      # nrow(data) == n_units * n_periods. If unbalanced, switch to the
+      # repeated-cross-section estimators.
+      n_periods = data[tname].nunique()
+      if len(data) != n * n_periods:
+        panel = False
+        true_rep_cross_section = False
     else:
       keepers = data.dropna().index
-      n = len(data[idname].unique)
-      print(n)
-      n_keep = len(data.iloc[keepers, idname].unique())
+      n = len(data[idname].unique())
+      n_keep = len(data.loc[keepers, idname].unique())
 
-      if len(data.loc[keepers] < len(data)):
+      if len(data.loc[keepers]) < len(data):
         print(f"Dropped {n-n_keep} observations that had missing data.")
         data = data.loc[keepers]
       # make balanced data set
@@ -386,7 +545,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     keepers = data.dropna().index.to_numpy()
     ndiff = len(data.loc[keepers]) - len(data)
     if len(keepers) == 0:
-      raise "All observations dropped due to missing data problems."
+      raise ValueError("All observations dropped due to missing data problems.")
     if ndiff < 0:
       mssg = f"Dropped {ndiff} observations that had missing data."
       data = data.loc[keepers]
@@ -402,9 +561,24 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
 
   data = data.sort_values([idname, tname])
   data = data.assign(w1 = lambda x: x['w'] * 1)
+
+  # Warn about the default handling of time-varying weights (matches R `did`).
+  if fix_weights is None and weights_name is not None and input_panel:
+    try:
+      w_tv = data.groupby(idname)['w'].nunique()
+      if (w_tv > 1).any():
+        warnings.warn(
+          "Time-varying weights detected. For balanced panel data, the default "
+          "behavior uses the weight from the earlier of the two time periods in each "
+          "2x2 comparison (the base period for post-treatment cells). Use the "
+          "'fix_weights' argument to control this behavior."
+        )
+    except Exception:
+      pass
+
   # data.loc[:, ".w"] = data['w']
   if len(glist) == 0:
-    raise f"No valid groups. The variable in '{gname}' should be expressed as the time a unit is first treated (0 if never-treated)."
+    raise ValueError(f"No valid groups. The variable in '{gname}' should be expressed as the time a unit is first treated (0 if never-treated).")
   if len(tlist) == 2:
     cband = False
   gsize = data.groupby(data[gname]).size().reset_index(name="count")
@@ -418,7 +592,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     warnings.warn(f"Be aware that there are some small groups in your dataset.\n  Check groups: {gpaste}.")
 
     if 0 in gsize[gname].to_numpy() and control_group == "nevertreated":
-      raise "Never-treated group is too small, try setting control_group='notyettreated'."
+      raise ValueError("Never-treated group is too small, try setting control_group='notyettreated'.")
   nT, nG = map(len, [tlist, glist])
   did_params = {
     'yname' : yname, 'tname': tname,
@@ -429,6 +603,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     'control_group': control_group, 'anticipation': anticipation,
     'weights_name': weights_name, 'panel': panel,
     'true_rep_cross_section': true_rep_cross_section,
-    'clustervars': clustervar
+    'clustervars': clustervar, 'fix_weights': fix_weights,
+    'xcov_cols': xcov_cols
   }
   return did_params
