@@ -404,6 +404,28 @@ class TestUniversalBaseNaN:
         se = np.asarray(res.results['se'], dtype=float)
         assert np.all(np.isfinite(se)), "varying base period should have finite SEs"
 
+    def test_only_base_cell_nan_when_estimated_cells_are_degenerate(self):
+        """Base cell is identified by position, not by an all-zero influence
+        function. With a deterministic outcome (y == period) every estimated
+        cell also has an all-zero IF; only the cohort's base cell may be NaN."""
+        rows = []
+        for uid in range(1, 201):
+            g = 3 if uid <= 100 else 0
+            for t in range(1, 6):
+                rows.append((uid, t, g, float(t)))  # y = t exactly (deterministic)
+        df = pd.DataFrame(rows, columns=['id', 'period', 'G', 'Y'])
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            res = ATTgt(yname='Y', tname='period', idname='id', gname='G',
+                        data=df, control_group='nevertreated').fit(
+                            est_method='ipw', base_period='universal', bstrap=False)
+        se = np.asarray(res.results['se'], dtype=float)
+        yr = np.asarray(res.results['year'])
+        # cohort g=3, periods 1..5 -> last pre-treatment period is 2 (the base).
+        nan_years = set(int(y) for y in yr[np.isnan(se)])
+        assert nan_years == {2}, f"only base year 2 should be NaN, got {sorted(nan_years)}"
+        assert np.all(np.isfinite(se[yr != 2])), "degenerate estimated cells must keep finite SE"
+
 
 class TestIdnameNumericValidation:
     """R did v2.5.1: idname must be numeric; csdid raises a clear error."""
@@ -422,3 +444,22 @@ class TestIdnameNumericValidation:
             res = ATTgt(yname='y', tname='year', idname='id', gname='group',
                         data=df, control_group='nevertreated').fit(bstrap=False)
         assert len(res.results['att']) > 0
+
+    def test_nullable_int_idname_accepted(self):
+        """pandas nullable integer ids (Int64) are numeric and must be accepted,
+        not crash np.issubdtype with a TypeError."""
+        df = make_panel(seed=3)
+        df['id'] = df['id'].astype('Int64')
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            res = ATTgt(yname='y', tname='year', idname='id', gname='group',
+                        data=df, control_group='nevertreated').fit(bstrap=False)
+        assert len(res.results['att']) > 0
+
+    def test_bool_idname_rejected(self):
+        """A boolean id is not numeric (R rejects logical ids)."""
+        df = make_panel(seed=3)
+        df['id'] = (df['id'] % 2).astype(bool)
+        with pytest.raises(ValueError, match="must be numeric"):
+            ATTgt(yname='y', tname='year', idname='id', gname='group',
+                  data=df, control_group='nevertreated')

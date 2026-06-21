@@ -5,17 +5,17 @@ _Generated: 2026-06-20 · `pytest csdid/test_csdid`_
 > **Update:** all features discussed below have since been implemented —
 > `est_method`/treatment-reversal validation, custom callable `est_method`,
 > `fix_weights`, and `faster_mode` (see `FASTER_MODE.md`). The suite now runs
-> **561 passed, 0 skipped, 0 failures**. The skip analysis in this file is
+> **564 passed, 0 skipped, 0 failures**. The skip analysis in this file is
 > retained as the historical record that drove that work.
 
 ## Summary (current)
 
 | Result | Count |
 |--------|------:|
-| **Passed** | **561** |
+| **Passed** | **564** |
 | Skipped | 0 |
 | Failed | 0 |
-| **Total collected** | **561** |
+| **Total collected** | **564** |
 
 ## Summary (at the time of this report)
 

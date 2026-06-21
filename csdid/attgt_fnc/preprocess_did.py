@@ -246,6 +246,7 @@
 
 import pandas as pd, numpy as np
 import patsy 
+from pandas.api.types import is_numeric_dtype, is_bool_dtype
 from csdid.utils.bmisc import makeBalancedPanel
 import warnings
 
@@ -253,6 +254,13 @@ fml = patsy.dmatrices
 
 # Internal column names that must not collide with user data
 _RESERVED_NAMES = {'w', 'w1', 'G_m', 'C', 'y_main', 'rowid', 'y0', 'y1', 'dy'}
+
+
+def _strictly_numeric(series):
+  """True for numeric dtypes (including pandas nullable Int64/Float64), but not
+  boolean. Uses pandas dtype checks so extension dtypes are handled and do not
+  crash ``np.issubdtype`` (which raises on e.g. ``Int64Dtype``)."""
+  return is_numeric_dtype(series) and not is_bool_dtype(series)
 
 
 def _validate_inputs(yname, tname, idname, gname, data, control_group,
@@ -290,20 +298,22 @@ def _validate_inputs(yname, tname, idname, gname, data, control_group,
     )
 
   # --- Non-numeric outcome (allow bool, which R treats as logical) ---
-  if not (np.issubdtype(data[yname].dtype, np.number) or np.issubdtype(data[yname].dtype, np.bool_)):
+  if not (is_numeric_dtype(data[yname]) or is_bool_dtype(data[yname])):
     raise ValueError(
       f"Outcome variable '{yname}' must be numeric, got dtype '{data[yname].dtype}'."
     )
 
-  # --- Non-numeric tname / gname ---
-  if not np.issubdtype(data[tname].dtype, np.number):
+  # --- tname / gname / idname must be numeric (not boolean). pandas dtype
+  # checks accept nullable integers (Int64) and avoid np.issubdtype crashing on
+  # extension dtypes. ---
+  if not _strictly_numeric(data[tname]):
     raise ValueError(f"Time variable '{tname}' must be numeric, got dtype '{data[tname].dtype}'.")
-  if not np.issubdtype(data[gname].dtype, np.number):
+  if not _strictly_numeric(data[gname]):
     raise ValueError(f"Group variable '{gname}' must be numeric, got dtype '{data[gname].dtype}'.")
 
   # --- Non-numeric idname (R did v2.5.1: idname must be numeric so the
   # influence function can be indexed by unit). ---
-  if not np.issubdtype(data[idname].dtype, np.number):
+  if not _strictly_numeric(data[idname]):
     raise ValueError(
       f"The id variable '{idname}' must be numeric, got dtype '{data[idname].dtype}'. "
       f"Please convert it to numeric."

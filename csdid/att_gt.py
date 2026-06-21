@@ -4,6 +4,7 @@ from csdid.aggte_fnc.aggte import aggte as agg_te
 from csdid.attgt_fnc.preprocess_did import pre_process_did
 from csdid.attgt_fnc.compute_att_gt import compute_att_gt
 from csdid.attgt_fnc.compute_att_gt2 import compute_att_gt2
+from csdid.attgt_fnc.compute_att_gt_shared import last_pretreatment_index
 
 from csdid.utils.mboot import mboot
 
@@ -138,13 +139,21 @@ class ATTgt:
         cl_se = _analytical_cluster_se(inffunc, dp)
         if cl_se is not None:
           se = cl_se
-      # Universal base period: the base cell has att=0 by construction and an
-      # all-zero influence function, so its SE is undefined. R `did` reports NA
-      # there, so set those SEs to NaN (instead of a misleading 0) to match.
+      # Universal base period: each cohort's base cell has att=0 by construction
+      # and an undefined SE; R `did` reports NA there. Identify that cell by its
+      # position -- year == the cohort's last pre-treatment period -- NOT by an
+      # all-zero influence function, since a degenerate-but-valid estimated cell
+      # can also have an all-zero IF and must keep its (zero) SE.
       if base_period == 'universal':
-        base_mask = np.all(np.asarray(inffunc) == 0, axis=1)
+        tl = np.asarray(dp['tlist'])
+        ant = dp['anticipation']
+        groups = np.asarray(result['group'])
+        years = np.asarray(result['year'])
         se = np.array(se, dtype=float)
-        se[base_mask] = np.nan
+        for _i in range(len(se)):
+          _b = last_pretreatment_index(groups[_i], tl, ant)
+          if _b is not None and years[_i] == tl[_b]:
+            se[_i] = np.nan
       inf_fnc = {'inffunc': inffunc.T}
     else:
       # No influence functions: no SEs, no bootstrap
