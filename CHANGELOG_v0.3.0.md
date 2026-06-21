@@ -4,7 +4,7 @@
 
 This release brings the Python `csdid` package into full alignment with the R `did` package v2.5.x. Key additions: comprehensive input validation, critical bug fixes, proper clustered inference (bootstrap **and** analytical), a point-estimates-only mode, a ~10× faster bootstrap, the **`fix_weights`** parameter, and a vectorized **`faster_mode`** (~3× faster, bit-identical). Pre-existing Python defects fixed during this work (unrelated to the R sync) are tracked separately in **`PYTHON_BUGFIXES.md`**.
 
-**561 tests** (`csdid/test_csdid`, 0 skipped) cover all changes; **65 compare directly against live R `did` 2.5.0** (ATT(g,t) to ~1e-16, analytical SEs within ~0.1–1%, across all aggregations, `fix_weights` modes, and factor covariates) or published JEL values. See §10–§15 and `csdid/test_csdid/test_suite_desc.md`.
+**564 tests** (`csdid/test_csdid`, 0 skipped) cover all changes; **65 compare directly against live R `did` 2.5.0** (ATT(g,t) to ~1e-16, analytical SEs within ~0.1–1%, across all aggregations, `fix_weights` modes, and factor covariates) or published JEL values. See §10–§16 and `csdid/test_csdid/test_suite_desc.md`.
 
 ---
 
@@ -252,6 +252,31 @@ the standard path too).
 
 ---
 
+### 16. Final review (GPT-5.5) follow-ups
+
+**Files:** `csdid/att_gt.py`, `csdid/attgt_fnc/preprocess_did.py`  
+**Tests:** `test_review_fixes.py` (`TestUniversalBaseNaN`, `TestIdnameNumericValidation`, +3)
+
+A final GPT-5.5 code review of §15 surfaced two real edge-case defects, both fixed
+and verified:
+
+- **Universal base cell mis-identified by all-zero IF (Medium).** §15 detected the
+  universal base cell via `np.all(inffunc == 0, axis=1)`. A *degenerate but valid*
+  estimated cell (e.g. a perfectly deterministic outcome with a true zero effect)
+  also has an all-zero influence function and was wrongly assigned `SE=NaN` instead
+  of `0`. The base cell is now identified by **position** — `year` equal to the
+  cohort's last pre-treatment period (`last_pretreatment_index`) — exactly R's
+  definition, independent of IF contents.
+- **Numeric dtype check crashed on pandas nullable ints (Medium).** The
+  `np.issubdtype(data[col].dtype, np.number)` checks raised
+  `TypeError: Cannot interpret 'Int64Dtype()'` for pandas nullable integer columns
+  (`Int64`), and pandas extension dtypes generally. Replaced with
+  `pandas.api.types.is_numeric_dtype` (excluding `is_bool_dtype` for
+  `tname`/`gname`/`idname`), so nullable numeric ids/keys are accepted and boolean
+  ones are still rejected (matching R). String ids remain rejected for R parity.
+
+---
+
 ## Pre-existing Python bug fixes
 
 Defects in the Python port itself (crashes / wrong output, independent of the R
@@ -274,7 +299,7 @@ masking error messages.
 
 ## Test suite
 
-**`csdid/test_csdid`: 561 passed, 0 skipped, 0 failures.** 65 tests compare
+**`csdid/test_csdid`: 564 passed, 0 skipped, 0 failures.** 65 tests compare
 directly to live/published R values (see `test_csdid/test_suite_desc.md`);
 `faster_mode` details in `test_csdid/FASTER_MODE.md`.
 
