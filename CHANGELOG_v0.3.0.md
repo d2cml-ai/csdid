@@ -1,5 +1,10 @@
 # csdid v0.3.0 — Sync with R `did` v2.5.1
 
+> **v0.3.1 (patch):** two edge-case fixes from a final GPT-5.5 review of v0.3.0
+> (universal base cell identified by position not by an all-zero influence
+> function; numeric dtype validation robust to pandas nullable integers). See
+> §16. Validated by an independent Opus 4.8 review. 564 tests passing.
+
 ## Summary
 
 This release brings the Python `csdid` package into full alignment with the R `did` package v2.5.x. Key additions: comprehensive input validation, critical bug fixes, proper clustered inference (bootstrap **and** analytical), a point-estimates-only mode, a ~10× faster bootstrap, the **`fix_weights`** parameter, and a vectorized **`faster_mode`** (~3× faster, bit-identical). Pre-existing Python defects fixed during this work (unrelated to the R sync) are tracked separately in **`PYTHON_BUGFIXES.md`**.
