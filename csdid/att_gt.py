@@ -18,21 +18,23 @@ import warnings
 import numpy as np, pandas as pd
 
 
-def _analytical_cluster_se(inffunc, dp):
-    """Cluster-robust analytical SE per (g,t) cell, matching R `did` (bstrap=FALSE).
+def _cluster_sums(inffunc, dp):
+    """Sum the influence function over the units in each cluster.
 
-    For each cell the SE is ``sqrt(sum_c S_c^2) / n`` where ``S_c`` is the sum of the
-    influence function over the units in cluster ``c`` and ``n`` is the number of
-    units. Returns ``None`` when there is no effective cluster variable (so the
-    caller falls back to the i.i.d. analytical SE).
+    Returns ``(cluster_sums, n)`` where ``cluster_sums`` is ``(n_clusters x n_cells)``
+    and ``n`` is the number of units, or ``(None, n)`` when there is no effective
+    (beyond-unit) cluster variable. Shared by the cluster-robust analytical SE and
+    the clustered analytical Wald pre-test (both match R `did`, bstrap=FALSE).
     """
     clustervars = dp.get('clustervars')
     idname = dp['idname']
     cv = clustervars
     if isinstance(cv, (list, tuple)):
         cv = cv[0] if len(cv) else None
+    inffunc = np.asarray(inffunc)
+    n = inffunc.shape[1] if inffunc.ndim == 2 else len(inffunc)
     if cv is None or cv == idname:
-        return None
+        return None, n
 
     data = dp['data']
     tname = dp['tname']
@@ -43,21 +45,115 @@ def _analytical_cluster_se(inffunc, dp):
     else:
         dta = data.drop_duplicates(subset=[idname])
     if cv not in dta.columns:
-        return None
+        return None, n
 
     cluster_map = dta[[idname, cv]].drop_duplicates().set_index(idname)[cv]
     unit_ids = dta[idname].unique()
     labels = np.asarray(cluster_map.reindex(unit_ids).values)
 
-    inffunc = np.asarray(inffunc)
-    n = inffunc.shape[1]
     uniq = np.unique(labels)
     codes = np.searchsorted(uniq, labels)
 
-    # cluster_sums[cell, cluster] = sum of IF over units in that cluster
+    # cluster_sums[cluster, cell] = sum of IF over units in that cluster
     cluster_sums = np.zeros((len(uniq), inffunc.shape[0]))
     np.add.at(cluster_sums, codes, inffunc.T)
+    return cluster_sums, n
+
+
+def _analytical_cluster_se(inffunc, dp):
+    """Cluster-robust analytical SE per (g,t) cell, matching R `did` (bstrap=FALSE).
+
+    For each cell the SE is ``sqrt(sum_c S_c^2) / n`` where ``S_c`` is the sum of the
+    influence function over the units in cluster ``c`` and ``n`` is the number of
+    units. Returns ``None`` when there is no effective cluster variable (so the
+    caller falls back to the i.i.d. analytical SE).
+    """
+    cluster_sums, n = _cluster_sums(inffunc, dp)
+    if cluster_sums is None:
+        return None
     return np.sqrt((cluster_sums ** 2).sum(axis=0)) / n
+
+
+def _wald_pretest(inffunc, att, group, year, dp):
+    """Parallel-trends Wald pre-test ``(W, Wpval)``, matching R `did` 2.5.0 `att_gt`.
+
+    Wald test that the pre-treatment ``ATT(g,t)`` (the cells with cohort ``g`` first
+    treated strictly after period ``t``) are jointly zero, using the ANALYTIC
+    influence-function covariance ``V`` -- the same ``V`` the analytic SEs derive from
+    (the pre-test always uses the analytic variance, never the bootstrap one, even
+    when ``bstrap=True``). Returns ``(W, Wpval)`` or ``(None, None)`` when not
+    computable, with R's guard semantics:
+
+      * clustering BEYOND the unit level together with a clustered bootstrap -> the
+        analytic ``V`` ignores between-cluster correlation, so the pre-test is
+        suppressed (use the bootstrap confidence intervals instead);
+      * no usable pre-treatment cells (every pre cell has zero/NA variance -- e.g. a
+        universal-base base cell -- or every cohort is treated from the first period);
+      * any NA in the pre covariance, or a singular pre covariance
+        (``rcond(preV) <= eps``).
+
+    ``W = n * preatt' solve(preV) preatt`` and
+    ``Wpval = round(1 - chi2.cdf(W, q), 5)`` with ``q`` the number of usable pre
+    cells -- byte-for-byte R's formula.
+    """
+    from scipy.stats import chi2
+
+    inffunc = np.asarray(inffunc, dtype=float)
+    if inffunc.ndim != 2 or inffunc.size == 0:
+        return None, None
+    att = np.asarray(att, dtype=float)
+    group = np.asarray(group, dtype=float)
+    year = np.asarray(year, dtype=float)
+
+    clustervars = dp.get('clustervars')
+    cv = (clustervars[0] if isinstance(clustervars, (list, tuple)) and len(clustervars)
+          else clustervars)
+    extra_cluster = cv is not None and cv != dp.get('idname')
+    bstrap = bool(dp.get('bstrap', False))
+
+    # R `wald_invalid`: beyond-unit clustering with a clustered bootstrap -> the
+    # analytic variance does not account for between-cluster correlation -> suppress.
+    if extra_cluster and bstrap:
+        return None, None
+
+    # Analytic V: clustered crossprod when a beyond-unit clustervar is set and the
+    # bootstrap is off (R `cluster_analytic`); i.i.d. otherwise.
+    if extra_cluster:
+        cluster_sums, n = _cluster_sums(inffunc, dp)
+        if cluster_sums is None:
+            n = inffunc.shape[1]
+            V = inffunc @ inffunc.T / n
+        else:
+            V = cluster_sums.T @ cluster_sums / n
+    else:
+        n = inffunc.shape[1]
+        V = inffunc @ inffunc.T / n
+
+    se = np.sqrt(np.clip(np.diag(V), 0.0, None) / n)
+    zero_na = se <= np.sqrt(np.finfo(float).eps) * 10
+
+    pre = np.where(group > year)[0]
+    pre = pre[~zero_na[pre]]
+    if pre.size == 0:
+        return None, None
+    preatt = att[pre]
+    preV = V[np.ix_(pre, pre)]
+    if np.isnan(preV).any():
+        return None, None
+    # R: rcond(preV) <= .Machine$double.eps  (singular pre-covariance)
+    try:
+        rcond = 1.0 / np.linalg.cond(preV, p=1)
+    except Exception:
+        rcond = 0.0
+    if not np.isfinite(rcond) or rcond <= np.finfo(float).eps:
+        return None, None
+    try:
+        W = float(n * preatt @ np.linalg.solve(preV, preatt))
+    except np.linalg.LinAlgError:
+        return None, None
+    q = int(pre.size)
+    Wpval = round(float(1.0 - chi2.cdf(W, q)), 5)
+    return W, Wpval
 
 
 # class ATTgt(AGGte):
@@ -125,9 +221,15 @@ class ATTgt:
     
     if self.compute_inffunc:
       n_len = list(map(len, inffunc))
+      # Analytical i.i.d. SE = sqrt(mean(IF^2)) / sqrt(n): the population (1/n),
+      # non-centered influence-function variance, matching R `did`/DRDID and the
+      # port's own clustered (`_analytical_cluster_se`) and aggregation
+      # (`aggte_fnc/utils.py`) paths. (Previously np.std(..., ddof=1), the sample
+      # variance, which inflated every i.i.d. SE by exactly sqrt(n/(n-1)).)
+      inffunc_arr = np.asarray(inffunc)
       crit_val, se, V = (
               1.96,
-              np.std(inffunc, axis=1, ddof = 1) / np.sqrt(n_len),
+              np.sqrt(np.mean(inffunc_arr ** 2, axis = 1)) / np.sqrt(n_len),
               np.zeros(len(att)),
           )
       if bstrap:
@@ -174,10 +276,18 @@ class ATTgt:
     self.dp = dp
     n = dp['n']
 
+    # Parallel-trends Wald pre-test (R `did` 2.5.0 att_gt $W / $Wpval). Needs the
+    # influence functions; in point-estimates-only mode there is nothing to test.
+    if self.compute_inffunc:
+      W, Wpval = _wald_pretest(inffunc_arr, result['att'],
+                               result['group'], result['year'], dp)
+    else:
+      W, Wpval = None, None
+
     mp = {
       'group': group, 'att': att, 't': tt,
-      'DIDparams': dp, 'inffunc': inf_fnc, 
-      'n': n
+      'DIDparams': dp, 'inffunc': inf_fnc,
+      'n': n, 'W': W, 'Wpval': Wpval
     }
     self.MP = mp
 

@@ -39,7 +39,9 @@ setup(
         'patsy',
         'plotnine',
         'twine',
-        'joblib'
+        'joblib',
+        'statsmodels',
+        'drdid'
   ],
   packages=find_packages(),
   package_data={

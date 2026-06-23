@@ -11,3 +11,6 @@ test/plot_files
 
 # regenerable benchmark dataset (created by csdid/test_csdid/r_ref/benchmark.py)
 csdid/test_csdid/r_ref/sim/big_tp10.csv
+
+# local virtualenv
+.venv/

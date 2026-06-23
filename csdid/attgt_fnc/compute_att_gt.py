@@ -3,7 +3,8 @@ import patsy
 from drdid import reg_did
 from csdid.attgt_fnc import drdid_trim
 from csdid.attgt_fnc.compute_att_gt_shared import (
-    select_estimators, last_pretreatment_index, plan_cell, BREAK, BASE_ZERO)
+    select_estimators, last_pretreatment_index, plan_cell, rcond_check_fail,
+    drdid_design_singular, overlap_check_fail, BREAK, BASE_ZERO)
 
 from csdid.utils.bmisc import panel2cs2
 import warnings
@@ -68,6 +69,30 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
     # 2x2 estimators (panel + repeated cross sections), selected once.
     est_panel, est_rc = select_estimators(est_method)
 
+    # Distinguish a BALANCED panel force-routed through the RC estimators by
+    # fix_weights="varying" (preprocess sets panel=False *before* its imbalance
+    # check, so the balanced/unbalanced distinction is otherwise lost) from a
+    # GENUINELY unbalanced panel. R `did` scales the per-cell influence function
+    # by #units in the former (it reshapes wide) and by #rows in the latter (it
+    # stays long / RC). A balanced panel has every unit observed in every period,
+    # i.e. nrow == n_units * n_periods (R's own imbalance test, preprocess L552).
+    # Without this, fix_weights="varying" on a real unbalanced panel over-scaled
+    # the IF by n_rows/n_units, inflating every SE/band (audit-v3 F1).
+    varying_forced_rc_balanced = (
+        fix_weights == "varying" and not true_rep_cross_section
+        and len(data) == n * data[tname].nunique())
+
+    # Regression-feasibility guards (match R). `did`'s pooled control pre-check
+    # applies to outcome-regression methods (dr/reg); DRDID's internal per-group
+    # design checks apply to any built-in method (dr/reg outcome designs, dr/ipw
+    # PS design). Custom (callable) estimators are exempt.
+    apply_rcond = (not callable(est_method)) and est_method in ("dr", "reg")
+    apply_guard = not callable(est_method)
+    # Propensity-overlap guard (matches R): dr/ipw fit a PS logit, so a
+    # (near-)separated cell must be NA'd rather than estimated from exploding IPW
+    # weights. reg / custom estimators are exempt.
+    apply_overlap = (not callable(est_method)) and est_method in ("dr", "ipw")
+
     # Loop over groups
     for g_index, g in enumerate(glist):  
         # Set up .G once
@@ -115,7 +140,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
         # results for the case with panel data
         #-----------------------------------------------------------------------------
 
-            if panel: 
+            if panel:
                 disdat = panel2cs2(disdat, yname, idname, tname)
                 disdat = disdat.dropna()
                 n_cell = len(disdat)
@@ -143,6 +168,33 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 ypost, covariates = map(np.array, [ypost, covariates])
 
                 est_att_f = est_panel
+
+                # Propensity-overlap guard (matches R, checked BEFORE the singular
+                # guard so its precedence/message match): NA a dr/ipw cell whose PS
+                # logit is (near-)separated (max fitted PS >= 0.999).
+                if apply_overlap and overlap_check_fail(covariates, G):
+                    warnings.warn(
+                        f"overlap condition violated for group {g} in time period {tn}"
+                    )
+                    add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+                    continue
+
+                # Regression-feasibility guard (matches R): NA the cell when a 2x2
+                # estimating design is singular/ill-conditioned, rather than letting
+                # the solver return an untrustworthy estimate. Covers the control
+                # design (`did` pre-check) and DRDID's per-group designs (incl. the
+                # treated outcome regression -- a tiny treated cohort can be singular
+                # even when the control design is fine).
+                if (apply_rcond and rcond_check_fail(covariates[G == 0])) or (
+                        apply_guard and drdid_design_singular(
+                            covariates, w, G, est_method, post=None)):
+                    warnings.warn(
+                        f"Covariate matrix for control units is singular or numerically "
+                        f"ill-conditioned for group {g} in time period {tn}; consider "
+                        f"centering/rescaling covariates or removing collinear terms"
+                    )
+                    add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+                    continue
 
                 try:
                     att_gt, att_inf_func = est_att_f(ypost, ypre, G, i_weights=w, covariates=covariates)
@@ -248,7 +300,32 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 #-----------------------------------------------------------------------------
                 
                 est_att_f = est_rc
-                
+
+                # Propensity-overlap guard (matches R), checked before the singular
+                # guard. On the RC / varying path the PS logit is fit on the stacked
+                # long sample (covariates, G as built here).
+                if apply_overlap and overlap_check_fail(covariates, G):
+                    warnings.warn(
+                        f"overlap condition violated for group {g} in time period {tn}"
+                    )
+                    add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+                    continue
+
+                # Regression-feasibility guard (matches R): on the RC / unbalanced
+                # path DRDID fits control AND treated outcome regressions separately
+                # pre and post, so each period-by-group design is checked (this is
+                # what NAs a tiny treated cohort with too few post observations).
+                if (apply_rcond and rcond_check_fail(covariates[G == 0])) or (
+                        apply_guard and drdid_design_singular(
+                            covariates, w, G, est_method, post=post)):
+                    warnings.warn(
+                        f"Covariate matrix for control units is singular or numerically "
+                        f"ill-conditioned for group {g} in time period {tn}; consider "
+                        f"centering/rescaling covariates or removing collinear terms"
+                    )
+                    add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+                    continue
+
                 try:
                     att_gt, att_inf_func = est_att_f(y=Y, post=post, D = G, i_weights=w, covariates=covariates)
                 except Exception as e:
@@ -259,8 +336,21 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                     add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
                     continue
 
-                att_inf_func = (n/n1)*att_inf_func
-                
+                # n/n1 rescaling (matches R `did`). Two regimes, keyed on whether
+                # this is a BALANCED panel force-routed through the RC estimator by
+                # fix_weights='varying' (preprocess sets panel=False), or a genuine
+                # RC / unbalanced panel:
+                #   * balanced-through-RC: R reshapes wide and scales by #units. The
+                #     stacked long 2x2 has TWO rows per unit; the per-row IF is
+                #     summed back per unit (groupby right_ids below), so scaling by
+                #     the row count would halve every SE/band. Use #units.
+                #   * genuine RC / unbalanced: R stays long and scales by #rows; a
+                #     unit may contribute one OR two rows, so #units != #rows and
+                #     scaling by #units over-inflates the IF by n_rows/n_units
+                #     (audit-v3 F1). Use #rows (= n1).
+                n1_scale = len(np.unique(right_ids)) if varying_forced_rc_balanced else n1
+                att_inf_func = (n/n1_scale)*att_inf_func
+
                 inf_func_df = pd.DataFrame(
                 {
                     "inf_func": att_inf_func,
