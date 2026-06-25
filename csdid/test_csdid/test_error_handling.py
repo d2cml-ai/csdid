@@ -86,19 +86,22 @@ def test_att_gt_drops_first_period_units(sim_data):
         ).fit(bstrap=False)
 
 
-def test_att_gt_handles_na_in_outcome(sim_data, capsys):
-    """R: att_gt warns/prints when dropping rows with missing data.
-    csdid drops NA rows (printing a message) and routes the resulting
-    unbalanced panel through RC estimators (matches R)."""
+def test_att_gt_handles_na_in_outcome(sim_data):
+    """R: att_gt WARNS when dropping rows with missing data.
+    csdid drops NA rows (emitting a Python warning -- v7-CF1 fix moved this from a
+    stdout print() onto the warnings channel) and routes the resulting unbalanced
+    panel through RC estimators (matches R)."""
     data = sim_data.copy()
     data.loc[data.index[:5], "Y"] = np.nan
 
-    ATTgt(
-        yname="Y", tname="period", idname="id", gname="G", data=data,
-    ).fit(bstrap=False)
+    with warnings.catch_warnings(record=True) as wl:
+        warnings.simplefilter("always")
+        ATTgt(
+            yname="Y", tname="period", idname="id", gname="G", data=data,
+        ).fit(bstrap=False)
 
-    out = capsys.readouterr().out.lower()
-    assert "dropped" in out or "missing" in out
+    msgs = " ".join(str(w.message).lower() for w in wl)
+    assert "dropped" in msgs or "missing" in msgs
 
 
 # ─────────────────────────────────────────────────────────────

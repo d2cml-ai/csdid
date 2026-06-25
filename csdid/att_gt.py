@@ -17,6 +17,8 @@ import warnings
 
 import numpy as np, pandas as pd
 
+from scipy.stats import norm
+
 
 def _cluster_sums(inffunc, dp):
     """Sum the influence function over the units in each cluster.
@@ -130,11 +132,22 @@ def _wald_pretest(inffunc, att, group, year, dp):
         V = inffunc @ inffunc.T / n
 
     se = np.sqrt(np.clip(np.diag(V), 0.0, None) / n)
-    zero_na = se <= np.sqrt(np.finfo(float).eps) * 10
+    # Drop pre cells with zero OR NA/inf variance. NaN must be tested explicitly:
+    # `NaN <= x` is False, so a NaN-variance cell would otherwise survive this filter,
+    # leave NaN in preV, and force the pre-test to bail with None even when other pre
+    # cells are valid -- R instead computes the Wald over the valid subset (F45-1).
+    zero_na = (se <= np.sqrt(np.finfo(float).eps) * 10) | ~np.isfinite(se)
 
     pre = np.where(group > year)[0]
     pre = pre[~zero_na[pre]]
     if pre.size == 0:
+        # No usable pre-treatment cells -> the Wald pre-test of parallel trends
+        # cannot be computed. R `did` warns here rather than silently dropping it
+        # (V4-V2); e.g. a two-period (T=2) panel has no pre-treatment periods.
+        warnings.warn(
+            "No pre-treatment periods available for the Wald pre-test of parallel "
+            "trends. The pre-test will not be reported."
+        )
         return None, None
     preatt = att[pre]
     preV = V[np.ix_(pre, pre)]
@@ -158,12 +171,29 @@ def _wald_pretest(inffunc, att, group, year, dp):
 
 # class ATTgt(AGGte):
 class ATTgt:
-  def __init__(self, yname, tname, idname, gname, data, control_group = ['nevertreated', 'notyettreated'], 
-  xformla: str = None, panel = True, allow_unbalanced_panel = True, 
-  clustervar = None, weights_name = None, anticipation = 0, 
+  def __init__(self, yname, tname, idname, gname, data, control_group = ['nevertreated', 'notyettreated'],
+  xformla: str = None, panel = True, allow_unbalanced_panel = True,
+  clustervar = None, weights_name = None, anticipation = 0,
   cband = False, biters = 1000, alp = 0.05, compute_inffunc = True,
-  fix_weights = None, faster_mode = False
+  fix_weights = None, faster_mode = False,
+  print_details = False, pl = False, cores = 1, **kwargs
   ):
+    # v7-O1..O4: accept R `att_gt`'s extra formals for call-site compatibility.
+    #   print_details : verbosity toggle -- accepted as a no-op (the port is quiet).
+    #   pl, cores     : parallel multiplier-bootstrap controls, threaded through to
+    #                   mboot in fit() (R defaults pl=FALSE/cores=1 reproduce the
+    #                   serial behavior exactly).
+    #   **kwargs      : extra args forwarded to a custom est_method in R; with a
+    #                   built-in est_method R warns "Extra arguments ... are ignored"
+    #                   (att_gt__02). Mirror that warning here instead of raising.
+    self.print_details = bool(print_details)
+    self.pl = bool(pl)
+    self.cores = int(cores)
+    if kwargs:
+      warnings.warn(
+        "Extra arguments " + ", ".join(repr(k) for k in kwargs)
+        + " are ignored when using a built-in est_method."
+      )
     # Validate alp and biters
     if not isinstance(alp, (int, float)) or alp <= 0 or alp >= 1:
       raise ValueError(f"'alp' must be a number strictly between 0 and 1, got {alp}.")
@@ -177,7 +207,11 @@ class ATTgt:
         "fix_weights must be None or one of 'varying', 'base_period', or 'first_period'."
       )
 
-    # Point-estimates-only mode: skip IF computation
+    # Point-estimates-only mode: skip IF computation. compute_inffunc must be a
+    # single logical (matches R `did`); a truthy non-bool (e.g. "yes") was silently
+    # bool()-coerced to True (V4-S4), masking a user error.
+    if not isinstance(compute_inffunc, (bool, np.bool_)):
+      raise ValueError("compute_inffunc must be a single logical (True or False).")
     self.compute_inffunc = bool(compute_inffunc)
     if not self.compute_inffunc:
       cband = False
@@ -210,6 +244,19 @@ class ATTgt:
         f"'base_period' must be 'varying' or 'universal', got {base_period!r}."
       )
 
+    # fix_weights='varying' on panel data switches the engine to the
+    # repeated-cross-section estimators (preprocess flips panel->False), whose
+    # callable est_method signature differs from the panel one. R refuses this
+    # combination up front rather than invoking the callable with the wrong
+    # signature (V4-S3). dp['input_panel'] is the user's original panel flag,
+    # before the varying-weights flip.
+    if (callable(est_method) and dp.get('fix_weights') == 'varying'
+        and dp.get('input_panel')):
+      raise ValueError(
+        'fix_weights = "varying" is not currently supported with a custom '
+        '(callable) est_method.'
+      )
+
     # Point-estimates-only mode
     if not self.compute_inffunc:
       bstrap = False
@@ -227,13 +274,18 @@ class ATTgt:
       # (`aggte_fnc/utils.py`) paths. (Previously np.std(..., ddof=1), the sample
       # variance, which inflated every i.i.d. SE by exactly sqrt(n/(n-1)).)
       inffunc_arr = np.asarray(inffunc)
+      # Pointwise critical value MP$c = qnorm(1 - alp/2) (matches R `did`). Was a
+      # hardcoded 1.96 literal (V4-V1), which ignored alp entirely on the analytic
+      # path -- wrong at any alp != 0.05 (and off by ~3.6e-5 even at the default).
+      # The bootstrap path below overwrites crit_val from mboot.
       crit_val, se, V = (
-              1.96,
+              norm.ppf(1 - dp['alp'] / 2),
               np.sqrt(np.mean(inffunc_arr ** 2, axis = 1)) / np.sqrt(n_len),
               np.zeros(len(att)),
           )
       if bstrap:
-        ref_se = mboot(inffunc.T, dp)
+        # v7-O2/O3: thread pl/cores through to the multiplier bootstrap.
+        ref_se = mboot(inffunc.T, dp, pl=self.pl, cores=self.cores)
         crit_val, se = ref_se['crit_val'], ref_se['se']
         V = ref_se['V']
       else:
@@ -452,7 +504,9 @@ class ATTgt:
     self.results_plot_df_aggte = results
     
     if did_object['crit_val_egt'] is None:
-        results['c'] = abs(norm.ppf(0.025))
+        # v6-F-PLOTC: respect alp rather than hardcoding qnorm(0.975) ~ 1.96.
+        # R `did` uses qnorm(1 - alp/2) for the pointwise band crit value.
+        results['c'] = norm.ppf(1 - did_object['DIDparams']['alp'] / 2)
     else:
         results['c'] = did_object['crit_val_egt']
 

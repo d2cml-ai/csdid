@@ -167,9 +167,13 @@ class TestClusteredBootstrap:
             'y': y, 'tv_cluster': cluster,
         })
         
-        obj = ATTgt(
-            yname="y", tname="year", idname="id", gname="group",
-            data=data, clustervar="tv_cluster", biters=50,
-        )
-        with pytest.raises(ValueError, match="varies over time"):
-            obj.fit(est_method='dr')
+        # V4-S1: the time-invariance guard now lives in pre_process_did
+        # (_validate_inputs), so a time-varying cluster var is rejected up front at
+        # construction -- regardless of bstrap -- rather than only on the clustered
+        # bootstrap path during fit(). (Previously rejected at mboot with "varies
+        # over time"; bstrap=False slipped through silently. See N1 root-cause rule.)
+        with pytest.raises(ValueError, match="[Tt]ime-varying cluster"):
+            ATTgt(
+                yname="y", tname="year", idname="id", gname="group",
+                data=data, clustervar="tv_cluster", biters=50,
+            )

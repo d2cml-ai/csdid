@@ -186,8 +186,12 @@ class TestFormulaValidation:
     """Test that bad formulas raise errors instead of silently using intercept."""
 
     def test_bad_formula_raises(self):
+        # V4-U4: a formula naming a column that is not in the data is now caught by
+        # an up-front pre-check that names the missing variable ("...not in data:
+        # nonexistent_column"), instead of surfacing as a patsy NameError wrapped in
+        # "Error processing formula ..." (unclassified). Matches R `did`.
         data = make_panel(n_units=30, n_periods=4)
-        with pytest.raises(ValueError, match="Error processing formula"):
+        with pytest.raises(ValueError, match="not in data"):
             pre_process_did('y', 'year', 'id', 'group', data,
                             control_group='nevertreated',
                             xformla='y ~ nonexistent_column')

@@ -38,17 +38,30 @@ def TorF(cond, use_isTRUE=False):
         cond[np.isnan(cond)] = False
     return cond
 
-def multiplier_bootstrap(inf_func, biters):
-    """Multiplier bootstrap using Rademacher weights (vectorized, chunked for large inputs)."""
+def multiplier_bootstrap(inf_func, biters, seed=None):
+    """Multiplier bootstrap using Rademacher weights (vectorized, chunked for large inputs).
+
+    ``seed`` (v10-F1): when ``None`` the draws come from the GLOBAL ``np.random``
+    state (so the serial path stays reproducible under ``np.random.seed`` and
+    bit-identical to the legacy behavior). When an integer/``SeedSequence`` is
+    given, a LOCAL ``np.random.Generator`` is used instead -- this lets the
+    parallel path seed each worker deterministically (derived from the parent
+    global RNG) so the parallel bootstrap is reproducible AND its workers stay
+    independent.
+    """
     n, K = inf_func.shape
     biters = int(biters)
+    rng = np.random.default_rng(seed) if seed is not None else None
     # Chunk to limit peak memory: each chunk allocates (chunk_size x n) array
     max_chunk = max(1, min(biters, int(5e8 / max(n, 1))))  # ~500M elements max
     outMat = np.empty((biters, K))
     pos = 0
     while pos < biters:
         chunk = min(max_chunk, biters - pos)
-        Ub = np.random.choice([1, -1], size=(chunk, n))
+        if rng is not None:
+            Ub = rng.choice([1, -1], size=(chunk, n))
+        else:
+            Ub = np.random.choice([1, -1], size=(chunk, n))
         outMat[pos:pos+chunk] = Ub @ inf_func / n
         pos += chunk
     return outMat

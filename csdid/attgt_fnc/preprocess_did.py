@@ -244,8 +244,9 @@
 #   return did_params
 
 
+import re
 import pandas as pd, numpy as np
-import patsy 
+import patsy
 from pandas.api.types import is_numeric_dtype, is_bool_dtype
 from csdid.utils.bmisc import makeBalancedPanel
 import warnings
@@ -265,7 +266,32 @@ def _strictly_numeric(series):
 
 def _validate_inputs(yname, tname, idname, gname, data, control_group,
                      anticipation, panel, clustervar, weights_name):
-  """Validate inputs to pre_process_did, raising clear errors on bad data."""
+  """Validate inputs to pre_process_did, raising clear errors on bad data.
+
+  Returns the normalized ``clustervar`` (a single-element list/tuple is unwrapped
+  to a scalar; an empty one becomes ``None``), so callers store a scalar cluster
+  variable consistently.
+  """
+
+  # --- panel requires an idname (R `did`: missing_idname). Must precede the
+  # column-existence check so a None idname is not reported as a missing column
+  # (V4-U5). ---
+  if panel and idname is None:
+    raise ValueError(
+      "Must provide idname when panel=True. Set panel=False for repeated cross sections."
+    )
+
+  # --- Normalize clustervar: at most one cluster variable is supported beyond
+  # the unit (R `did`). A raw list reaches the column-existence check below and
+  # would crash with `unhashable type: 'list'` (V4-U3); refuse >1 cleanly and
+  # unwrap a single-element list/tuple to a scalar. ---
+  if isinstance(clustervar, (list, tuple)):
+    if len(clustervar) > 1:
+      raise ValueError(
+        "At most one cluster variable (beyond 'idname') is supported. "
+        "Please reduce to one."
+      )
+    clustervar = clustervar[0] if len(clustervar) == 1 else None
 
   # --- Check columns exist ---
   required = {
@@ -281,6 +307,17 @@ def _validate_inputs(yname, tname, idname, gname, data, control_group,
     raise ValueError(
       f"Column(s) not found in data: {', '.join(missing)}. "
       f"Available columns: {list(data.columns)}"
+    )
+
+  # --- Time-varying cluster variable: only the first period's labels are used
+  # internally, so a within-unit time-varying cluster var is silently mis-applied
+  # (V4-S1). R refuses it up front; the fix belongs here in _validate_inputs, not
+  # in the SE code (the N1 lesson). ---
+  if panel and clustervar is not None and \
+      data.groupby(idname)[clustervar].nunique().gt(1).any():
+    raise ValueError(
+      "Time-varying cluster variables are not supported. "
+      "Please provide a time-invariant cluster variable."
     )
 
   # --- Reserved column name checks ---
@@ -365,6 +402,8 @@ def _validate_inputs(yname, tname, idname, gname, data, control_group,
     if w.mean() <= 0:
       raise ValueError(f"Weights column '{weights_name}' has non-positive mean.")
 
+  return clustervar
+
 
 def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame, 
   control_group = ['nevertreated', 'notyettreated'], 
@@ -386,9 +425,10 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
       f"Use fix_weights = 'varying' or None instead."
     )
 
-  # Validate inputs early with clear error messages
-  _validate_inputs(yname, tname, idname, gname, data, control_group,
-                   anticipation, panel, clustervar, weights_name)
+  # Validate inputs early with clear error messages. Returns the normalized
+  # clustervar (single-element list unwrapped to a scalar; see V4-U3).
+  clustervar = _validate_inputs(yname, tname, idname, gname, data, control_group,
+                                anticipation, panel, clustervar, weights_name)
 
   columns = [idname, tname, yname, gname]
   # print(columns)
@@ -404,6 +444,27 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
 
   if xformla is None:
     xformla = f'{yname} ~ 1'
+
+  # Pre-check formula variables against the data columns. A bare name in the
+  # formula that is not a column otherwise surfaces downstream as a patsy
+  # NameError wrapped in "Error processing formula ..." (unclassified); R reports
+  # a clean missing-column error naming the variable(s) (V4-U4). Only flag bare
+  # identifiers (e.g. `Ghost`) -- transformed/call terms like `np.log(X)` or
+  # `C(x)` are left for patsy to resolve.
+  try:
+    _desc = patsy.ModelDesc.from_formula(xformla)
+    _fnames = {f.name() for side in (_desc.lhs_termlist, _desc.rhs_termlist)
+               for term in side for f in term.factors}
+    _missing_vars = sorted(
+      nm for nm in _fnames
+      if re.fullmatch(r'[A-Za-z_]\w*', nm) and nm not in data.columns
+    )
+  except Exception:
+    _missing_vars = []
+  if _missing_vars:
+    raise ValueError(
+      "The following variables are not in data: " + ", ".join(_missing_vars) + "."
+    )
 
   # if xformla is None:
   try:
@@ -439,9 +500,18 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
 
 
   data = data.dropna()
-  ndiff = n - len(data) 
-  if ndiff != 0: 
-    print(f'dropped, {ndiff}, rows from original data due to missing data')
+  # All rows dropped (e.g. a fully-missing model column) -> downstream reductions
+  # like np.max(tlist) crash on the empty frame (V4-U2). The clean all-dropped
+  # guard previously existed only on the balanced-panel branch.
+  if len(data) == 0:
+    raise ValueError(
+      "All observations dropped due to missing data. Check your outcome, group, "
+      "time, and covariate variables for missing values."
+    )
+  ndiff = n - len(data)
+  if ndiff != 0:
+    # v7-CF1: surface on the warnings channel (matches R `did`), not stdout.
+    warnings.warn(f"dropped {ndiff} rows from original data due to missing data")
   try:
 
     tlist = np.sort(data[tname].unique())
@@ -597,8 +667,11 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
   data = data.sort_values([idname, tname])
   data = data.assign(w1 = lambda x: x['w'] * 1)
 
-  # Warn about the default handling of time-varying weights (matches R `did`).
-  if fix_weights is None and weights_name is not None and input_panel:
+  # Warn about the handling of time-varying weights (matches R `did`). R emits this
+  # whenever time-varying weights are detected on a panel, regardless of fix_weights
+  # (the message points the user at fix_weights to control the behavior) -- so the
+  # warning must NOT be gated on `fix_weights is None` (F45-2).
+  if weights_name is not None and input_panel:
     try:
       w_tv = data.groupby(idname)['w'].nunique()
       if (w_tv > 1).any():
@@ -639,6 +712,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     'weights_name': weights_name, 'panel': panel,
     'true_rep_cross_section': true_rep_cross_section,
     'clustervars': clustervar, 'fix_weights': fix_weights,
+    'input_panel': input_panel,
     'xcov_cols': xcov_cols
   }
   return did_params

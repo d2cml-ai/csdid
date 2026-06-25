@@ -92,7 +92,16 @@ def compute_aggte(MP,
             inffunc = inffunc[:, not_all_na]
             glist = np.sort(np.unique(group))
 
-    
+        # All att_gt() estimates were NA -> na_rm stripped every cell, leaving
+        # nothing to aggregate. Downstream `max(t)` would crash on the empty
+        # sequence (V4-U1); R returns a clean refusal instead.
+        if len(att) == 0:
+            raise ValueError(
+                "All att_gt() estimates are NA. Cannot compute aggregated "
+                "treatment effects."
+            )
+
+
     if (not na_rm) and np.any(np.isnan(att)):
         raise ValueError("Missing values at att_gt found. If you want to remove these, set `na_rm = True`.")
 
@@ -228,22 +237,23 @@ def compute_aggte(MP,
         
         if dp['cband']:
             if not dp['bstrap']:
-                print("Used bootstrap procedure to compute simultaneous confidence band")
-        
+                # v7-CF2: warn (matches calendar branch + R `did`), not print().
+                warnings.warn("Used bootstrap procedure to compute simultaneous confidence band")
+
             selective_crit_val = mboot(selective_inf_func_g, dp)['crit_val']
-        
+
             if np.isnan(selective_crit_val) or np.isinf(selective_crit_val):
-                print("Simultaneous critical value is NA. This probably happened because we cannot compute t-statistic (std errors are NA). We then report pointwise conf. intervals.")
+                warnings.warn("Simultaneous critical value is NA. This probably happened because we cannot compute t-statistic (std errors are NA). We then report pointwise conf. intervals.")
                 selective_crit_val = norm.ppf(1 - alp/2)
                 dp['cband'] = False
-        
+
             if selective_crit_val < norm.ppf(1 - alp/2):
-                print("Simultaneous conf. band is somehow smaller than pointwise one using normal approximation. Since this is unusual, we are reporting pointwise confidence intervals")
+                warnings.warn("Simultaneous conf. band is somehow smaller than pointwise one using normal approximation. Since this is unusual, we are reporting pointwise confidence intervals")
                 selective_crit_val = norm.ppf(1 - alp/2)
                 dp['cband'] = False
-        
+
             if selective_crit_val >= 7:
-                print("Simultaneous critical value is arguably 'too large' to be reliable. This usually happens when the number of observations per group is small and/or there is not much variation in outcomes.")
+                warnings.warn("Simultaneous critical value is arguably 'too large' to be reliable. This usually happens when the number of observations per group is small and/or there is not much variation in outcomes.")
   
         # get overall att under selective treatment timing
         # (here use pgg instead of pg because we can just look at each group)            
@@ -349,21 +359,22 @@ def compute_aggte(MP,
         dynamic_crit_val = norm.ppf(1 - alp/2)
         if dp['cband']:
             if not dp['bstrap']:
-                print('Used bootstrap procedure to compute simultaneous confidence band')
+                # v7-CF2: warn (matches calendar branch + R `did`), not print().
+                warnings.warn('Used bootstrap procedure to compute simultaneous confidence band')
             dynamic_crit_val = mboot(dynamic_inf_func_e, dp)['crit_val']
-        
+
             if np.isnan(dynamic_crit_val) or np.isinf(dynamic_crit_val):
-                print('Simultaneous critical value is NA. This probably happened because we cannot compute t-statistic (std errors are NA). We then report pointwise conf. intervals.')
+                warnings.warn('Simultaneous critical value is NA. This probably happened because we cannot compute t-statistic (std errors are NA). We then report pointwise conf. intervals.')
                 dynamic_crit_val = norm.ppf(1 - alp/2)
                 dp['cband'] = False
-        
+
             if dynamic_crit_val < norm.ppf(1 - alp/2):
-                print('Simultaneous conf. band is somehow smaller than pointwise one using normal approximation. Since this is unusual, we are reporting pointwise confidence intervals')
+                warnings.warn('Simultaneous conf. band is somehow smaller than pointwise one using normal approximation. Since this is unusual, we are reporting pointwise confidence intervals')
                 dynamic_crit_val = norm.ppf(1 - alp/2)
                 dp['cband'] = False
-        
+
             if dynamic_crit_val >= 7:
-                print("Simultaneous critical value is arguably 'too large' to be reliable. This usually happens when the number of observations per group is small and/or there is not much variation in outcomes.")
+                warnings.warn("Simultaneous critical value is arguably 'too large' to be reliable. This usually happens when the number of observations per group is small and/or there is not much variation in outcomes.")
 
         epos = eseq >= 0
         dynamic_att = np.mean(np.array(dynamic_att_e)[epos])
