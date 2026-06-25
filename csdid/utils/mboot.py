@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 from scipy.stats import mstats, norm
 from joblib import Parallel, delayed
@@ -52,7 +54,16 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
     # Validate cluster variable
     if clustervars is not None:
         if clustervars not in data.columns:
-            raise ValueError(f"Cluster variable '{clustervars}' not found in data.")
+            # v7-DIV1: match R `did` (graceful degradation) -- warn and proceed with
+            # non-clustered SEs rather than raising. R emits "reporting standard
+            # errors that do NOT account for clustering" and falls back to the
+            # unclustered bootstrap.
+            warnings.warn(
+                f"Cluster variable '{clustervars}' not found in data; reporting "
+                f"standard errors that do NOT account for clustering."
+            )
+            clustervars = None
+    if clustervars is not None:
         # Check that cluster variable does not vary over time within unit
         # Must check full data (not just first period) to catch time-varying clusters
         clust_tv = data.groupby(idname)[clustervars].nunique()
@@ -137,12 +148,24 @@ def run_multiplier_bootstrap(inf_func, biters, pl=False, cores=1):
 
     n = inf_func.shape[0]
 
-    def parallel_function(b):
-        return multiplier_bootstrap(inf_func, b)
-
     if n > 2500 and pl and cores > 1:
+        # v10-F1: make the parallel path REPRODUCIBLE under np.random.seed while
+        # keeping workers INDEPENDENT. loky workers do not inherit the parent's
+        # global RNG, so we derive a deterministic per-chunk seed from the parent
+        # global state: draw a uint32 entropy value off np.random (pinned by
+        # np.random.seed), build a master SeedSequence, and spawn one independent
+        # child SeedSequence per chunk. Distinct spawned sequences => independent
+        # draw streams (no variance collapse); deterministic derivation => same
+        # seed => same draws across runs.
+        entropy = int(np.random.randint(0, 2 ** 31 - 1))
+        live_chunks = [b for b in chunks if b > 0]
+        children = np.random.SeedSequence(entropy).spawn(len(live_chunks))
+
+        def parallel_function(b, ss):
+            return multiplier_bootstrap(inf_func, b, seed=ss)
+
         results = Parallel(n_jobs=cores)(
-            delayed(parallel_function)(b) for b in chunks if b > 0
+            delayed(parallel_function)(b, ss) for b, ss in zip(live_chunks, children)
         )
         results = np.vstack(results)
     else:

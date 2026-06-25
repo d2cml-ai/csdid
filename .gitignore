@@ -14,3 +14,6 @@ csdid/test_csdid/r_ref/sim/big_tp10.csv
 
 # local virtualenv
 .venv/
+
+# local differential-testing audit harness (kept out of the package per audit plan)
+csdid/test_csdid/stress/

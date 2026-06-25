@@ -206,8 +206,9 @@ def plan_cell(g, t_i, tlist, anticipation, base_period, tfac):
     Shared verbatim by the standard and faster_mode paths so they cannot drift.
     Returns ``(pret, action)`` where ``pret`` is the (final) pretreatment period
     index and ``action`` is one of :data:`ESTIMATE`, :data:`BASE_ZERO`,
-    :data:`BREAK`. Raises ``ValueError`` for a universal base period with no
-    pre-treatment period (matches the standard path).
+    :data:`BREAK`. For a universal base period with no pre-treatment period it
+    warns and returns :data:`BREAK` (warn-and-drop), mirroring R `did` and the
+    varying-base path (v7-DIV2).
 
     The caller is expected to derive ``tn``/``pret_year``/``post_treat`` from its
     own ``tlist`` so that stored values keep their original dtypes.
@@ -220,10 +221,13 @@ def plan_cell(g, t_i, tlist, anticipation, base_period, tfac):
     if base_period == "universal":
         idx = last_pretreatment_index(g, tl, anticipation)
         if idx is None:
-            raise ValueError(
-                f"There are no pre-treatment periods for the group first treated at {g}. "
-                f"Units from this group are dropped."
+            # v7-DIV2: match R `did` -- warn and drop the cohort (warn-and-drop),
+            # mirroring the varying-base path below, rather than raising.
+            warnings.warn(
+                f"There are no pre-treatment periods for the group first treated at {g}\n"
+                f"Units from this group are dropped"
             )
+            return pret, BREAK
         pret = idx
 
     # Post-treatment period: reference is the last pre-treatment period.
