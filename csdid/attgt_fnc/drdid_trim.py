@@ -1,5 +1,6 @@
 import numpy as np
 import statsmodels.api as sm
+import warnings
 
 
 def _add_intercept(covariates, n):
@@ -38,7 +39,7 @@ def std_ipw_did_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.9
     pscore_model = sm.GLM(D, int_cov, family=sm.families.Binomial(), freq_weights=i_weights)
     pscore_results = pscore_model.fit()
     if not pscore_results.converged:
-        print("Warning: glm algorithm did not converge")
+        warnings.warn("glm algorithm did not converge")
     if np.any(np.isnan(pscore_results.params)):
         raise ValueError(
             "Propensity score model coefficients have NA components. \n"
@@ -87,7 +88,7 @@ def drdid_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.995):
     pscore_model = sm.GLM(D, int_cov, family=sm.families.Binomial(), freq_weights=i_weights)
     pscore_results = pscore_model.fit()
     if not pscore_results.converged:
-        print("Warning: glm algorithm did not converge")
+        warnings.warn("glm algorithm did not converge")
     if np.any(np.isnan(pscore_results.params)):
         raise ValueError(
             "Propensity score model coefficients have NA components. \n"
@@ -158,7 +159,7 @@ def std_ipw_did_rc(y, post, D, covariates=None, i_weights=None, trim_level=0.995
     pscore_model = sm.GLM(D, int_cov, family=sm.families.Binomial(), freq_weights=i_weights)
     pscore_results = pscore_model.fit()
     if not pscore_results.converged:
-        print("Warning: glm algorithm did not converge")
+        warnings.warn("glm algorithm did not converge")
     if np.any(np.isnan(pscore_results.params)):
         raise ValueError(
             "Propensity score model coefficients have NA components. \n"
@@ -221,7 +222,7 @@ def drdid_rc(y, post, D, covariates=None, i_weights=None, trim_level=0.995):
     pscore_model = sm.GLM(D, int_cov, family=sm.families.Binomial(), freq_weights=i_weights)
     pscore_results = pscore_model.fit()
     if not pscore_results.converged:
-        print("Warning: glm algorithm did not converge")
+        warnings.warn("glm algorithm did not converge")
     if np.any(np.isnan(pscore_results.params)):
         raise ValueError(
             "Propensity score model coefficients have NA components. \n"

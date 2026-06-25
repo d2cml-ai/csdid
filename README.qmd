@@ -135,3 +135,31 @@ out.aggte(typec='calendar');
 ```{python}
 out.plot_aggte();
 ```
+
+## Additional options
+
+`ATTgt(...)` and `.fit(...)` support several options for inference, performance,
+and weighting (all matching the R `did` package):
+
+- **Control group**: `control_group="nevertreated"` (default) or `"notyettreated"`.
+- **Estimation method**: `.fit(est_method="dr")` (doubly robust, default),
+  `"reg"` (outcome regression), `"ipw"` (inverse-probability weighting), or a
+  Python callable.
+- **Base period**: `.fit(base_period="varying")` (default) or `"universal"`.
+- **Clustered inference**: pass `clustervar="..."` for cluster-robust standard
+  errors (analytical when `bstrap=False`, or via the multiplier bootstrap).
+- **Point estimates only**: `compute_inffunc=False` skips influence-function and
+  standard-error computation for faster, lighter exploratory runs.
+- **Time-varying weights** (`weights_name`): `fix_weights` controls which
+  period's weights each 2×2 comparison uses — `None` (earlier period, default),
+  `"base_period"`, `"first_period"`, or `"varying"`.
+- **Faster computation**: `faster_mode=True` returns identical results to the
+  default path but is ~3× faster by precomputing the covariate design once per
+  period and pre-pivoting outcomes/weights.
+
+```{python, eval = False}
+# ~3x faster, identical results; cluster-robust SEs; point estimates only:
+out = ATTgt(yname="lemp", gname="first.treat", idname="countyreal", tname="year",
+            xformla="lemp~1", data=data, clustervar="countyreal",
+            faster_mode=True).fit(est_method="dr")
+```
