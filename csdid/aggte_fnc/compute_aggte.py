@@ -249,12 +249,17 @@ def compute_aggte(MP,
         # (here use pgg instead of pg because we can just look at each group)            
         selective_att = np.sum(selective_att_g * pgg) / np.sum(pgg)
         
-        # account for having to estimate pgg in the influence function    
-        selective_wif = wif(keepers = np.arange(1, len(glist)+1)-1, 
-                            pg  = pgg, 
-                            weights_ind = weights_ind, 
-                            G = G, 
-                            group = group)
+        # account for having to estimate pgg in the influence function.
+        # `keepers` indexes the DISTINCT groups (pgg/selective_att_g are per-group),
+        # so `wif` must compare each unit's group against the distinct group values
+        # (`glist`), NOT the per-(g,t) `group` vector whose first len(glist) entries
+        # repeat the first group. Matches R `did`'s compute.aggte (passes the group
+        # list). Fixes a systematic, anti-conservative error in the group-overall SE.
+        selective_wif = wif(keepers = np.arange(1, len(glist)+1)-1,
+                            pg  = pgg,
+                            weights_ind = weights_ind,
+                            G = G,
+                            group = glist)
         
         # get overall influence function   
         selective_inf_func = get_agg_inf_func(att = selective_att_g, 

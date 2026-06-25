@@ -11,6 +11,7 @@ simdt <- read.csv(file.path(datadir, "sim_data.csv"))
 
 attgt_rows <- list()
 aggte_rows <- list()
+pretest_rows <- list()
 
 run_scenario <- function(scn, data, yname, tname, idname, gname,
                          xformla = ~1, control_group = "nevertreated",
@@ -23,6 +24,12 @@ run_scenario <- function(scn, data, yname, tname, idname, gname,
   attgt_rows[[scn]] <<- data.frame(
     scenario = scn, group = out$group, t = out$t,
     att = out$att, se = out$se
+  )
+  # Parallel-trends Wald pre-test ($W / $Wpval); NA when R suppresses it.
+  pretest_rows[[scn]] <<- data.frame(
+    scenario = scn,
+    W = if (is.null(out$W)) NA_real_ else as.numeric(out$W),
+    Wpval = if (is.null(out$Wpval)) NA_real_ else as.numeric(out$Wpval)
   )
   for (tp in c("simple", "group", "dynamic", "calendar")) {
     ag <- aggte(out, type = tp, bstrap = FALSE)
@@ -51,7 +58,10 @@ run_scenario("sim_nev_dr", simdt, "Y", "period", "id", "G",
 
 attgt <- do.call(rbind, attgt_rows)
 aggte_df <- do.call(rbind, aggte_rows)
+pretest_df <- do.call(rbind, pretest_rows)
 write.csv(attgt, file.path(outdir, "ref_attgt.csv"), row.names = FALSE)
 write.csv(aggte_df, file.path(outdir, "ref_aggte.csv"), row.names = FALSE)
+write.csv(pretest_df, file.path(outdir, "ref_pretest.csv"), row.names = FALSE)
 cat("did version:", as.character(packageVersion("did")), "\n")
-cat("wrote ref_attgt.csv (", nrow(attgt), "rows) and ref_aggte.csv (", nrow(aggte_df), "rows)\n")
+cat("wrote ref_attgt.csv (", nrow(attgt), "rows), ref_aggte.csv (", nrow(aggte_df),
+    "rows), ref_pretest.csv (", nrow(pretest_df), "rows)\n")

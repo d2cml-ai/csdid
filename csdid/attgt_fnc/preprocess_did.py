@@ -503,17 +503,34 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
       else int(treated_fp.sum())
 
   if nfirst_period > 0:
-    warnings.warn(f"Dropped {nfirst_period} units that were already treated in the first period.")
-    # Drop ONLY the already-treated units, by row identity (R did v2.5.1). The previous
-    # cohort-membership filter could delete the last-treated cohort that serves as a
-    # not-yet-treated control.
-    data = data[~treated_fp]
+    warnings.warn(
+      "Dropped {n} units that were already treated in the first period{anti}.".format(
+        n=nfirst_period,
+        anti=(f" (accounting for anticipation = {anticipation})" if anticipation > 0 else ""),
+      )
+    )
+    # Match R `did` (pre_process_did) EXACTLY: keep only rows whose cohort is in
+    # {0} ∪ glist. At this point glist already excludes the first-period-treated
+    # cohort(s) (via `glist > fp + anticipation`) AND -- in the no-never-treated
+    # case -- the last cohort (via `glist < latest_g` above). R's
+    #   data <- data[data[, gname] %in% c(0, glist), ]
+    # therefore drops the already-treated units *and* the last-treated cohort's
+    # units. The latter is essential and was the N1 bug: with
+    # control_group="notyettreated", anticipation>0 and no never-treated group,
+    # keeping the last cohort left its units in the data, where the (correct)
+    # not-yet-treated control cutoff then admitted them as valid controls,
+    # contaminating the comparison group and biasing the ATT. The earlier behavior
+    # (`data = data[~treated_fp]`) dropped only the first-period rows and so kept
+    # the last cohort. When a never-treated group IS present this filter is
+    # equivalent to dropping `treated_fp` (glist = all cohorts > fp+anticipation,
+    # plus 0), so non-N1 cases are unchanged.
+    glist_in = np.append(glist, 0)
+    data = data[data[gname].isin(glist_in)]
     tlist = np.sort(data[tname].unique())
+    glist = np.sort(data[gname].unique())
     glist = glist[glist > 0]
     fp = tlist[0]
     glist = glist[glist > fp + anticipation]
-    if control_group != "nevertreated" and not (data[gname] == 0).any():
-      glist = glist[glist < latest_g]
 
   # idname is validated to be numeric in _validate_inputs (R did v2.5.1).
   true_rep_cross_section = False
