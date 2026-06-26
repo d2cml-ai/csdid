@@ -19,6 +19,74 @@ import numpy as np, pandas as pd
 
 from scipy.stats import norm
 
+import math
+from decimal import Decimal
+
+
+def _unwrap_len1(x):
+  """Unwrap a length-1 container / 0-d numpy array to its scalar element, matching
+  R's treatment of length-1 vectors as scalars. Returns ``(scalar, True)`` when an
+  unwrap happened, else ``(x, False)``. Multi-element containers are returned as-is
+  with the second flag False so the caller can reject them by length. A python str /
+  bytes is NOT treated as a container (it is itself a scalar value)."""
+  if isinstance(x, np.ndarray):
+    if x.ndim == 0:
+      return x[()], True
+    if x.size == 1:
+      return x.reshape(-1)[0], True
+    return x, False
+  if isinstance(x, (list, tuple)):
+    if len(x) == 1:
+      return x[0], True
+    return x, False
+  return x, False
+
+
+def _validate_logical_scalar(x, name):
+  """Mirror R `validate_logical_scalar`: accept only a single logical (python bool /
+  np.bool_), unwrapping a length-1 logical vector first (F-C1-1; so ``(False,)`` ->
+  False rather than being read as truthy). Reject 'yes'/0/1/2/None/1.0/[True,False]/
+  ''/2.5/etc. (C1-1)."""
+  x, _ = _unwrap_len1(x)
+  if not isinstance(x, (bool, np.bool_)):
+    raise ValueError(f"{name} must be a single logical (True or False).")
+  return bool(x)
+
+
+def _validate_positive_whole_number(x, name):
+  """Mirror R `validate_positive_whole_number`: a single finite positive whole number
+  (C1-3). Accepts python/np ints and whole floats (4.0), unwrapping a length-1 vector
+  first. Rejects bool, str, non-finite, non-whole (1.5), and < 1 (0/neg)."""
+  x, _ = _unwrap_len1(x)
+  # bool is an int subclass in python; R logicals are not whole numbers here.
+  if isinstance(x, (bool, np.bool_)):
+    raise ValueError(f"{name} must be a single positive whole number.")
+  if not isinstance(x, (int, float, np.integer, np.floating, Decimal)):
+    raise ValueError(f"{name} must be a single positive whole number.")
+  xf = float(x)
+  if not math.isfinite(xf) or xf < 1 or xf != round(xf):
+    raise ValueError(f"{name} must be a single positive whole number.")
+  return int(round(xf))
+
+
+def _coerce_alp(alp):
+  """Generalize the `alp` scalar type check to mirror R `validate_alp` (C1-4, C1-8):
+  accept length-1 numeric vectors / 0-d arrays / np.number / Decimal / python
+  int|float (unwrapping a length-1 container to its scalar), and reject NaN/non-finite
+  (NaN<=0 and NaN>=1 are both False, so the old guard let NaN through -> all-NaN
+  inference) as well as length!=1 containers, bool, str, and out-of-range values.
+  Returns a python float in (0, 1)."""
+  alp, _ = _unwrap_len1(alp)
+  # bool would pass the numeric isinstance below but is not a valid significance level.
+  if isinstance(alp, (bool, np.bool_)):
+    raise ValueError(f"'alp' must be a number strictly between 0 and 1, got {alp}.")
+  if not isinstance(alp, (int, float, np.integer, np.floating, Decimal)):
+    raise ValueError(f"'alp' must be a number strictly between 0 and 1, got {alp}.")
+  alpf = float(alp)
+  if not math.isfinite(alpf) or alpf <= 0 or alpf >= 1:
+    raise ValueError(f"'alp' must be a number strictly between 0 and 1, got {alp}.")
+  return alpf
+
 
 def _cluster_sums(inffunc, dp):
     """Sum the influence function over the units in each cluster.
@@ -152,6 +220,11 @@ def _wald_pretest(inffunc, att, group, year, dp):
     preatt = att[pre]
     preV = V[np.ix_(pre, pre)]
     if np.isnan(preV).any():
+        # A-wald-warn (C3-F9): R warns before suppressing (att_gt.R:667) rather than
+        # returning None silently.
+        warnings.warn(
+            "Not returning pre-test Wald statistic due to NA pre-treatment values"
+        )
         return None, None
     # R: rcond(preV) <= .Machine$double.eps  (singular pre-covariance)
     try:
@@ -159,6 +232,10 @@ def _wald_pretest(inffunc, att, group, year, dp):
     except Exception:
         rcond = 0.0
     if not np.isfinite(rcond) or rcond <= np.finfo(float).eps:
+        # A-wald-warn (C3-F9): R warns before suppressing (att_gt.R:672).
+        warnings.warn(
+            "Not returning pre-test Wald statistic due to singular covariance matrix"
+        )
         return None, None
     try:
         W = float(n * preatt @ np.linalg.solve(preV, preatt))
@@ -172,7 +249,7 @@ def _wald_pretest(inffunc, att, group, year, dp):
 # class ATTgt(AGGte):
 class ATTgt:
   def __init__(self, yname, tname, idname, gname, data, control_group = ['nevertreated', 'notyettreated'],
-  xformla: str = None, panel = True, allow_unbalanced_panel = True,
+  xformla: str = None, panel = True, allow_unbalanced_panel = False,
   clustervar = None, weights_name = None, anticipation = 0,
   cband = False, biters = 1000, alp = 0.05, compute_inffunc = True,
   fix_weights = None, faster_mode = False,
@@ -186,20 +263,75 @@ class ATTgt:
     #   **kwargs      : extra args forwarded to a custom est_method in R; with a
     #                   built-in est_method R warns "Extra arguments ... are ignored"
     #                   (att_gt__02). Mirror that warning here instead of raising.
-    self.print_details = bool(print_details)
-    self.pl = bool(pl)
-    self.cores = int(cores)
+    # A-argalias (C2 / C3-F3/F4): R's formals are `clustervars` (plural) and
+    # `weightsname` (no underscore). When an R-faithful call passes those, the port
+    # would otherwise drop them via **kwargs and only emit the generic "Extra
+    # arguments ... ignored" warning -- silently disabling clustering / weights.
+    # Consume the aliases here BEFORE the extra-args warning, preferring the
+    # explicitly-set canonical arg and erroring on a genuine conflict (both given
+    # with different values).
+    if 'clustervars' in kwargs:
+      _alias = kwargs.pop('clustervars')
+      if clustervar is not None and clustervar != _alias:
+        raise ValueError(
+          "Both 'clustervar' and its alias 'clustervars' were supplied with "
+          "different values; pass only one."
+        )
+      if clustervar is None:
+        clustervar = _alias
+    if 'weightsname' in kwargs:
+      _alias = kwargs.pop('weightsname')
+      if weights_name is not None and weights_name != _alias:
+        raise ValueError(
+          "Both 'weights_name' and its alias 'weightsname' were supplied with "
+          "different values; pass only one."
+        )
+      if weights_name is None:
+        weights_name = _alias
+
+    # A-logical (C1-1): validate logical scalars rather than truthy/bool()-coercing.
+    self.print_details = _validate_logical_scalar(print_details, "print_details")
+    self.pl = _validate_logical_scalar(pl, "pl")
+    panel = _validate_logical_scalar(panel, "panel")
+    allow_unbalanced_panel = _validate_logical_scalar(
+      allow_unbalanced_panel, "allow_unbalanced_panel")
+    cband = _validate_logical_scalar(cband, "cband")
+    faster_mode = _validate_logical_scalar(faster_mode, "faster_mode")
+
+    # A-cores (C1-3): validate `cores` as a positive whole number (was int(cores),
+    # which silently truncated 1.5, accepted 0/neg, coerced '4'/True).
+    self.cores = _validate_positive_whole_number(cores, "cores")
+
+    # A-control-vec (C1-5): R `validate_choice_scalar` requires a length-1
+    # control_group. The port's default is the LIST ['nevertreated','notyettreated']
+    # (a sentinel meaning "use the first / default"), which preprocess_did reduces to
+    # element[0]. Refuse a USER-supplied multi-element control_group that is NOT that
+    # exact default sentinel, instead of silently reducing it to element[0]. The
+    # default list (and any length-1 container) is left untouched for preprocess_did.
+    _default_cg = ['nevertreated', 'notyettreated']
+    if isinstance(control_group, (list, tuple)):
+      if len(control_group) > 1 and list(control_group) != _default_cg:
+        raise ValueError(
+          "control_group must be either 'nevertreated' or 'notyettreated'."
+        )
+
+    # A-argalias: only warn about genuinely-unknown kwargs (aliases already consumed).
     if kwargs:
       warnings.warn(
         "Extra arguments " + ", ".join(repr(k) for k in kwargs)
         + " are ignored when using a built-in est_method."
       )
-    # Validate alp and biters
-    if not isinstance(alp, (int, float)) or alp <= 0 or alp >= 1:
-      raise ValueError(f"'alp' must be a number strictly between 0 and 1, got {alp}.")
-    if not isinstance(biters, (int, float)) or biters < 1 or biters != int(biters):
-      raise ValueError(f"'biters' must be a positive integer, got {biters}.")
-    biters = int(biters)
+    # A-alp-nan (C1-4) / A-np-scalar (C1-8): accept length-1 numeric vectors / 0-d
+    # arrays / np.number / Decimal for alp, and reject NaN/non-finite (the old
+    # `alp<=0 or alp>=1` guard let NaN through -> norm.ppf(NaN)=NaN -> all-NaN
+    # inference).
+    alp = _coerce_alp(alp)
+    # biters: validate at construction (a single positive whole number). R defers
+    # this to the bootstrap branch (C1-9 flags the port as marginally stricter), but
+    # validating early is benign and strictly safer -- an invalid biters is a user
+    # error regardless of bstrap -- so the port keeps its construction-time guard.
+    # biters=1 is valid (the degenerate-bootstrap crash is fixed in mboot, O7-F1).
+    biters = _validate_positive_whole_number(biters, "biters")
 
     # Validate fix_weights (matches R `did`).
     if fix_weights is not None and fix_weights not in ("varying", "base_period", "first_period"):
@@ -210,9 +342,11 @@ class ATTgt:
     # Point-estimates-only mode: skip IF computation. compute_inffunc must be a
     # single logical (matches R `did`); a truthy non-bool (e.g. "yes") was silently
     # bool()-coerced to True (V4-S4), masking a user error.
-    if not isinstance(compute_inffunc, (bool, np.bool_)):
-      raise ValueError("compute_inffunc must be a single logical (True or False).")
-    self.compute_inffunc = bool(compute_inffunc)
+    # A-inffunc-list (C1-10): accept a length-1 logical vector ([True]/(True,)) by
+    # unwrapping before the bool check (R accepts; the port's bare isinstance rejected
+    # a list). _validate_logical_scalar does the unwrap-then-validate.
+    self.compute_inffunc = _validate_logical_scalar(
+      compute_inffunc, "compute_inffunc")
     if not self.compute_inffunc:
       cband = False
 
@@ -233,6 +367,9 @@ class ATTgt:
 
   def fit(self, est_method = 'dr', base_period = 'varying', bstrap = True):
     dp = self.dp
+
+    # A-logical (C1-1): bstrap is a logical scalar (was bool()-coerced).
+    bstrap = _validate_logical_scalar(bstrap, "bstrap")
 
     # Validate est_method and base_period (matches R `did`).
     if not (callable(est_method) or est_method in ('dr', 'reg', 'ipw')):

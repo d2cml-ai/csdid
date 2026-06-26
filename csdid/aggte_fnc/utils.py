@@ -140,9 +140,18 @@ def AGGTEobj(overall_att=None,
     # Overall estimates
     alp = out["DIDparams"]["alp"]
     pointwise_cval = stats.norm.ppf(1 - alp / 2)
-    overall_cband_upper = out["overall_att"] + pointwise_cval * out["overall_se"]
-    overall_cband_lower = out["overall_att"] - pointwise_cval * out["overall_se"]
-    out1 = np.column_stack((out["overall_att"], out["overall_se"], overall_cband_lower, overall_cband_upper))
+    # AGG-sentinel (O5-F-A / C3-F7): a degenerate-variance or all-NA aggregation
+    # can leave overall_att / overall_se as None. `float * None` would crash with
+    # a TypeError; coerce a None/non-finite SE (and a None att) to np.nan so the
+    # confidence band degrades to NaN gracefully, like R returns NA, for ALL four
+    # aggregation types.
+    _oa = out["overall_att"]
+    _ose = out["overall_se"]
+    _oa = np.nan if _oa is None else _oa
+    _ose = np.nan if _ose is None else _ose
+    overall_cband_upper = _oa + pointwise_cval * _ose
+    overall_cband_lower = _oa - pointwise_cval * _ose
+    out1 = np.column_stack((_oa, _ose, overall_cband_lower, overall_cband_upper))
     out1 = np.round(out1, 4)
     overall_sig = (overall_cband_upper < 0) | (overall_cband_lower > 0)
     overall_sig = np.asarray(overall_sig)
