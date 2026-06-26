@@ -293,7 +293,24 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                     continue
 
                 # return (inf_func)
-                covariates = disdat[xcov_cols].to_numpy()
+                # F-O1-2 / compute.att_gt.R:526-540: fix_weights only changes
+                # weights, not the covariate conditioning set. In the forced-RC
+                # "varying" balanced branch, R remaps every stacked row to its
+                # unit's earlier-period -- min(pret, t+tfac) -- covariate
+                # (earlier_idx_v; cov_early[id_map,]). The default RC path keeps
+                # each row's own-period covariate, which diverges from R when the
+                # covariate is time-varying. With a time-invariant covariate (or
+                # none) earlier-period == own-period, so this is a no-op there.
+                if varying_forced_rc_balanced:
+                    earlier_idx = min(pret, t_i + tfac)
+                    earlier_period = tlist[earlier_idx]
+                    cov_early = (
+                        data[data[tname] == earlier_period]
+                        .drop_duplicates(subset=[idname])
+                        .set_index(idname)[xcov_cols])
+                    covariates = cov_early.reindex(disdat[idname]).to_numpy()
+                else:
+                    covariates = disdat[xcov_cols].to_numpy()
 
                 #-----------------------------------------------------------------------------
                 # code for actually computing att(g,t)
@@ -349,7 +366,14 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 #     scaling by #units over-inflates the IF by n_rows/n_units
                 #     (audit-v3 F1). Use #rows (= n1).
                 n1_scale = len(np.unique(right_ids)) if varying_forced_rc_balanced else n1
-                att_inf_func = (n/n1_scale)*att_inf_func
+                # R `did` 2.5.1 (commit 4e9de53): the RC influence function is
+                # normalized over the 2*n_units stacked rows; folding pre+post per
+                # unit (the groupby-sum below) must divide by 2 so the balanced-panel
+                # fix_weights='varying' SE matches the panel normalization. Without
+                # the 0.5 the SE is exactly 2x too large -- R 2.5.0's bug, which the
+                # port had inherited.
+                fold_factor = 0.5 if varying_forced_rc_balanced else 1.0
+                att_inf_func = fold_factor * (n/n1_scale) * att_inf_func
 
                 inf_func_df = pd.DataFrame(
                 {

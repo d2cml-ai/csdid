@@ -124,7 +124,7 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
                     data, tname, idname, yname, gname, never_treated, anticipation,
                     tlist, tfac, full_cov, rowid_unique, n, fix_weights,
                     est_rc, add_att_data, t_i, apply_rcond, apply_guard, est_method,
-                    apply_overlap)
+                    apply_overlap, xcov_cols)
 
     output = {'group': group, 'year': year, "att": att_est, 'post': post_array}
     if compute_inffunc:
@@ -201,7 +201,8 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
                     data, tname, idname, yname, gname, never_treated, anticipation,
                     tlist, tfac, full_cov, rowid_unique, n, fix_weights,
                     est_att_f, add_att_data, t_i, apply_rcond=False,
-                    apply_guard=False, est_method="dr", apply_overlap=False):
+                    apply_guard=False, est_method="dr", apply_overlap=False,
+                    xcov_cols=None):
     if never_treated:
         C_main = (data[gname] == 0)
     else:
@@ -244,7 +245,29 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
         add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
         return
 
-    covariates = full_cov.loc[disdat.index].to_numpy()
+    # Balanced panel force-routed through RC by fix_weights='varying' (balanced iff
+    # every unit observed in every period: nrow == n_units * n_periods). Computed
+    # here (not just below) because it also gates the covariate remap.
+    varying_forced_rc_balanced = (
+        fix_weights == "varying" and len(data) == n * data[tname].nunique())
+
+    # F-O1-2 / compute.att_gt.R:526-540: fix_weights only changes weights, not the
+    # covariate conditioning set. In the forced-RC "varying" balanced branch, R
+    # remaps every stacked row to its unit's earlier-period -- min(pret, t+tfac) --
+    # covariate (earlier_idx_v; cov_early[id_map,]). The default RC path keeps each
+    # row's own-period covariate, which diverges from R when the covariate is
+    # time-varying. With a time-invariant covariate (or none) earlier-period ==
+    # own-period, so this is a no-op there.
+    if varying_forced_rc_balanced:
+        earlier_idx = min(pret, tn_idx)
+        earlier_period = tlist[earlier_idx]
+        cov_early = (
+            data[data[tname] == earlier_period]
+            .drop_duplicates(subset=[idname])
+            .set_index(idname)[xcov_cols])
+        covariates = cov_early.reindex(disdat[idname]).to_numpy()
+    else:
+        covariates = full_cov.loc[disdat.index].to_numpy()
 
     # Propensity-overlap guard (matches R), checked before the singular guard.
     if apply_overlap and overlap_check_fail(covariates, G):
@@ -279,12 +302,15 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
     # by fix_weights='varying' (R reshapes wide; two rows per unit summed back per
     # unit below, so the row count would halve every SE/band). A genuinely
     # unbalanced panel must scale by #rows (= n1) like R's long/RC path; using
-    # #units there over-inflates the IF by n_rows/n_units (audit-v3 F1). Balanced
-    # iff every unit is observed in every period: nrow == n_units * n_periods.
-    varying_forced_rc_balanced = (
-        fix_weights == "varying" and len(data) == n * data[tname].nunique())
+    # #units there over-inflates the IF by n_rows/n_units (audit-v3 F1).
+    # (varying_forced_rc_balanced computed above, where it also gates the cov remap.)
     n1_scale = len(np.unique(right_ids)) if varying_forced_rc_balanced else n1
-    att_inf_func = (n / n1_scale) * att_inf_func
+    # R `did` 2.5.1 (commit 4e9de53): fold pre+post per unit must divide by 2 (the
+    # RC IF is normalized over 2*n_units stacked rows) so the balanced-panel
+    # fix_weights='varying' SE matches the panel normalization; without it the SE is
+    # exactly 2x too large (R 2.5.0's bug). Mirrors compute_att_gt.
+    fold_factor = 0.5 if varying_forced_rc_balanced else 1.0
+    att_inf_func = fold_factor * (n / n1_scale) * att_inf_func
     inf_func_df = pd.DataFrame({"inf_func": att_inf_func, "right_ids": right_ids}).fillna(0)
     inf_zeros = np.zeros(n)
     aggte_if = inf_func_df.groupby('right_ids').inf_func.sum()

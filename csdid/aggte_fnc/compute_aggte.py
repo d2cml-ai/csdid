@@ -7,6 +7,60 @@ from scipy.stats import norm
 from csdid.aggte_fnc.utils import get_agg_inf_func, get_se, wif, AGGTEobj
 from csdid.utils.mboot import mboot
 import warnings
+import numbers
+
+
+# =============================================================================
+# Scalar-argument validators (AGG-validate: O6-F5 / C1-6 / C1-7).
+# Mirror R `did`'s utility_functions.R validators so the aggte stage refuses
+# invalid alp / balance_e / min_e / max_e / na_rm cleanly instead of accepting
+# nonsense (alp in {0,1,1.5,-0.1,NaN}, fractional/negative balance_e, truthy
+# na_rm) or crashing with a cryptic error on string/vector args.
+# =============================================================================
+def _is_numeric_scalar(x):
+    # Accept Python/NumPy real scalars (including whole-valued floats); reject
+    # bool (R is.numeric(TRUE) is FALSE), strings, vectors/arrays, None.
+    if isinstance(x, bool):
+        return False
+    if isinstance(x, numbers.Number):
+        return True
+    if isinstance(x, np.generic):
+        return isinstance(x.item(), numbers.Number) and not isinstance(x.item(), bool)
+    return False
+
+
+def _validate_logical_scalar(x, name):
+    # R: validate_logical_scalar -> single non-NA logical. Python bools (and
+    # numpy bool_) qualify; truthy ints/strings do NOT.
+    if isinstance(x, np.bool_):
+        return
+    if isinstance(x, bool):
+        return
+    raise ValueError(f"{name} must be a single logical (TRUE or FALSE).")
+
+
+def _validate_numeric_scalar(x, name):
+    # R: validate_numeric_scalar -> single non-missing number (Inf allowed).
+    if (not _is_numeric_scalar(x)) or (isinstance(x, float) and np.isnan(x)) or \
+       (isinstance(x, np.generic) and np.isnan(x)):
+        raise ValueError(f"{name} must be a single non-missing number.")
+
+
+def _validate_alp(alp, name="alp"):
+    # R: validate_alp -> single number strictly between 0 and 1, non-NA.
+    if (not _is_numeric_scalar(alp)) or \
+       (isinstance(alp, (float, np.generic)) and np.isnan(alp)) or \
+       alp <= 0 or alp >= 1:
+        raise ValueError(f"{name} must be a single number strictly between 0 and 1.")
+
+
+def _validate_nonnegative_whole_number(x, name):
+    # R: validate_nonnegative_whole_number -> single non-NA finite non-negative
+    # whole number (whole-valued floats accepted; Inf rejected).
+    if (not _is_numeric_scalar(x)) or \
+       (isinstance(x, (float, np.generic)) and np.isnan(x)) or \
+       (not np.isfinite(x)) or x < 0 or x != round(x):
+        raise ValueError(f"{name} must be a single non-negative whole number.")
 
 def compute_aggte(MP,
                       typec         = "group",
@@ -43,6 +97,32 @@ def compute_aggte(MP,
     
     if clustervars is None:
         clustervars = dp['clustervars']
+    # AGG-clust-list (C3-F4): accept a list (faithful translation of R `c(...)`)
+    # in addition to a bare string. att_gt's analytic SE path keys on a single
+    # cluster variable; unwrap a length-1 list, take the first of a longer list
+    # (R semantics: at most idname + one extra cluster var). Avoids the
+    # `TypeError: unhashable type: 'list'` crash in get_se's column lookup.
+    if isinstance(clustervars, (list, tuple, np.ndarray)):
+        cl = list(clustervars)
+        clustervars = cl[0] if len(cl) > 0 else None
+
+    # AGG-clust-warn (O6-F2): if an extra cluster variable (beyond idname) is
+    # requested but is not available in the retained att_gt data, warn and fall
+    # back to non-clustered SE rather than silently doing so. Mirrors R
+    # compute.aggte.R:87-107. (get_se's `clustervars in dta.columns` check is the
+    # port's availability test; replicate it here so the warning surfaces.)
+    if clustervars is not None and clustervars not in ("", idname):
+        if clustervars not in data.columns:
+            warnings.warn(
+                "Clustered standard errors were requested in aggte() "
+                f"(clustervars = '{clustervars}'), but the cluster information "
+                "needed is not available in this att_gt object. Reporting "
+                "standard errors that do NOT account for clustering; re-run "
+                f"att_gt() with clustervars = '{clustervars}' for clustered "
+                "inference."
+            )
+            clustervars = None
+
     if bstrap is None:
         bstrap = dp['bstrap']
     if biters is None:
@@ -67,7 +147,17 @@ def compute_aggte(MP,
 
     if typec not in ["simple", "dynamic", "group", "calendar"]:
         raise ValueError("`typec` must be one of ['simple', 'dynamic', 'group', 'calendar']")
-    # Removing missing values    
+
+    # AGG-validate (O6-F5 / C1-6 / C1-7): mirror R compute.aggte.R:42-51,122
+    # scalar-arg validation. alp is validated after defaulting (above).
+    _validate_logical_scalar(na_rm, "na_rm")
+    _validate_numeric_scalar(min_e, "min_e")
+    _validate_numeric_scalar(max_e, "max_e")
+    if balance_e is not None:
+        _validate_nonnegative_whole_number(balance_e, "balance_e")
+    _validate_alp(alp, "alp")
+
+    # Removing missing values
     if na_rm:
         notna = ~np.isnan(att)
         group = group[notna]
@@ -79,7 +169,13 @@ def compute_aggte(MP,
         if typec == "group":
             gnotna = []
             for g in glist:
-                indices = np.where((group == g) & (g <= t))
+                # AGG-grp-maxe (O6-F4): restrict to the SAME max_e window the
+                # group-specific estimate uses below; mirrors R
+                # compute.aggte.R:169-181 `(t <= (group + max_e))`. Without it, a
+                # group whose only non-NA post cell is PAST max_e survives this
+                # filter but then has an empty in-window selection -> att.egt=NaN
+                # and overall_att=NaN. No-op when max_e=Inf.
+                indices = np.where((group == g) & (g <= t) & (t <= (g + max_e)))
                 is_not_na = np.any(~np.isnan(att[indices]))
                 gnotna.append(is_not_na)
             
@@ -167,6 +263,17 @@ def compute_aggte(MP,
 
 
     if typec == "simple":
+        # AGG-empty-window (O6-F3 / C3-F6): an out-of-range max_e (or window)
+        # can leave the post-treatment selection EMPTY. R refuses via
+        # get_agg_inf_func()'s "No valid att_gt() estimates" stop; mirror that
+        # cleanly here rather than returning a phantom att=None/se=None object.
+        if len(keepers) == 0:
+            raise ValueError(
+                "No valid att_gt() estimates found for this aggregation. "
+                "This may happen if all estimates for a particular group or "
+                "time period are NA, or the requested max_e window excludes "
+                "every post-treatment period."
+            )
         # Simple ATT
         # Averages all post-treatment ATT(g,t) with weights given by group size
         pg = np.array(pg)
@@ -187,10 +294,14 @@ def compute_aggte(MP,
         # Get standard errors from the overall influence function
         simple_se = get_se(simple_if, dp)
         
+        # AGG-sentinel (O5-F-A / C3-F7): use np.nan, not None, for the
+        # degenerate-SE sentinel so downstream `overall_att + cval*overall_se`
+        # in AGGTEobj degrades to NaN gracefully (matching dynamic/calendar)
+        # instead of crashing with `float * None`. Mirrors R `simple.se <- NA`.
         if simple_se is not None:
             if simple_se <= np.sqrt(np.finfo(float).eps) * 10:
-                simple_se = None
-                
+                simple_se = np.nan
+
         AGGTEobj_print = AGGTEobj(overall_att=simple_att, 
                                   overall_se=simple_se, 
                                   typec=typec,
@@ -280,9 +391,12 @@ def compute_aggte(MP,
         
         # get overall standard error        
         selective_se = get_se(selective_inf_func, dp)
+        # AGG-sentinel (O5-F-A / C3-F7): np.nan, not None, so AGGTEobj's
+        # `overall_att + cval*overall_se` degrades to NaN instead of crashing
+        # with `float * None`. Mirrors R `selective.se <- NA`.
         if not np.isnan(selective_se):
             if selective_se <= np.sqrt(np.finfo(float).eps) * 10:
-                selective_se = None
+                selective_se = np.nan
     
         AGGTEobj_print = AGGTEobj(overall_att = selective_att, 
                             overall_se = selective_se, 
@@ -325,6 +439,18 @@ def compute_aggte(MP,
             eseq = np.sort(eseq)      
             eseq = eseq[(eseq <= balance_e) & (eseq >= balance_e - t2orig(maxT) + t2orig(1))]
         eseq = eseq[(eseq >= min_e) & (eseq <= max_e)]
+
+        # AGG-empty-window (O6-F3 / C3-F6): a window (min_e>max_e, out-of-range
+        # min_e/max_e, over-large balance_e) can leave NO event times. Without
+        # this guard `np.column_stack([])` later raises a cryptic
+        # "need at least one array to concatenate". Mirror R
+        # compute.aggte.R:472-476 with a clean refusal.
+        if len(eseq) == 0:
+            raise ValueError(
+                "No event times fall within the requested window. "
+                "Adjust 'min_e'/'max_e' (and 'balance_e') so at least one event "
+                "time is included."
+            )
 
         dynamic_att_e = []
         for e in eseq:
@@ -414,12 +540,35 @@ def compute_aggte(MP,
 
  # np.array(group)
     if typec == "calendar":
+        # AGG-cal-warn (O6-F1 / C3-F5): min_e/max_e/balance_e have no effect on
+        # calendar aggregation; warn so the (correct) unrestricted result is not
+        # mistaken for a windowed one. Mirrors R compute.aggte.R:579-582.
+        if np.isfinite(max_e) or np.isfinite(min_e) or (balance_e is not None):
+            warnings.warn(
+                "`min_e`, `max_e`, and `balance_e` are ignored for type = "
+                "\"calendar\"; returning the unrestricted calendar-time effects."
+            )
         minG = min(group)
         calendar_tlist = tlist[tlist >= minG]
         pg = np.array(pg)
-        calendar_att_t = []
         group = np.array(group)
         t = np.array(t)
+
+        # AGG-cal-haspost (O6-F6): drop calendar periods with no non-missing
+        # post-treatment ATT(g,t) cell (e.g. after na_rm stripped all of a
+        # period's cells). Without this guard the port keeps a phantom att=0.0
+        # period (empty `whicht` -> np.sum(pgt*attt)=0.0), corrupting the overall
+        # calendar ATT. Mirrors R compute.aggte.R:593-600 `has_post`.
+        has_post = np.array([np.any((t == t1) & (group <= t)) for t1 in calendar_tlist])
+        calendar_tlist = calendar_tlist[has_post]
+        if len(calendar_tlist) == 0:
+            raise ValueError(
+                "No calendar periods have non-missing post-treatment att_gt() "
+                "estimates. Cannot compute calendar aggregation. Check your "
+                "att_gt() results."
+            )
+
+        calendar_att_t = []
         for t1 in calendar_tlist:
             whicht = np.where((t == t1) & (group <= t))[0]
             attt = att[whicht]

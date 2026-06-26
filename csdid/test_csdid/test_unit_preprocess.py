@@ -48,7 +48,11 @@ _BASE = dict(yname="Y", tname="period", idname="id", gname="G",
 
 
 def _validate(data, **over):
-    return _validate_inputs(data=data, **{**_BASE, **over})
+    # _validate_inputs now returns the normalized
+    # (yname, tname, gname, idname, weights_name, clustervar, anticipation) tuple
+    # (it also normalizes/unwraps the name + anticipation args, mirroring R
+    # `validate_*`); the cluster-normalization contract these tests pin is slot 5.
+    return _validate_inputs(data=data, **{**_BASE, **over})[5]
 
 
 def test_validate_normal_returns_none_clustervar():
@@ -59,9 +63,20 @@ def test_validate_unwraps_single_clustervar():
     assert _validate(_mk(), clustervar=["cl"]) == "cl"
 
 
+def test_validate_drops_idname_from_clustervars():
+    # C2-F7: R removes idname from the cluster set BEFORE the "at most one" count
+    # check, so [other, idname] is a single effective cluster var -> accepted.
+    d = _mk()
+    d["cl2"] = np.repeat(np.arange(40), 2)
+    assert _validate(d, clustervar=["cl", "id"]) == "cl"
+
+
 def test_validate_rejects_multiple_clustervars():
+    # Two genuine (non-idname) cluster vars still exceed the one-beyond-unit limit.
+    d = _mk()
+    d["cl2"] = np.repeat(np.arange(40), 2)
     with pytest.raises(ValueError):
-        _validate(_mk(), clustervar=["cl", "id"])
+        _validate(d, clustervar=["cl", "cl2"])
 
 
 def test_validate_rejects_time_varying_cluster():

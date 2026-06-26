@@ -120,12 +120,22 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
     quantile_75 = np.quantile(bres, 0.75, axis=0, method="inverted_cdf")
     quantile_25 = np.quantile(bres, 0.25, axis=0, method="inverted_cdf")
     qnorm_75 = norm.ppf(0.75)
-    qnorm_25 = norm.ppf(0.25)   
+    qnorm_25 = norm.ppf(0.25)
     bSigma = (quantile_75 - quantile_25) / (qnorm_75 - qnorm_25)
-        
+
     # Critical value for uniform confidence band
-    bT = np.max(np.abs(bres / bSigma), axis=1)
+    # O7-F1: biters=1 -> 25th and 75th percentiles coincide -> bSigma=0 -> bres/bSigma
+    # all non-finite -> bT empty after isfinite filter -> np.quantile on empty array
+    # crashes (IndexError). Suppress the divide-by-zero and guard the empty bT case so
+    # the function degrades gracefully (crit_val=NaN), matching R's mboot and the
+    # existing all-degenerate branch's contract, instead of crashing.
+    with np.errstate(divide='ignore', invalid='ignore'):
+        bT = np.max(np.abs(bres / bSigma), axis=1)
     bT = bT[np.isfinite(bT)]
+    if bT.size == 0:
+        se = np.full(ndg_dim.shape, np.nan)
+        se[ndg_dim] = bSigma * np.sqrt(n_clusters) / n
+        return {'bres': bres, 'V': V, 'se': se, 'crit_val': np.nan}
     crit_val = np.quantile(bT, 1 - alp, method="inverted_cdf")
     
     # Standard error: R uses bSigma * sqrt(n_clusters) / n
