@@ -4,33 +4,39 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  build-and-publish:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-
+    permissions:
+      # Required for PyPI Trusted Publishing (OIDC) — lets GitHub publish without
+      # any stored PyPI password or API token.
+      id-token: write
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - id: Python_pip
-        name: Python dependencies
-        uses: actions/setup-python@v2
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.8"
-          cache: "pip"
-      - run: pip install -r requirements.txt
+          python-version: "3.11"
 
-      - name: Build Package
+      - name: Build sdist and wheel
         run: |
-          python setup.py sdist
+          python -m pip install --upgrade pip build
+          python -m build
 
-      - name: Upload to PyPi
-        env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USER}}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      - name: Check distribution metadata
         run: |
-          sudo apt-get install tree
-          tree /home/runner/work/csdid
-          twine upload dist/*
+          python -m pip install --upgrade twine
+          python -m twine check dist/*
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # Don't fail the run if this version is already on PyPI (e.g. a merge
+          # that didn't bump csdid/_version.py) — just skip and succeed.
+          skip-existing: true
