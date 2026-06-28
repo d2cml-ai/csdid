@@ -4,16 +4,19 @@ on:
   push:
     branches:
       - main
-    # - cron: "40 15 * * 1,3,5"
+  workflow_dispatch:
 
 jobs:
   CreateQuarto:
-    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
+      # `contents: write` lets the action create the branch; `pull-requests: write`
+      # lets it open the PR. We no longer push to `main` directly because `main`
+      # is a protected branch (direct pushes are rejected with GH006).
       contents: write
+      pull-requests: write
     steps:
-      - name: Chequear el  código
+      - name: Chequear el código
         uses: actions/checkout@v4
 
       - name: Set up Quarto
@@ -24,22 +27,31 @@ jobs:
         with:
           python-version: "3.10"
           cache: "pip"
-      - run: pip uninstall csdid; pip install git+https://github.com/d2cml-ai/csdid/; pip install nbclient nbformat PyYAML; pip install git+https://github.com/d2cml-ai/DRDID
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
+
+      - name: Install csdid and dependencies
+        run: |
+          pip uninstall -y csdid || true
+          pip install git+https://github.com/d2cml-ai/csdid/
+          pip install nbclient nbformat PyYAML
+          pip install git+https://github.com/d2cml-ai/DRDID
+          pip install -r requirements.txt
 
       - name: Generar quarto doc
         run: quarto render README.qmd
 
-      - id: commit
-        name: Commit  files
-        run: |
-          git config --local user.name "action-user"
-          git pull
-          git config --local user.email "actions@github.com"
-          git add -A
-          git commit -m "Update Readme"
-          git push origin main
-        env:
-          REPO_KEY: ${{ secrets.GITHUB_TOKEN }}
-          username: github-actions
+      - name: Open a PR with the regenerated README
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "docs: update generated README"
+          title: "docs: update generated README"
+          body: |
+            Automated regeneration of `readme.md` from `README.qmd` by the
+            **Actualizar Readme** workflow.
+
+            Merge this PR to publish the updated README. If there are no changes
+            to the rendered README, no PR is created.
+          branch: auto/update-readme
+          delete-branch: true
+          author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          committer: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
