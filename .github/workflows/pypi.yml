@@ -12,6 +12,7 @@ permissions:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+    environment: pypi
     permissions:
       # Required for PyPI Trusted Publishing (OIDC) — lets GitHub publish without
       # any stored PyPI password or API token.
