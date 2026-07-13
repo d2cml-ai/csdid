@@ -1,6 +1,6 @@
 # from aggte import AGGte
 from csdid.aggte_fnc.aggte import aggte as agg_te
-
+import inspect
 from csdid.attgt_fnc.preprocess_did import pre_process_did
 from csdid.attgt_fnc.compute_att_gt import compute_att_gt
 
@@ -33,10 +33,13 @@ class ATTgt:
     dp['cband'] = cband
     dp['panel'] = panel
     self.dp = dp
+    # print(dp['true_repeated_cross_sections'])
 
   def fit(self, est_method = 'dr', base_period = 'varying', bstrap = True):
     # print(self.dp)
     dp = self.dp
+    # print(inspect.signature(dp))
+
     result, inffunc = compute_att_gt(dp, est_method = est_method, base_period = base_period)
     att = result['att']
     n_len = list(map(len, inffunc))
