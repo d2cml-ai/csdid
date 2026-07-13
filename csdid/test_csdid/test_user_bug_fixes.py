@@ -165,6 +165,41 @@ def test_variables_not_in_dataset():
 
 
 # ─────────────────────────────────────────────────────────────
+# Bug: object-dtype covariate raises clear error (issue #74)
+# ─────────────────────────────────────────────────────────────
+
+def test_object_dtype_covariate_raises_clear_error():
+    """A covariate column with object dtype should raise a clear ValueError
+    instead of a confusing patsy NameError (GitHub issue #74)."""
+    data = build_sim_data(n=500, time_periods=3, seed=74)
+    # Convert numeric covariate X to object dtype (e.g. string representation)
+    data["X_str"] = data["X"].astype(str)
+
+    with pytest.raises(ValueError, match="non-numeric dtype"):
+        ATTgt(
+            yname="Y", tname="period", idname="id", gname="G",
+            data=data, xformla="Y~X_str",
+            control_group="notyettreated",
+        ).fit(est_method="dr", bstrap=False)
+
+
+def test_object_dtype_covariate_wrapped_in_C_is_allowed():
+    """An object-dtype column wrapped in C() should be accepted (patsy handles it
+    as categorical). This must NOT raise the new dtype error (issue #74)."""
+    data = build_sim_data(n=500, time_periods=3, seed=74)
+    data["X_cat"] = data["X"].apply(lambda x: "high" if x > 0 else "low")
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        result = ATTgt(
+            yname="Y", tname="period", idname="id", gname="G",
+            data=data, xformla="Y~C(X_cat)",
+            control_group="notyettreated",
+        ).fit(est_method="reg", bstrap=False)
+    assert result.MP is not None
+
+
+# ─────────────────────────────────────────────────────────────
 # Bug: groups treated after max(t) within anticipation window
 # ─────────────────────────────────────────────────────────────
 

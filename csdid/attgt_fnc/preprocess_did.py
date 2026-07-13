@@ -590,6 +590,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
   # wrongly counted (reqsize was 1 too high). Default to 0 so the fallback path
   # (intercept-only) is also correct.
   n_rhs = 0
+  _rhs_vars = set()
   try:
     _desc = patsy.ModelDesc.from_formula(xformla)
     _fnames = {f.name() for side in (_desc.lhs_termlist, _desc.rhs_termlist)
@@ -607,6 +608,28 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
   if _missing_vars:
     raise ValueError(
       "The following variables are not in data: " + ", ".join(_missing_vars) + "."
+    )
+
+  # Check for non-numeric bare covariate variables (issue #74). A column with
+  # object/string dtype referenced as a bare name (e.g. `y ~ res_num`) causes a
+  # confusing patsy NameError downstream. Detect it here and raise a clear message.
+  # Columns wrapped in a function call like C(cat) are left for patsy to handle.
+  _non_numeric_covars = sorted(
+    nm for nm in _rhs_vars
+    if re.fullmatch(r'[A-Za-z_]\w*', nm) and nm in data.columns
+    and not (is_numeric_dtype(data[nm]) or is_bool_dtype(data[nm]))
+  )
+  if _non_numeric_covars:
+    _detail = ", ".join(
+      f"'{v}' (dtype: {data[v].dtype})" for v in _non_numeric_covars
+    )
+    _example = _non_numeric_covars[0]
+    raise ValueError(
+      f"Covariate variable(s) {_detail} have non-numeric dtype and cannot be used "
+      f"as bare covariates in the formula. Please convert them to a numeric dtype "
+      f"(e.g., data['{_example}'] = pd.to_numeric(data['{_example}'])) before calling "
+      f"ATTgt, or wrap in C() to treat as categorical "
+      f"(e.g., xformla='... ~ C({_example})')."
     )
 
   # if xformla is None:
