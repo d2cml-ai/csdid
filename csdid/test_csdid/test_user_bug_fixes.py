@@ -187,7 +187,7 @@ def test_object_dtype_covariate_wrapped_in_C_is_allowed():
     """An object-dtype column wrapped in C() should be accepted (patsy handles it
     as categorical). This must NOT raise the new dtype error (issue #74)."""
     data = build_sim_data(n=500, time_periods=3, seed=74)
-    data["X_cat"] = (data["X"] > 0).map({True: "high", False: "low"})
+    data["X_cat"] = data["X"].apply(lambda x: "high" if x > 0 else "low")
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
