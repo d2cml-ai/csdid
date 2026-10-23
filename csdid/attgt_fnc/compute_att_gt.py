@@ -182,9 +182,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 # Regression-feasibility guard (matches R): NA the cell when a 2x2
                 # estimating design is singular/ill-conditioned, rather than letting
                 # the solver return an untrustworthy estimate. Covers the control
-                # design (`did` pre-check) and DRDID's per-group designs (incl. the
-                # treated outcome regression -- a tiny treated cohort can be singular
-                # even when the control design is fine).
+                # design (`did` pre-check) and DRDID's weighted estimating designs.
                 if (apply_rcond and rcond_check_fail(covariates[G == 0])) or (
                         apply_guard and drdid_design_singular(
                             covariates, w, G, est_method, post=None)):
@@ -203,6 +201,11 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                         f"Estimation failed for group {g} in time period {tn}: {e}. "
                         f"Setting ATT to NA for this cell."
                     )
+                    add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+                    continue
+
+                if np.isnan(att_gt):
+                    warnings.warn(f"ATT for (g,t) = ({g},{tn}) is NaN; setting it to NA")
                     add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
                     continue
 
@@ -329,9 +332,8 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                     continue
 
                 # Regression-feasibility guard (matches R): on the RC / unbalanced
-                # path DRDID fits control AND treated outcome regressions separately
-                # pre and post, so each period-by-group design is checked (this is
-                # what NAs a tiny treated cohort with too few post observations).
+                # path DRDID fits control outcome regressions separately pre/post;
+                # the DR estimator additionally fits treated outcome regressions.
                 if (apply_rcond and rcond_check_fail(covariates[G == 0])) or (
                         apply_guard and drdid_design_singular(
                             covariates, w, G, est_method, post=post)):
@@ -350,6 +352,11 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                         f"Estimation failed for group {g} in time period {tn}: {e}. "
                         f"Setting ATT to NA for this cell."
                     )
+                    add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+                    continue
+
+                if np.isnan(att_gt):
+                    warnings.warn(f"ATT for (g,t) = ({g},{tn}) is NaN; setting it to NA")
                     add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
                     continue
 

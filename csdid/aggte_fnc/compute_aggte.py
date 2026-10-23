@@ -157,6 +157,11 @@ def compute_aggte(MP,
         _validate_nonnegative_whole_number(balance_e, "balance_e")
     _validate_alp(alp, "alp")
 
+    if not np.any(group <= t):
+        raise ValueError(
+            "No post-treatment ATT(g,t) cells are available: all cells have t < g."
+        )
+
     # Removing missing values
     if na_rm:
         notna = ~np.isnan(att)
@@ -169,13 +174,9 @@ def compute_aggte(MP,
         if typec == "group":
             gnotna = []
             for g in glist:
-                # AGG-grp-maxe (O6-F4): restrict to the SAME max_e window the
-                # group-specific estimate uses below; mirrors R
-                # compute.aggte.R:169-181 `(t <= (group + max_e))`. Without it, a
-                # group whose only non-NA post cell is PAST max_e survives this
-                # filter but then has an empty in-window selection -> att.egt=NaN
-                # and overall_att=NaN. No-op when max_e=Inf.
-                indices = np.where((group == g) & (g <= t) & (t <= (g + max_e)))
+                # Apply the same original-time window as the group estimate.
+                indices = np.where((group == g) & (g <= t) &
+                                   (t <= g + max_e) & (t >= g + min_e))
                 is_not_na = np.any(~np.isnan(att[indices]))
                 gnotna.append(is_not_na)
             
@@ -252,10 +253,18 @@ def compute_aggte(MP,
     pg = [pg[glist.index(g)] for g in group]  
     
     # Which group time average treatment effects are post-treatment
-    keepers = [i for i in range(len(group)) if group[i] <= t[i] <= (group[i] + max_e)] ### added second condition to allow for limit on longest period included in att
+    event_time = originalt - originalgroup
+    in_window = (originalgroup <= originalt) & (event_time >= min_e) & (event_time <= max_e)
+    keepers = np.flatnonzero(in_window)
     
     # n x 1 vector of group variable
     G = [orig2t(g) for g in dta[gname].to_numpy()]
+
+    if typec in ("simple", "group") and balance_e is not None:
+        warnings.warn(
+            f'`balance_e` is ignored for type = "{typec}"; '
+            'it only applies to type = "dynamic".'
+        )
 
 # =============================================================================
 #  simple
@@ -271,8 +280,8 @@ def compute_aggte(MP,
             raise ValueError(
                 "No valid att_gt() estimates found for this aggregation. "
                 "This may happen if all estimates for a particular group or "
-                "time period are NA, or the requested max_e window excludes "
-                "every post-treatment period."
+                "time period are NA, or the requested event-time window excludes "
+                "every post-treatment period. Adjust 'min_e'/'max_e'."
             )
         # Simple ATT
         # Averages all post-treatment ATT(g,t) with weights given by group size
@@ -319,13 +328,21 @@ def compute_aggte(MP,
         group = np.array(group)
         t = np.array(t) 
         pg = np.array(pg) 
-        selective_att_g = [np.mean(att[( group== g) & (t >= g) & (t <= (group + max_e))]) for g in glist]
+        empty_groups = [originalglist[i] for i, g in enumerate(glist)
+                        if not np.any((group == g) & in_window)]
+        if empty_groups:
+            raise ValueError(
+                "No group-time average treatment effects fall within the requested "
+                f"window for group(s) {', '.join(map(str, empty_groups))}. "
+                "Adjust 'min_e'/'max_e', or set `na_rm = True` to drop those groups."
+            )
+        selective_att_g = [np.mean(att[(group == g) & in_window]) for g in glist]
         selective_att_g = np.asarray(selective_att_g)
         selective_att_g[np.isnan(selective_att_g)] = None
     
         selective_se_inner = [None] * len(glist)
         for i, g in enumerate(glist):
-            whichg = np.where(np.logical_and.reduce((group == g, g <= t, t <= (group + max_e))))[0]
+            whichg = np.flatnonzero((group == g) & in_window)
             weightsg =  pg[whichg] / np.sum(pg[whichg])
             inf_func_g = get_agg_inf_func(att = att , 
                                             inffunc = inffunc , 

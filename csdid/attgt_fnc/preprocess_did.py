@@ -374,6 +374,19 @@ def _validate_inputs(yname, tname, idname, gname, data, control_group,
       f"Available columns: {list(data.columns)}"
     )
 
+  # Genuine repeated cross sections use one sampling unit per observation.
+  # Check the user's panel argument before an unbalanced panel is routed to RC.
+  if not panel and idname is not None and data[idname].dropna().duplicated().any():
+    raise ValueError(
+      "The value of idname must be unique when panel = FALSE. Repeated cross "
+      "sections treat each observation as a distinct sampling unit, but some "
+      f"values of '{idname}' appear in more than one row. If the same units are "
+      "observed in multiple periods, use panel = TRUE (with "
+      "allow_unbalanced_panel = TRUE if the panel is incomplete). If the data "
+      "are genuine repeated cross sections, give each observation its own "
+      f"unique value of '{idname}' (or omit idname)."
+    )
+
   # --- Time-varying cluster variable: only the first period's labels are used
   # internally, so a within-unit time-varying cluster var is silently mis-applied
   # (V4-S1). R refuses it up front; the fix belongs here in _validate_inputs, not
@@ -494,14 +507,6 @@ def _validate_inputs(yname, tname, idname, gname, data, control_group,
     raise ValueError(
       f"'control_group' must be one of {valid_cg}, got '{control_group}'."
     )
-
-  # --- weights validation ---
-  if weights_name is not None:
-    w = data[weights_name]
-    if (w < 0).any():
-      raise ValueError(f"Weights column '{weights_name}' contains negative values.")
-    if w.mean() <= 0:
-      raise ValueError(f"Weights column '{weights_name}' has non-positive mean.")
 
   # Return the normalized name args + unwrapped anticipation alongside clustervar
   # so the caller uses the unwrapped scalars (P-name-scalar / C2-F1; P-anticipation).
@@ -684,6 +689,12 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
   if ndiff != 0:
     # v7-CF1: surface on the warnings channel (matches R `did`), not stdout.
     warnings.warn(f"dropped {ndiff} rows from original data due to missing or non-finite data")
+  # The finite-data filter may remove every observation carrying positive weight.
+  # Validate the retained weights before balancing, as both R preprocessors do.
+  if weights_name is not None and ((data['w'] < 0).any() or data['w'].mean() <= 0):
+    raise ValueError(
+      f"The weights variable '{weights_name}' must be non-negative with a positive mean."
+    )
   try:
 
     tlist = np.sort(data[tname].unique())
@@ -722,6 +733,12 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
       # notyettreated: drop late periods; the last cohort stays in the data as the
       # not-yet-treated comparison group.
       data = data.query(f'{tname} < @cutoff_t')
+    if len(data) == 0:
+      raise ValueError(
+        "No periods before the last treated cohort's treatment date (net of "
+        "anticipation) remain. Check that 'gname' is measured on the same "
+        "scale as 'tname'."
+      )
     tlist = np.sort(data[tname].unique())
     glist = np.sort(data[gname].unique())
     # The last cohort only serves as a comparison; exclude it from estimated groups.
@@ -796,12 +813,6 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
   if not panel:
     true_rep_cross_section = True
 
-  # fix_weights="varying" with panel data: use the repeated-cross-section
-  # estimators with per-period weights (matches R `did`).
-  if fix_weights == "varying" and panel:
-    panel = False
-    true_rep_cross_section = False
-
   if panel:
     if allow_unbalanced_panel:
       try:
@@ -833,6 +844,48 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
         warnings.warn(f"Dropped {n_old-n} observations while converting to balanced panel.")
       tn = tlist[0]
       n = len(data.query(f'{tname} == @tn'))
+
+      # Balancing removes whole units, so both the cohort list and the
+      # never-treated fallback must be resolved again on the retained sample.
+      gone = np.setdiff1d(glist, data[gname].unique())
+      if len(gone):
+        warnings.warn(
+          "Dropped cohort(s) " + ", ".join(map(str, gone)) +
+          " while converting to balanced panel; set "
+          "allow_unbalanced_panel = TRUE to keep them."
+        )
+        glist = np.setdiff1d(glist, gone)
+      if not (data[gname] == 0).any() and (
+          latest_g is None or data[gname].max() < latest_g):
+        latest_g = data[gname].max()
+        cutoff_t = latest_g - anticipation
+        data = data.loc[data[tname] < cutoff_t].copy()
+        action = ("coerced as 'never-treated' units" if
+                  control_group == "nevertreated" else
+                  "used only as a comparison group")
+        warnings.warn(
+          "No never-treated group is available after converting to balanced "
+          "panel (set allow_unbalanced_panel = TRUE to keep the never-treated "
+          "units). The last treated cohort is being " + action +
+          ", and data from periods at/after that is being filtered out "
+          "(no available comparison groups)."
+        )
+        if control_group == "nevertreated":
+          data.loc[data[gname] == latest_g, gname] = 0
+        tlist = np.sort(data[tname].unique())
+        glist = np.sort(data[gname].unique())
+        if len(tlist):
+          glist = glist[(glist > 0) & (glist > tlist[0] + anticipation)]
+        else:
+          glist = glist[:0]
+        if control_group != "nevertreated":
+          glist = glist[glist < latest_g]
+        n = data[idname].nunique()
+
+  # Resolve panel balance before routing varying weights through RC estimators.
+  if fix_weights == "varying" and panel:
+    panel = False
+    true_rep_cross_section = False
   # add rowid
   if not panel:
 
@@ -875,8 +928,24 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
 
   # data.loc[:, ".w"] = data['w']
   if len(glist) == 0:
+    if latest_g is not None:
+      raise ValueError(
+        "No valid groups: with no never-treated group, the last treated cohort "
+        f"(first treated at {latest_g}) is used only as a comparison group and "
+        "no other treated cohort remains."
+      )
     raise ValueError(f"No valid groups. The variable in '{gname}' should be expressed as the time a unit is first treated (0 if never-treated).")
+  if len(tlist) < 2:
+    raise ValueError(
+      "Only one time period remains after dropping periods from the last "
+      "treated cohort's treatment date onward."
+    )
   if len(tlist) == 2:
+    if cband:
+      warnings.warn(
+        "Only two time periods are available; setting cband = FALSE and "
+        "reporting pointwise confidence intervals."
+      )
     cband = False
   gsize = data.groupby(data[gname]).size().reset_index(name="count")
   gsize["count"] /= len(tlist)
@@ -905,7 +974,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     'weights_name': weights_name, 'panel': panel,
     'true_rep_cross_section': true_rep_cross_section,
     'clustervars': clustervar, 'fix_weights': fix_weights,
-    'input_panel': input_panel,
+    'input_panel': input_panel, 'cband': cband,
     'xcov_cols': xcov_cols
   }
   return did_params

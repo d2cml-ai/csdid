@@ -190,6 +190,11 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
         add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
         return
 
+    if np.isnan(att_gt):
+        warnings.warn(f"ATT for (g,t) = ({g},{tn}) is NaN; setting it to NA")
+        add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+        return
+
     n1 = len(uids)
     inf_zeros = np.zeros(n)
     positions = global_pos.reindex(uids).to_numpy()
@@ -294,6 +299,11 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
         warnings.warn(
             f"Estimation failed for group {g} in time period {tn}: {e}. "
             f"Setting ATT to NA for this cell.")
+        add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+        return
+
+    if np.isnan(att_gt):
+        warnings.warn(f"ATT for (g,t) = ({g},{tn}) is NaN; setting it to NA")
         add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
         return
 

@@ -4,11 +4,12 @@ preprocessing logic in ``csdid/attgt_fnc/preprocess_did.py``.
 NO R at runtime. ``_validate_inputs`` is a pure guard function: each test feeds a
 specific bad input and asserts the corresponding ValueError, pinning every
 threshold/comparison in the guard (>1 cluster var, time-varying cluster, negative
-gname, negative / non-positive-mean weights, invalid control_group, negative
+gname, invalid control_group, negative
 anticipation, duplicate (id,t), irreversible-treatment, panel-without-idname,
 strict-numeric dtype). The structural pre_process_did paths (anticipation-text in
 the dropped-first-period warning, time-varying-weights warning) are exercised
-through public construction with crafted data.
+through public construction with crafted data. Weight validity is checked after
+finite-data exclusions, so those tests exercise pre_process_did directly.
 """
 import contextlib
 import io
@@ -95,12 +96,12 @@ def test_validate_rejects_negative_weights():
     w = np.ones(80)
     w[0] = -1.0
     with pytest.raises(ValueError):
-        _validate(_mk(w=w), weights_name="w")
+        pre_process_did(data=_mk(w=w), **{**_BASE, "weights_name": "w"})
 
 
 def test_validate_rejects_nonpositive_mean_weights():
     with pytest.raises(ValueError):
-        _validate(_mk(w=np.zeros(80)), weights_name="w")
+        pre_process_did(data=_mk(w=np.zeros(80)), **{**_BASE, "weights_name": "w"})
 
 
 def test_validate_accepts_positive_weights():

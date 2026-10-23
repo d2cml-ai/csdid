@@ -348,8 +348,8 @@ def drdid_rc(y, post, D, covariates=None, i_weights=None, trim_level=0.995):
     inf_or_post = np.dot(asy_lin_rep_ols_post_treat - asy_lin_rep_ols_post, mom_post)
     inf_or_pre = np.dot(asy_lin_rep_ols_pre_treat - asy_lin_rep_ols_pre, mom_pre)
 
-    inf_treat_or = inf_treat_or_post + inf_treat_or_pre
-    inf_cont_or = inf_cont_or_post + inf_cont_or_pre
+    inf_treat_or = inf_treat_or_post - inf_treat_or_pre
+    inf_cont_or = inf_cont_or_post - inf_cont_or_pre
     inf_or = inf_or_post - inf_or_pre
 
     inf_treat = inf_treat_post - inf_treat_pre + inf_treat_or

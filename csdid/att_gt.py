@@ -361,7 +361,6 @@ class ATTgt:
     dp['biters'] = biters
     dp['alp'] = alp
     dp['true_repeated_cross_sections'] = dp['true_rep_cross_section']
-    dp['cband'] = cband
     self.faster_mode = bool(faster_mode)
     self.dp = dp
 
@@ -423,7 +422,9 @@ class ATTgt:
       if bstrap:
         # v7-O2/O3: thread pl/cores through to the multiplier bootstrap.
         ref_se = mboot(inffunc.T, dp, pl=self.pl, cores=self.cores)
-        crit_val, se = ref_se['crit_val'], ref_se['se']
+        se = ref_se['se']
+        if dp['cband']:
+          crit_val = ref_se['crit_val']
         V = ref_se['V']
       else:
         # Analytical cluster-robust SEs when a cluster variable is set (matches R).

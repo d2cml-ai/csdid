@@ -273,6 +273,8 @@ def test_gap_scenarios_match_r(scn):
     rkey = {(int(r.group), int(r.t)): (float(r.att), float(r.se)) for _, r in ref.iterrows()}
     data = pd.read_csv(GAPS_DATA)
     ikw, fkw = GAP_SCENARIOS[scn]
+    if scn == "rc":
+        data["countyreal"] = np.arange(len(data))
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         res = ATTgt(yname="lemp", tname="year", idname="countyreal", gname="first.treat",

@@ -143,14 +143,11 @@ def drdid_design_singular(int_cov, i_weights, treated, est_method, post=None):
     """Replicate DRDID's *internal* per-cell design-feasibility checks
     (DRDID >= 1.3.0), which NA a cell whose 2x2 estimating designs are singular:
 
-      * ``dr``/``reg`` fit outcome regressions for BOTH the control and treated
-        groups, so each group's weighted design must be non-singular. On the
-        repeated-cross-section / unbalanced path (``post`` given) the control and
-        treated outcome regressions are fit separately pre and post, so all four
-        period-by-group designs are checked (this is what catches a tiny treated
-        cohort with too few post observations to support the covariate design --
-        e.g. 3 treated obs against a 4-column design). On the balanced panel path
-        (``post=None``) the differenced design is checked once per group.
+      * Panel ``dr``/``reg`` fit an outcome regression only for controls.
+        Repeated-cross-section ``reg`` fits controls separately pre and post;
+        ``dr`` additionally fits treated outcome regressions in both periods.
+        Check only designs actually fitted by the selected estimator, so a tiny
+        treated cell does not incorrectly invalidate a regression-only estimate.
       * ``dr``/``ipw`` additionally fit a propensity-score logit on the full
         sample, so the full-sample design is checked too.
 
@@ -167,13 +164,12 @@ def drdid_design_singular(int_cov, i_weights, treated, est_method, post=None):
             # outcome design is checked -- there is NO treated-design check.
             masks += [control]
         else:
-            # Repeated cross-section / unbalanced (drdid_rc/reg_did_rc): control
-            # AND treated outcome regressions are fit separately pre and post, so
-            # all four period-by-group designs are checked. The treated-design
-            # checks are what NA a tiny treated cohort with too few observations.
+            # Only DR fits treated regressions in addition to control regressions.
             post = np.asarray(post).astype(bool)
             pre = ~post
-            masks += [control & post, control & pre, treated & post, treated & pre]
+            masks += [control & post, control & pre]
+            if est_method == "dr":
+                masks += [treated & post, treated & pre]
     for m in masks:
         if _gram_singular(int_cov, i_weights, m):
             return True
