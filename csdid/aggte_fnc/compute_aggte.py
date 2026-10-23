@@ -4,7 +4,9 @@ import numpy as np
 from scipy.stats import norm
 
 
-from csdid.aggte_fnc.utils import get_agg_inf_func, get_se, wif, AGGTEobj
+from csdid.aggte_fnc.utils import (
+    get_agg_inf_func, get_se, wif, AGGTEobj, _make_cached_get_se,
+)
 from csdid.utils.mboot import mboot
 import warnings
 import numbers
@@ -156,6 +158,7 @@ def compute_aggte(MP,
     if balance_e is not None:
         _validate_nonnegative_whole_number(balance_e, "balance_e")
     _validate_alp(alp, "alp")
+    get_se_for_call = _make_cached_get_se(get_se)
 
     if not np.any(group <= t):
         raise ValueError(
@@ -227,10 +230,19 @@ def compute_aggte(MP,
         return originalgtlist[uniquet.index(t) if t in uniquet else -1]
     
     # Function to switch between "original" t values and new t values
+    time_lookup = {value: i + 1 for i, value in enumerate(originalgtlist)}
+    # Mixed NumPy float/int scalars can compare equal with different hashes
+    # beyond exact floating-point precision. Preserve the original comparison.
+    for values in (originalt, originalgroup, originalglist):
+        if values.dtype != originalgtlist.dtype:
+            for value in np.unique(values):
+                if value in time_lookup:
+                    continue
+                matches = np.flatnonzero(originalgtlist == value)
+                if matches.size:
+                    time_lookup[value] = int(matches[0]) + 1
     def orig2t(orig):
-        new_t = [uniquet[i] for i in range(len(originalgtlist)) if originalgtlist[i] == orig]
-        out = new_t[0] if new_t else None
-        return out
+        return time_lookup.get(orig)
     
     t     = [orig2t(orig) for orig in originalt]
     group = [orig2t(orig) for orig in originalgroup]
@@ -301,7 +313,7 @@ def compute_aggte(MP,
                                      wif = simple_wif )[:, None]
     
         # Get standard errors from the overall influence function
-        simple_se = get_se(simple_if, dp)
+        simple_se = get_se_for_call(simple_if, dp)
         
         # AGG-sentinel (O5-F-A / C3-F7): use np.nan, not None, for the
         # degenerate-SE sentinel so downstream `overall_att + cval*overall_se`
@@ -349,7 +361,7 @@ def compute_aggte(MP,
                                             whichones = whichg ,
                                             weights_agg = weightsg , 
                                             wif = None)[:, None]
-            se_g = get_se(inf_func_g, dp)
+            se_g = get_se_for_call(inf_func_g, dp)
             selective_se_inner[i] = {'inf_func': inf_func_g, 'se': se_g}
             
         # recover standard errors separately by group   
@@ -407,7 +419,7 @@ def compute_aggte(MP,
                                               wif = selective_wif)[:, None]    
         
         # get overall standard error        
-        selective_se = get_se(selective_inf_func, dp)
+        selective_se = get_se_for_call(selective_inf_func, dp)
         # AGG-sentinel (O5-F-A / C3-F7): np.nan, not None, so AGGTEobj's
         # `overall_att + cval*overall_se` degrades to NaN instead of crashing
         # with `float * None`. Mirrors R `selective.se <- NA`.
@@ -490,7 +502,7 @@ def compute_aggte(MP,
                                           whichones   = whiche, 
                                           weights_agg = pge, 
                                           wif         = wif_e)[:, None]
-            se_e = get_se(inf_func_e, dp)
+            se_e = get_se_for_call(inf_func_e, dp)
             dynamic_se_inner.append({'inf_func': inf_func_e, 'se': se_e})
 
         dynamic_se_e = np.array([item['se'] for item in dynamic_se_inner]).T
@@ -527,7 +539,7 @@ def compute_aggte(MP,
                                             weights_agg = np.repeat(1 / np.sum(epos), np.sum(epos)),
                                             wif=None)[:, None]
         
-        dynamic_se = get_se(dynamic_inf_func, dp)
+        dynamic_se = get_se_for_call(dynamic_inf_func, dp)
         if not np.isnan(dynamic_se):
             if dynamic_se <= np.sqrt(np.finfo(float).eps) * 10:
                 dynamic_se = np.nan
@@ -608,7 +620,7 @@ def compute_aggte(MP,
                                             whichones=which_t, 
                                             weights_agg=pgt, 
                                             wif=wif_t)[:, None]
-            se_t = get_se(inf_func_t, dp)
+            se_t = get_se_for_call(inf_func_t, dp)
             calendar_se_inner.append({"inf_func": inf_func_t, "se": se_t})
     
     
@@ -658,7 +670,7 @@ def compute_aggte(MP,
         calendar_inf_func = np.array(calendar_inf_func)
         
         # get overall standard error
-        calendar_se = get_se(calendar_inf_func, dp)
+        calendar_se = get_se_for_call(calendar_inf_func, dp)
         if not np.isnan(calendar_se):
             if calendar_se <= np.sqrt(np.finfo(float).eps) * 10:
                 calendar_se = np.nan

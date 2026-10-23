@@ -78,9 +78,11 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
         for p, tp in enumerate(tlist):
             fr = data[data[tname] == tp]
             fid = fr[idname].to_numpy()
-            period_y[p] = pd.Series(fr[yname].to_numpy(), index=fid)
-            period_w[p] = pd.Series(fr['w'].to_numpy(), index=fid)
-            period_cov[p] = pd.DataFrame(fr[xcov_cols].to_numpy(), index=fid)
+            # Align once to the global unit order, including when a caller has
+            # reordered the preprocessed frame. Cells then select NumPy rows.
+            period_y[p] = pd.Series(fr[yname].to_numpy(), index=fid).reindex(unit_ids).to_numpy()
+            period_w[p] = pd.Series(fr['w'].to_numpy(), index=fid).reindex(unit_ids).to_numpy()
+            period_cov[p] = pd.DataFrame(fr[xcov_cols].to_numpy(), index=fid).reindex(unit_ids).to_numpy()
     else:
         # repeated cross sections / unbalanced panel: one global design matrix
         full_cov = pd.DataFrame(data[xcov_cols].to_numpy(), index=data.index)
@@ -151,16 +153,18 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
     G = Gm[mask].astype(float)
 
     earlier_idx = min(tn_idx, pret)
-    ypre = period_y[pret].reindex(uids).to_numpy()
-    ypost = period_y[tn_idx].reindex(uids).to_numpy()
-    covariates = period_cov[earlier_idx].reindex(uids).to_numpy()
+    ypre = period_y[pret][mask]
+    ypost = period_y[tn_idx][mask]
+    # Pandas' former row reindexing yielded column-contiguous covariates.
+    # Retain that layout so estimator reductions keep their rounding behavior.
+    covariates = np.asfortranarray(period_cov[earlier_idx][mask])
 
     if fix_weights == "base_period":
-        w = period_w[pret_g].reindex(uids).to_numpy()
+        w = period_w[pret_g][mask]
     elif fix_weights == "first_period":
-        w = period_w[0].reindex(uids).to_numpy()
+        w = period_w[0][mask]
     else:
-        w = period_w[earlier_idx].reindex(uids).to_numpy()
+        w = period_w[earlier_idx][mask]
 
     # Propensity-overlap guard (matches R), checked before the singular guard.
     if apply_overlap and overlap_check_fail(covariates, G):
@@ -197,7 +201,7 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
 
     n1 = len(uids)
     inf_zeros = np.zeros(n)
-    positions = global_pos.reindex(uids).to_numpy()
+    positions = np.flatnonzero(mask)
     inf_zeros[positions] = (n / n1) * att_inf_func
     add_att_data(att_gt, pst=post_treat, inf_f=inf_zeros)
 

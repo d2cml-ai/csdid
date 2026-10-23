@@ -2,17 +2,24 @@ import pandas as pd
 def makeBalancedPanel(data, idname, tname):
   data = data.sort_values([idname, tname]).reset_index(drop = True)
   nt = len(data[tname].unique())
-  data = data.groupby(idname)\
-    .filter(lambda x: len(x) == nt)
-  return data
+  counts = data.groupby(idname)[tname].transform('size')
+  return data.loc[counts.eq(nt)]
 
 
-def panel2cs2(data: pd.DataFrame, yname, idname, tname):
+def panel2cs2(data: pd.DataFrame, yname, idname, tname, assume_sorted=False):
+  """Reshape a two-period panel, optionally reusing its unit/time ordering."""
   if len(data[tname].unique()) != 2:
     raise ValueError('panel2cs2 only for 2 perios of apnel data')
 
-  data = data.sort_values([idname, tname])
-  y1 = data.groupby(idname)[yname].shift(-1)
+  if not assume_sorted:
+    data = data.sort_values([idname, tname])
+  ids = data[idname]
+  # Compare adjacent values without a shift that casts large integer IDs to
+  # float64, or index alignment that can pair rows with duplicate labels.
+  adjacent = pd.array(ids.array[:-1] == ids.array[1:], dtype='boolean')
+  next_same_id = np.r_[adjacent.fillna(False).to_numpy(dtype=bool), False]
+  next_same_id &= ids.notna().to_numpy()
+  y1 = data[yname].shift(-1).where(next_same_id)
   y0 = data[yname]
   dy = y1 - y0
   data = data.assign(
@@ -59,9 +66,11 @@ def multiplier_bootstrap(inf_func, biters, seed=None):
     while pos < biters:
         chunk = min(max_chunk, biters - pos)
         if rng is not None:
-            Ub = rng.choice([1, -1], size=(chunk, n))
+            Ub = rng.integers(0, 2, size=(chunk, n))
         else:
-            Ub = np.random.choice([1, -1], size=(chunk, n))
+            Ub = np.random.randint(0, 2, size=(chunk, n))
+        Ub *= -2
+        Ub += 1
         outMat[pos:pos+chunk] = Ub @ inf_func / n
         pos += chunk
     return outMat

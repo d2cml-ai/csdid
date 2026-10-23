@@ -141,8 +141,8 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
         #-----------------------------------------------------------------------------
 
             if panel:
-                disdat = panel2cs2(disdat, yname, idname, tname)
-                disdat = disdat.dropna()
+                # Preprocessing sorts by unit and time; subsetting preserves it.
+                disdat = panel2cs2(disdat, yname, idname, tname, assume_sorted=True)
                 n_cell = len(disdat)
                 dis_idx = np.array(disdat.G_m == 1) | np.array(disdat.C == 1)
                 disdat = disdat.loc[dis_idx, :]

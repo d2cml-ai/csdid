@@ -6,6 +6,45 @@ import scipy.stats as stats
 import pandas as pd
 
 def wif(keepers, pg, weights_ind, G, group):
+    """Influence of estimated cohort weights, reusing the numerator matrix."""
+    pg_array = np.asarray(pg)
+    weights = np.asarray(weights_ind)
+    unit_groups = np.asarray(G)
+    groups = np.asarray(group)
+    selected = np.asarray(keepers)
+    # Preserve the scalar casting, errors and warnings of unusual direct calls.
+    # Normal aggregation inputs are nonempty one-dimensional float64 arrays.
+    if (type(weights_ind) is not np.ndarray or type(G) not in (list, tuple, np.ndarray) or
+            selected.ndim != 1 or selected.size == 0 or
+            selected.dtype.kind not in "iu" or pg_array.ndim != 1 or
+            groups.ndim != 1 or groups.dtype.kind not in "iuf" or
+            weights.ndim != 1 or unit_groups.ndim != 1 or
+            weights.shape != unit_groups.shape or
+            pg_array.dtype != np.float64 or weights.dtype != np.float64):
+        return _wif_legacy(keepers, pg, weights_ind, G, group)
+    selected_pg = pg_array[selected]
+    if (not np.all(np.isfinite(selected_pg)) or
+            not np.all(np.isfinite(weights))):
+        return _wif_legacy(keepers, pg, weights_ind, G, group)
+    try:
+        # If arithmetic would warn, retain the original per-column warnings.
+        with np.errstate(all="raise"):
+            denominator = np.sum(selected_pg)
+            if denominator == 0:
+                raise FloatingPointError
+            numerator = (weights[:, None] *
+                         (unit_groups[:, None] == groups[selected]) - selected_pg)
+            row_sum = np.sum(numerator, axis=1)
+            # Keep builtin sum: the original reduction is sequential.
+            multiplier = selected_pg / sum(selected_pg) ** 2
+            numerator /= denominator
+            numerator -= np.outer(row_sum, multiplier)
+    except FloatingPointError:
+        return _wif_legacy(keepers, pg, weights_ind, G, group)
+    return numerator
+
+
+def _wif_legacy(keepers, pg, weights_ind, G, group):
     # note: weights are all of the form P(G=g|cond)/sum_cond(P(G=g|cond))
     # this is equal to P(G=g)/sum_cond(P(G=g)) which simplifies things here
     pg = np.array(pg)
@@ -105,6 +144,57 @@ def get_se(thisinffunc, DIDparams=None):
             
         # Standard (iid) analytical SE
         return np.sqrt(np.mean(thisinffunc**2) / n)
+
+
+_ORIGINAL_GET_SE = get_se
+
+
+def _make_cached_get_se(get_se_func):
+    """Cache analytical cluster membership for one compute_aggte invocation.
+
+    Bootstrap calls retain their original dispatch and random draw sequence.
+    An overridden public helper is also called unchanged.
+    """
+    if get_se_func is not _ORIGINAL_GET_SE:
+        return get_se_func
+    cache = {}
+
+    def cached_get_se(thisinffunc, DIDparams=None):
+        if DIDparams is None or DIDparams['bstrap']:
+            return get_se_func(thisinffunc, DIDparams)
+        clustervars = DIDparams.get('clustervars')
+        if clustervars is None:
+            return get_se_func(thisinffunc, DIDparams)
+        data = DIDparams['data']
+        idname, tname = DIDparams['idname'], DIDparams['tname']
+        key = (id(data), idname, tname, DIDparams['panel'], clustervars)
+        if key not in cache:
+            if DIDparams['panel']:
+                tlist = np.sort(data[tname].unique())
+                dta = data[data[tname] == tlist[0]]
+            else:
+                dta = data.drop_duplicates(subset=[idname])
+            if clustervars not in dta.columns:
+                cache[key] = None
+            else:
+                cluster_map = (dta[[idname, clustervars]].drop_duplicates()
+                               .set_index(idname)[clustervars])
+                labels = cluster_map.reindex(dta[idname].unique()).values
+                # Ascending indices preserve the original boolean-mask sum order.
+                rows = [np.flatnonzero(labels == c) for c in np.unique(labels)]
+                cache[key] = (len(labels), rows)
+        metadata = cache[key]
+        influence = np.asarray(thisinffunc).flatten()
+        if metadata is None or metadata[0] != len(influence):
+            return get_se_func(thisinffunc, DIDparams)
+        rows = metadata[1]
+        # Match the original float64 accumulator even for float32 direct calls.
+        cluster_sums = np.zeros(len(rows))
+        for i, index in enumerate(rows):
+            cluster_sums[i] = np.sum(influence[index])
+        return np.sqrt(np.sum(cluster_sums**2)) / len(influence)
+
+    return cached_get_se
 
 def AGGTEobj(overall_att=None,
              overall_se=None,
