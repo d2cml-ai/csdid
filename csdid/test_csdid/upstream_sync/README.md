@@ -9,26 +9,15 @@ automatically.
 
 ## When checks run
 
-- Daily at 06:37 UTC, after this workflow is merged to the default branch.
-- Manually through Actions → R upstream parity → Run workflow.
-- On relevant Python pull requests, including stacked PRs.
-- On a `repository_dispatch` event of type `r-upstream-updated`.
+On every push to this Python repository, with no branch or changed-file filters.
+This includes documentation-only changes. The pushed revision must contain the
+workflow. Each run checks the latest R GitHub revisions available at checkout.
 
-The schedule checks the latest available revisions, not every intermediate R
-commit. GitHub schedules can be delayed; they are not an instantaneous push
-subscription. Immediate notification from an R repository requires an
-authenticated dispatch from that repository or its release process. This PR
-provides the receiving event but does not configure credentials or modify either
-R repository. After merge, an authorized caller can send:
+There is no daily schedule or separate pull-request trigger. A newer push to
+the same branch or tag cancels its superseded run. A push to an R repository
+alone does not start this workflow; its changes are checked on the next Python
+repository push.
 
-```sh
-gh api --method POST repos/d2cml-ai/csdid/dispatches \
-  --raw-field event_type=r-upstream-updated
-```
-
-Dispatch payloads cannot choose a repository, branch or script. Scheduled and
-dispatch events use the default branch, as described in
-[GitHub's event documentation](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows).
 The workflow needs only `contents: read`; results appear in the job summary and
 an artifact retained for 14 days. Setup failures also retain available logs.
 

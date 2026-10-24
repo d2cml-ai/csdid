@@ -1,39 +1,15 @@
 name: R upstream parity
 
 on:
-  schedule:
-    # Off the busy start of the hour; schedules activate on the default branch.
-    - cron: '37 6 * * *'
-  workflow_dispatch:
-  repository_dispatch:
-    types: [r-upstream-updated]
-  pull_request:
-    # No base-branch restriction: also validate stacked pull requests.
-    paths:
-      - '.github/workflows/r-upstream-parity.yml'
-      - 'csdid/att_gt.py'
-      - 'csdid/attgt_fnc/**'
-      - 'csdid/aggte_fnc/**'
-      - 'csdid/utils/**'
-      - 'csdid/test_csdid/upstream_sync/**'
-      - 'csdid/test_csdid/r_ref/current/**'
-      - 'csdid/test_csdid/r_reference_checks.py'
-      - 'csdid/test_csdid/r_test_alignment_*.json'
-      - 'csdid/test_csdid/test_r*.py'
-      - 'csdid/test_csdid/test_upstream*.py'
-      - 'csdid/test_csdid/test_drdid_test_alignment.py'
-      - 'csdid/test_csdid/test_current_r_hessian.py'
-      - 'setup.py'
-      - 'requirements*.txt'
-      - 'pyproject.toml'
-      - 'pytest.ini'
+  # Every push to this repository; no branch or changed-file filters.
+  push:
 
 permissions:
   contents: read
 
 concurrency:
-  group: r-upstream-parity-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: r-upstream-parity-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   parity:
@@ -65,7 +41,6 @@ jobs:
 
       # Omitting ref checks out each official repository's default branch once.
       # Full history lets the runner inspect changes since the reviewed pins.
-      # Dispatch payloads cannot select repositories, refs, or executable code.
       - name: Check out current R did
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
