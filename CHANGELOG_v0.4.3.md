@@ -26,6 +26,15 @@ the default. Pass `faster_mode=False` to select the standard path explicitly.
 - Give NaN estimator outputs missing influence functions throughout both
   computation paths. Regression-only RC estimation checks only the control
   outcome designs it actually fits; DR also checks treated outcome designs.
+- Rebuild categorical designs after retained-sample selection, removing unused
+  levels that otherwise cause artificial singularity.
+- Preserve missing observed custom-estimator influences during per-unit
+  folding; reserve structural zeros for units absent from a comparison.
+- Use first-period cohort weights when aggregating balanced panels with
+  `fix_weights="varying"`, even though their cells use RC estimation.
+- Calculate propensity information at final capped fitted probabilities in
+  all four DR/IPW kernels, matching current R DRDID. Solver defaults and ATT
+  arithmetic are unchanged; influence functions and SEs can change.
 
 The reference R sources are `did` master `74b88eb` (2.5.1.902) and `DRDID`
 master `eaac3b4` (1.4.0). These changes include the relevant behavior in
@@ -60,7 +69,7 @@ measurements and reproduction instructions are in
 
 ## Validation
 
-The complete suite passes 1,581 tests. The initial performance changes improved
+The performance stage passed 1,581 tests. The initial performance changes improved
 the measured workflows by 1.22x to 2.02x. A further audit against that already
 optimized baseline measured faster-mode gains of 1.93x for the core analytical
 panel, 2.57x with 12 covariates, 2.72x with 24 periods, and 3.84x with 3,000
@@ -77,6 +86,20 @@ result-changing fixes listed above are separate from these optimizations.
 See the [performance audit](csdid/test_csdid/PERFORMANCE_AUDIT_20261023.md) for
 raw measurements, source hashes, R/PyFixest comparisons, and remaining limits.
 
-Current-source R comparisons and their remaining solver precision differences
-are documented in
-[UPSTREAM_SYNC_v0.4.3.md](csdid/test_csdid/UPSTREAM_SYNC_v0.4.3.md).
+The follow-up test audit adds assertion-level crosswalks for all 34 R did and
+29 R DRDID test files and 372 tests, bringing the full local suite to **1,953
+passing tests** with no failures or skips. It adds 50 permanent numerical workflows (25 pinned
+current-R configurations in both Python modes), including full unit and
+aggregate influence functions, analytical clustering and shared-draw bootstrap.
+Componentwise tolerances are `atol=1e-7, rtol=1e-6` except for Wald outputs
+(`atol=rtol=1e-5`); support, dimensions and nonfinite masks must match exactly.
+Committed fixtures require no R installation in CI and fail if missing or
+altered. The 60 historical R 2.5.0 comparisons now also reject missing fixtures
+and omitted support rather than silently skipping them.
+
+Behavioral tests and independent derivative/aggregation oracles found the four
+additional corrections above. See the
+[test-alignment audit](csdid/test_csdid/R_TEST_ALIGNMENT_20261024.md) for complete
+validation, remaining R-specific contracts and reproducible pinned references.
+This strengthens numerical evidence without claiming exhaustive R API parity
+or identical answers for every input and numerical-library version.

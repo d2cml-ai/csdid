@@ -1,6 +1,11 @@
 # csdid Test Results — `csdid/test_csdid`
 
-_Generated: 2026-06-20 · `pytest csdid/test_csdid`_
+_Historical report generated: 2026-06-20 · `pytest csdid/test_csdid`_
+
+> This file records earlier validation, not the current test count or current R
+> alignment. See [current coverage](test_suite_desc.md) and the
+> [October 2026 audit](R_TEST_ALIGNMENT_20261024.md) for the assertion crosswalk,
+> pinned current-source references, stricter comparisons and latest results.
 
 > **Update:** all features discussed below have since been implemented —
 > `est_method`/treatment-reversal validation, custom callable `est_method`,
@@ -8,7 +13,7 @@ _Generated: 2026-06-20 · `pytest csdid/test_csdid`_
 > **564 passed, 0 skipped, 0 failures**. The skip analysis in this file is
 > retained as the historical record that drove that work.
 
-## Summary (current)
+## Summary (later June update; historical)
 
 | Result | Count |
 |--------|------:|

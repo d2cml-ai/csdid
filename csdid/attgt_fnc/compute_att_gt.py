@@ -387,10 +387,15 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                     "inf_func": att_inf_func,
                     "right_ids": right_ids
                 }
-                ).fillna(0)
+                )
 
                 inf_zeros = np.zeros(n)
                 aggte_infffuc = inf_func_df.groupby('right_ids').inf_func.sum()
+                # A missing contribution from an observed unit makes its IF
+                # missing; only units absent from this cell get structural zero.
+                missing_if = pd.isna(att_inf_func)
+                if np.any(missing_if):
+                    aggte_infffuc.loc[np.unique(right_ids[missing_if])] = np.nan
                 try:
                     dis_idx1 = np.isin(data['rowid'].unique(), aggte_infffuc.index.to_numpy())
                 except Exception:

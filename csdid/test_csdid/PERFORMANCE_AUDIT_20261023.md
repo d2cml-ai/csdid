@@ -1,5 +1,10 @@
 # Performance audit: PyFixest, R did, and csdid
 
+Follow-up: the [R test-alignment audit](R_TEST_ALIGNMENT_20261024.md) adds
+permanent current-source numerical gates and four correctness fixes after
+`dab3876`. Timings and exact-output claims below identify the earlier measured
+source; they do not claim that later correctness fixes preserve old results.
+
 Date: 2026-10-23. Python baseline:
 `972dbd0ff67f8a8b9d6099b7778774bd40c0f862`, which already includes the previous
 0.4.3 performance improvements. This audit measures additional gains against

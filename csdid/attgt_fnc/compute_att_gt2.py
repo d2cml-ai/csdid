@@ -387,9 +387,13 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
     # exactly 2x too large (R 2.5.0's bug). Mirrors compute_att_gt.
     fold_factor = 0.5 if varying_forced_rc_balanced else 1.0
     att_inf_func = fold_factor * (n / n1_scale) * att_inf_func
-    inf_func_df = pd.DataFrame({"inf_func": att_inf_func, "right_ids": right_ids}).fillna(0)
+    inf_func_df = pd.DataFrame({"inf_func": att_inf_func, "right_ids": right_ids})
     inf_zeros = np.zeros(n)
     aggte_if = inf_func_df.groupby('right_ids').inf_func.sum()
+    # Preserve missing observed contributions; absent units remain zero below.
+    missing_if = pd.isna(att_inf_func)
+    if np.any(missing_if):
+        aggte_if.loc[np.unique(right_ids[missing_if])] = np.nan
     try:
         dis_idx1 = np.isin(data['rowid'].unique(), aggte_if.index.to_numpy())
     except Exception:

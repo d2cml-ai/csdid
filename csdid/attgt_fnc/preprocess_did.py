@@ -614,6 +614,11 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
       "The following variables are not in data: " + ", ".join(_missing_vars) + "."
     )
 
+  # Keep source rows only when a categorical design may need rebuilding after
+  # sample selection. Balancing can reset the index, so use a private positional
+  # column instead of relying on the caller's index labels.
+  formula_data = data
+  category_row = None
   # if xformla is None:
   try:
     try:
@@ -626,8 +631,13 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     # which both fixes transformed/factor covariates and removes patsy from the
     # inner loop (matches R `did`, which builds model.matrix() once).
     xcov_cols = list(x_cov.columns)
+    if any(info.type == 'categorical'
+           for info in x_cov.design_info.factor_infos.values()):
+      category_row = object()
     data = pd.concat([data[columns], x_cov], axis=1)
     data = data.assign(w=w)
+    if category_row is not None:
+      data[category_row] = np.arange(len(formula_data))
   except Exception as e:
     if xformla is not None and xformla != f'{yname} ~ 1':
       raise ValueError(
@@ -905,6 +915,29 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
       data = data.assign(rowid = lambda x: x[idname] * 1)
     
     n = len(data[idname].unique())
+
+  if category_row is not None:
+    source_rows = data.pop(category_row).to_numpy(dtype=int)
+    categorical_columns = [col for col in formula_data.columns
+                           if isinstance(formula_data[col].dtype, pd.CategoricalDtype)]
+    has_unused_levels = any(
+        formula_data[col].nunique() < len(formula_data[col].cat.categories)
+        for col in categorical_columns)
+    if len(source_rows) != len(formula_data) or has_unused_levels:
+      retained = formula_data.iloc[source_rows].copy()
+      retained.index = data.index
+      for col in categorical_columns:
+        retained[col] = retained[col].cat.remove_unused_categories()
+      # Respect any outcome/cohort recoding already resolved by preprocessing.
+      for col in columns:
+        if col not in categorical_columns:
+          retained[col] = data[col].to_numpy()
+      try:
+        _, retained_cov = fml(xformla, data=retained, return_type='dataframe')
+      except Exception:
+        retained_cov = patsy.dmatrix(xformla, data=retained, return_type='dataframe')
+      data = pd.concat([data.drop(columns=xcov_cols), retained_cov], axis=1)
+      xcov_cols = list(retained_cov.columns)
 
   data = data.sort_values([idname, tname])
   data = data.assign(w1 = lambda x: x['w'] * 1)

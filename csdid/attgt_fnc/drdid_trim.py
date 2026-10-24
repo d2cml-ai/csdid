@@ -66,6 +66,30 @@ def _trim_pscore(ps_fit, D, trim_level):
     return ps_fit, trim_ps
 
 
+def _pscore_hessian(int_cov, i_weights, ps_fit):
+    """Invert propensity information at the returned, capped probabilities.
+
+    Statsmodels IRLS can stop after updating its coefficients while retaining
+    covariance weights from the preceding iteration. R DRDID instead rebuilds
+    this matrix from the final propensity scores used in the estimator.
+    """
+    weights = i_weights * ps_fit * (1 - ps_fit)
+    information = int_cov.T @ (weights[:, None] * int_cov)
+    try:
+        # Use the same 1-norm condition decision as the existing design guards.
+        rcond = 1.0 / np.linalg.cond(information, 1)
+        if not np.isfinite(rcond) or rcond < np.finfo(float).eps:
+            raise np.linalg.LinAlgError("singular propensity information")
+        cholesky = np.linalg.cholesky(information)
+        inverse_cholesky = np.linalg.solve(cholesky, np.eye(information.shape[0]))
+    except np.linalg.LinAlgError as error:
+        raise ValueError(
+            "The propensity score design matrix is singular. "
+            "Consider removing some covariates."
+        ) from error
+    return (inverse_cholesky.T @ inverse_cholesky) * len(ps_fit)
+
+
 def std_ipw_did_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.995,
                       *, _pscore_cache=None):
     D = np.asarray(D).flatten()
@@ -101,7 +125,7 @@ def std_ipw_did_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.9
     ipw_att = eta_treat - eta_cont
 
     score_ps = i_weights[:, np.newaxis] * (D - ps_fit)[:, np.newaxis] * int_cov
-    Hessian_ps = pscore_results.cov_params() * n
+    Hessian_ps = _pscore_hessian(int_cov, i_weights, ps_fit)
     asy_lin_rep_ps = np.dot(score_ps, Hessian_ps)
 
     inf_treat = (att_treat - w_treat * eta_treat) / np.mean(w_treat)
@@ -166,7 +190,7 @@ def drdid_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.995,
     asy_lin_rep_wols = np.dot(wols_eX, XpX_inv)
 
     score_ps = i_weights[:, np.newaxis] * (D - ps_fit)[:, np.newaxis] * int_cov
-    Hessian_ps = pscore_results.cov_params() * n
+    Hessian_ps = _pscore_hessian(int_cov, i_weights, ps_fit)
     asy_lin_rep_ps = np.dot(score_ps, Hessian_ps)
 
     inf_treat_1 = dr_att_treat - w_treat * eta_treat
@@ -233,7 +257,7 @@ def std_ipw_did_rc(y, post, D, covariates=None, i_weights=None, trim_level=0.995
     ipw_att = (att_treat_post - att_treat_pre) - (att_cont_post - att_cont_pre)
 
     score_ps = (i_weights * (D - ps_fit))[:, np.newaxis] * int_cov
-    Hessian_ps = pscore_results.cov_params() * n
+    Hessian_ps = _pscore_hessian(int_cov, i_weights, ps_fit)
     asy_lin_rep_ps = np.dot(score_ps, Hessian_ps)
 
     inf_treat_pre = eta_treat_pre - w_treat_pre * att_treat_pre / np.mean(w_treat_pre)
@@ -362,7 +386,7 @@ def drdid_rc(y, post, D, covariates=None, i_weights=None, trim_level=0.995):
     asy_lin_rep_ols_post_treat = np.dot(wols_eX_post_treat, XpX_inv_post_treat)
 
     score_ps = i_weights[:, np.newaxis] * (D - ps_fit)[:, np.newaxis] * int_cov
-    Hessian_ps = pscore_results.cov_params() * n
+    Hessian_ps = _pscore_hessian(int_cov, i_weights, ps_fit)
     asy_lin_rep_ps = np.dot(score_ps, Hessian_ps)
 
     inf_treat_pre = eta_treat_pre - w_treat_pre * att_treat_pre / np.mean(w_treat_pre)

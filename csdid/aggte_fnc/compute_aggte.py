@@ -205,7 +205,16 @@ def compute_aggte(MP,
     if (not na_rm) and np.any(np.isnan(att)):
         raise ValueError("Missing values at att_gt found. If you want to remove these, set `na_rm = True`.")
 
-    if panel:
+    # Varying weights route balanced panels through the RC estimators, setting
+    # dp['panel'] to False. The sampling design remains a balanced panel, whose
+    # aggregation cohort masses use first-period weights (as in R did). Detect
+    # balance on the retained, duplicate-free sample so genuine unbalanced
+    # panels and repeated cross sections keep their existing weight convention.
+    balanced_varying_weights = (
+        dp.get('input_panel', False) and dp.get('fix_weights') == 'varying'
+        and len(data) == n * len(tlist)
+    )
+    if panel or balanced_varying_weights:
         dta = data[data[tname] == tlist[0]]
     else:
         dta_cols = [idname, gname, "w1"]

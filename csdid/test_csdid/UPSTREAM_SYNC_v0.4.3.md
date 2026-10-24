@@ -1,5 +1,11 @@
 # R alignment and adversarial validation for 0.4.3
 
+Follow-up: the [2026-10-24 test audit](R_TEST_ALIGNMENT_20261024.md) adds
+assertion crosswalks, permanent pinned current-R fixtures and four further
+correctness fixes, including final-score propensity information. Results and
+solver residuals below describe the earlier source stage, not a rerun after
+that correction. See the follow-up for current validation and remaining gaps.
+
 The release targets the supported Python `dr`, `reg`, and stabilized `ipw`
 estimators, their preprocessing, and aggregation. It also changes the Python
 default to `faster_mode=True`; `False` remains supported. The objective is to
