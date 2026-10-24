@@ -8,7 +8,10 @@ d <- read.csv(file.path(simdir, "mpdta_extra.csv"))
 common <- list(yname = "lemp", tname = "year", idname = "countyreal",
                gname = "first.treat", data = d, bstrap = FALSE, cband = FALSE)
 run <- function(scn, ...) {
-  o <- do.call(att_gt, c(common, list(...)))
+  this_common <- common
+  # did >= 2.5.1.901 requires a distinct sampling unit for each true RC row.
+  if (scn == "rc") this_common$idname <- NULL
+  o <- do.call(att_gt, c(this_common, list(...)))
   data.frame(scenario = scn, group = o$group, t = o$t, att = o$att, se = o$se)
 }
 rows <- rbind(

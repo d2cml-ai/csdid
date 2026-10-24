@@ -139,7 +139,7 @@ out.plot_aggte();
 ## Additional options
 
 `ATTgt(...)` and `.fit(...)` support several options for inference, performance,
-and weighting (all matching the R `did` package):
+and weighting:
 
 - **Control group**: `control_group="nevertreated"` (default) or `"notyettreated"`.
 - **Estimation method**: `.fit(est_method="dr")` (doubly robust, default),
@@ -153,13 +153,14 @@ and weighting (all matching the R `did` package):
 - **Time-varying weights** (`weights_name`): `fix_weights` controls which
   period's weights each 2×2 comparison uses — `None` (earlier period, default),
   `"base_period"`, `"first_period"`, or `"varying"`.
-- **Faster computation**: `faster_mode=True` returns identical results to the
-  default path but is ~3× faster by precomputing the covariate design once per
-  period and pre-pivoting outcomes/weights.
+- **Faster computation**: `faster_mode=True` is the default starting in 0.4.3.
+  It precomputes panel outcomes, weights, and covariates by period. Pass
+  `faster_mode=False` to use the standard computation path. Both modes use the
+  same estimators and inference; speed gains depend on the data and options.
 
 ```{python, eval = False}
-# ~3x faster, identical results; cluster-robust SEs; point estimates only:
+# Cluster-robust SEs using the default faster computation path:
 out = ATTgt(yname="lemp", gname="first.treat", idname="countyreal", tname="year",
-            xformla="lemp~1", data=data, clustervar="countyreal",
-            faster_mode=True).fit(est_method="dr")
+            xformla="lemp~1", data=data,
+            clustervar="countyreal").fit(est_method="dr")
 ```

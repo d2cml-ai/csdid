@@ -106,7 +106,7 @@ class TestComboB:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             return ATTgt(
-                yname="Y", tname="period", idname="id", gname="G",
+                yname="Y", tname="period", idname="id" if panel else None, gname="G",
                 data=panel_data, xformla="Y~X", panel=panel,
             ).fit(est_method=em, bstrap=False)
 
@@ -236,7 +236,7 @@ def test_full_integration(panel_data, em, cg, bp, panel):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         res = ATTgt(
-            yname="Y", tname="period", idname="id", gname="G",
+            yname="Y", tname="period", idname="id" if panel else None, gname="G",
             data=panel_data, xformla="Y~X", panel=panel,
             control_group=cg,
         ).fit(est_method=em, bstrap=False, base_period=bp)
@@ -284,7 +284,7 @@ def test_rcs_dynamic_effects_by_method(dynamic_data, em):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         res = ATTgt(
-            yname="Y", tname="period", idname="id", gname="G",
+            yname="Y", tname="period", idname=None, gname="G",
             data=dynamic_data, xformla="Y~X", panel=False,
         ).fit(est_method=em, bstrap=False)
         res.aggte(typec="dynamic", bstrap=False)
@@ -305,7 +305,7 @@ def test_rcs_vs_panel_both_work(panel_data, em):
             data=panel_data, xformla="Y~X", panel=True,
         ).fit(est_method=em, bstrap=False)
         res_r = ATTgt(
-            yname="Y", tname="period", idname="id", gname="G",
+            yname="Y", tname="period", idname=None, gname="G",
             data=panel_data, xformla="Y~X", panel=False,
         ).fit(est_method=em, bstrap=False)
     att_p = np.asarray(res_p.MP["att"], dtype=float)

@@ -157,7 +157,7 @@ class TestWeightsValidation:
         data = sample_data.copy()
         data['wt'] = 1.0
         data.iloc[0, data.columns.get_loc('wt')] = -1.0
-        with pytest.raises(ValueError, match="negative values"):
+        with pytest.raises(ValueError, match="weights.*non-negative"):
             ATTgt(yname="y", tname="year", idname="id",
                   gname="group", data=data, weights_name="wt")
 

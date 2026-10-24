@@ -1,0 +1,1906 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-10-23",
+  "r_repository": "https://github.com/pedrohcgs/DRDID",
+  "r_revision": "eaac3b49cd225d0d7706c633858555a5f204e21e",
+  "python_drdid_dependency_version": "1.1.6",
+  "scope": "Assertion-intent crosswalk for the actual csdid DR / normalized-IPW / regression dispatch, not a claim that the entire DRDID API is ported.",
+  "status_definitions": {
+    "covered": "All identified applicable numerical/public intents have explicit Python checks; excluded R-only contracts are listed.",
+    "partial": "Some applicable assertions are covered and remaining gaps are named.",
+    "not applicable": "The tested R estimator/API is not dispatched by csdid, or deliberately has a different public contract. Related Python tests may still be listed.",
+    "gap": "No applicable counterpart exists; never inferred from a filename alone."
+  },
+  "dispatch": {
+    "dr_panel": "csdid.attgt_fnc.drdid_trim.drdid_panel",
+    "dr_rc": "csdid.attgt_fnc.drdid_trim.drdid_rc",
+    "ipw_panel": "csdid.attgt_fnc.drdid_trim.std_ipw_did_panel",
+    "ipw_rc": "csdid.attgt_fnc.drdid_trim.std_ipw_did_rc",
+    "reg_panel": "third-party drdid.reg_did.reg_did_panel",
+    "reg_rc": "third-party drdid.reg_did.reg_did_rc"
+  },
+  "unsupported": [
+    "improved/IPT estimators and IPT solver internals",
+    "non-normalized ipw_did_panel/ipw_did_rc",
+    "drdid_rc1 and improved rc1 variants",
+    "TWFE estimators",
+    "DRDID low-level boot.type=weighted exponential-weight refits",
+    "R S3 output methods and wrapper-only binary-dname rules"
+  ],
+  "validation": {
+    "new_test_file": "csdid/test_csdid/test_drdid_test_alignment.py",
+    "new_test_cases": 152,
+    "latest_result": "587 targeted tests passed, including 152 alignment cases and existing aggregation regressions; all four affected current-R varying-weight cases also passed.",
+    "production_code_changed": true,
+    "known_numerical_failures": [],
+    "fixture_adaptations": [
+      "The R undersized-cell fixture was enlarged only in unaffected cells to pass csdid's public minimum cohort-size check; each targeted outcome cell remains at 3 rows for 4 design columns.",
+      "R non-normalized-IPW closed forms were not reused for normalized IPW; only their independent empirical-derivative and mass-invariance strategy was reused."
+    ],
+    "command": "python -m pytest -q csdid/test_csdid/test_drdid_test_alignment.py csdid/test_csdid/test_unit_aggte.py csdid/test_csdid/test_aggte_comprehensive.py csdid/test_csdid/test_upstream_aggregation_sync.py csdid/test_csdid/test_performance_aggregation.py",
+    "production_fix": "Balanced-panel varying-weight aggregation uses first-period cohort masses, independently checked by 18 ATT/full-IF/SE oracles including true-RC and unbalanced boundary cases."
+  },
+  "status_counts": {
+    "covered": 12,
+    "not applicable": 14,
+    "partial": 3
+  },
+  "files": [
+    {
+      "status": "covered",
+      "assertion_intent": "For supported DR, normalized IPW and OR, turning bootstrap on preserves ATT; multiplier-bootstrap SE agrees with analytical IF inference.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_public_multiplier_bootstrap_preserves_point_estimate_and_influence",
+          "line": 165
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_mboot.py",
+          "test": "test_mboot_se_scales_with_if_magnitude",
+          "line": 133
+        }
+      ],
+      "not_applicable_intents": [
+        "Improved/IPT and non-normalized IPW variants are not dispatched.",
+        "Exponential-weight nuisance-refit bootstrap is not csdid's multiplier-bootstrap API."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_boot_panel.R",
+      "r_sha256": "51de427d459c64f4695bc32020956ec2055724bcc7bded949727e2a690c5b77d",
+      "r_tests": [
+        {
+          "line": 3,
+          "description": "Analytical and bootstrapped std errors are similar: Panel"
+        }
+      ],
+      "r_assertion_lines": [
+        183,
+        184,
+        185,
+        186,
+        187,
+        190,
+        191,
+        192,
+        193,
+        194,
+        198,
+        199,
+        200,
+        201,
+        202
+      ]
+    },
+    {
+      "status": "covered",
+      "assertion_intent": "For supported DR, normalized IPW and OR, turning bootstrap on preserves ATT; multiplier-bootstrap SE agrees with analytical IF inference.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_public_multiplier_bootstrap_preserves_point_estimate_and_influence",
+          "line": 165
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_mboot.py",
+          "test": "test_mboot_se_scales_with_if_magnitude",
+          "line": 133
+        }
+      ],
+      "not_applicable_intents": [
+        "Improved/IPT and non-normalized IPW variants are not dispatched.",
+        "Exponential-weight nuisance-refit bootstrap is not csdid's multiplier-bootstrap API."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_boot_rc.R",
+      "r_sha256": "a78985e53a946744b1b25c660fcb21ce704c854bd5b4dad140227caa5d5de3e3",
+      "r_tests": [
+        {
+          "line": 3,
+          "description": "Analytical and bootstrapped std errors are similar: RC"
+        }
+      ],
+      "r_assertion_lines": [
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "TWFE point-estimate invariance and analytical versus weighted/multiplier-bootstrap SE comparisons.",
+      "python_tests": [],
+      "not_applicable_intents": [
+        "csdid exposes DR, normalized IPW and OR, not a TWFE estimator."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_boot_twfe_panel.R",
+      "r_sha256": "7a815c52e4d436508cd1f20b2d7ea21c07573d559a9c5af3bd062aa56ea58b7f",
+      "r_tests": [
+        {
+          "line": 3,
+          "description": "Analytical and bootstrapped std errors are similar: TWFE Panel"
+        }
+      ],
+      "r_assertion_lines": [
+        117,
+        118,
+        120,
+        121,
+        125,
+        126,
+        128,
+        129
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "TWFE point-estimate invariance and analytical versus weighted/multiplier-bootstrap SE comparisons.",
+      "python_tests": [],
+      "not_applicable_intents": [
+        "csdid exposes DR, normalized IPW and OR, not a TWFE estimator."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_boot_twfe_rc.R",
+      "r_sha256": "4e5139730f0a19178e05f7d89025985c21545584059cba883011802e42500b63",
+      "r_tests": [
+        {
+          "line": 3,
+          "description": "Analytical and bootstrapped std errors are similar: TWFE RC"
+        }
+      ],
+      "r_assertion_lines": [
+        137,
+        138,
+        140,
+        141,
+        145,
+        146,
+        148,
+        149
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "Every R low-level estimator validates nboot before fitting/RNG; valid counts control boots length; inactive bootstrap ignores nboot.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_performance_estimation.py",
+          "test": "test_bootstrap_matches_choice_outputs_and_rng_state",
+          "line": 244
+        }
+      ],
+      "not_applicable_intents": [
+        "The R low-level boot/nboot/boots API is not exposed by csdid. csdid follows did's biters/multiplier contract; existing tests intentionally include zero draws at the internal sampler boundary."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_bootstrap_count.R",
+      "r_sha256": "ab97a49436ed97d25ccc722ce9fd55a672ea6a69e7a23642feff4c15dab18860",
+      "r_tests": [
+        {
+          "line": 17,
+          "description": "invalid bootstrap counts fail before fitting or consuming RNG"
+        },
+        {
+          "line": 33,
+          "description": "valid bootstrap counts produce the requested draw count"
+        },
+        {
+          "line": 50,
+          "description": "inactive bootstrap ignores nboot as documented"
+        }
+      ],
+      "r_assertion_lines": [
+        25,
+        28,
+        39,
+        42,
+        47,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ]
+    },
+    {
+      "status": "partial",
+      "assertion_intent": "R bootstrap summaries preserve IQR scaling and CI arithmetic and explicitly distinguish zero errors, zero IQR with nonzero errors, nonfinite errors, and overflow.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_unit_mboot.py",
+          "test": "test_mboot_se_scales_with_if_magnitude",
+          "line": 133
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_mboot.py",
+          "test": "test_mboot_se_positive_and_crit_exceeds_pointwise",
+          "line": 121
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_mboot.py",
+          "test": "test_mboot_degenerate_column_gives_nan_se",
+          "line": 148
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_mboot.py",
+          "test": "test_mboot_all_degenerate_returns_nan",
+          "line": 161
+        }
+      ],
+      "not_applicable_intents": [
+        "R DRDID returns point intervals for zero errors; csdid follows did and deliberately marks degenerate bootstrap columns NA.",
+        "R weighted-bootstrap error recentering has no corresponding csdid mode."
+      ],
+      "remaining_gaps": [
+        "Exact positive-scale IQR and critical-value arithmetic is indirectly tested but not independently reconstructed here for all malformed numerical bootstrap-error cases. This is a numerical hardening opportunity, not a claim that R low-level errors must match."
+      ],
+      "r_file": "tests/testthat/test_bootstrap_scale.R",
+      "r_sha256": "9b5f3e7894764242cea8792bea5be25c41dc5a7f0423e00c9baa3eaf2ece5606",
+      "r_tests": [
+        {
+          "line": 16,
+          "description": "all estimators return point intervals for exactly zero bootstrap errors"
+        },
+        {
+          "line": 29,
+          "description": "nondegenerate sparse multiplier errors with zero IQR fail clearly"
+        },
+        {
+          "line": 48,
+          "description": "positive-scale summaries retain the existing CI arithmetic"
+        },
+        {
+          "line": 63,
+          "description": "nonfinite errors and nonzero constant errors are never hidden"
+        },
+        {
+          "line": 73,
+          "description": "overflow in otherwise finite bootstrap errors fails explicitly"
+        }
+      ],
+      "r_assertion_lines": [
+        21,
+        22,
+        23,
+        24,
+        25,
+        34,
+        37,
+        38,
+        42,
+        56,
+        57,
+        58,
+        59,
+        65,
+        67,
+        68,
+        69,
+        74,
+        76
+      ]
+    },
+    {
+      "status": "covered",
+      "assertion_intent": "Missing variables, unsuitable time/ID/group inputs, missing-data warnings, treatment changes and inadequate groups fail/warn at the appropriate public boundary.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_error_handling.py",
+          "test": "test_att_gt_errors_on_missing_column",
+          "line": 29
+        },
+        {
+          "path": "csdid/test_csdid/test_error_handling.py",
+          "test": "test_att_gt_errors_on_bad_idname",
+          "line": 38
+        },
+        {
+          "path": "csdid/test_csdid/test_error_handling.py",
+          "test": "test_att_gt_warns_on_small_groups",
+          "line": 58
+        },
+        {
+          "path": "csdid/test_csdid/test_error_handling.py",
+          "test": "test_att_gt_handles_na_in_outcome",
+          "line": 89
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_preprocess.py",
+          "test": "test_validate_panel_requires_idname",
+          "line": 137
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_preprocess.py",
+          "test": "test_validate_rejects_nonnumeric_time",
+          "line": 142
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_preprocess.py",
+          "test": "test_validate_rejects_reversible_treatment",
+          "line": 130
+        }
+      ],
+      "not_applicable_intents": [
+        "R DRDID rejects time-varying panel covariates/weights; csdid explicitly supports them with its period/fix_weights rules.",
+        "DRDID exactly-two-period and binary-dname wrapper validation cannot replace csdid's staggered-cohort gname contract."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_errors.R",
+      "r_sha256": "855eb6de80f00bc8c8cf75027978be1cac180de219c6bbeee53a69d6d187cb4a",
+      "r_tests": [
+        {
+          "line": 3,
+          "description": "Error and Warning messages are working"
+        }
+      ],
+      "r_assertion_lines": [
+        94,
+        105,
+        117,
+        126,
+        135,
+        145,
+        155,
+        166,
+        176,
+        189,
+        201,
+        212,
+        224,
+        236,
+        247,
+        261
+      ]
+    },
+    {
+      "status": "covered",
+      "assertion_intent": "Every undersized RC outcome cell is rejected before an infeasible outcome regression, while methods check only designs they actually fit.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_each_undersized_rc_outcome_cell_is_guarded_before_estimation",
+          "line": 215
+        },
+        {
+          "path": "csdid/test_csdid/test_upstream_drdid_sync.py",
+          "test": "test_rc_guard_checks_only_the_outcome_designs_actually_fitted",
+          "line": 93
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_attgt_shared.py",
+          "test": "test_design_singular_rc_tiny_treated_post_fails",
+          "line": 207
+        }
+      ],
+      "not_applicable_intents": [
+        "fastglm native-wrapper identity and square/tall native-solver equivalence are R-specific; Python uses statsmodels.",
+        "csdid public cells warn and return NA rather than throwing R low-level estimator errors."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_fastglm_undersized_design.R",
+      "r_sha256": "65c94d9a6dfe509a4a493077682422d98f9d8aa48ddb69f975b6c1fbd07be715",
+      "r_tests": [
+        {
+          "line": 22,
+          "description": "undersized GLM designs are rejected before the native dependency"
+        },
+        {
+          "line": 42,
+          "description": "square and taller supported GLMs preserve direct native fits"
+        },
+        {
+          "line": 69,
+          "description": "each undersized repeated-cross-section outcome cell gives an R error"
+        }
+      ],
+      "r_assertion_lines": [
+        33,
+        37,
+        38,
+        39,
+        64,
+        81
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "Improved/IPT panel bootstrap refits preserve trimming, weights, no-intercept design, draws, uncertainty and RNG.",
+      "python_tests": [],
+      "not_applicable_intents": [
+        "Improved/IPT panel estimator and exponential-weight refit bootstrap are both unsupported dispatch choices."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_improved_panel_weighted_bootstrap.R",
+      "r_sha256": "ade55aa54fe670340b62b3d5a242e1da11318c916829c3f3ae017184ce829b4d",
+      "r_tests": [
+        {
+          "line": 48,
+          "description": "trimmed improved panel draws have an independently soluble target"
+        },
+        {
+          "line": 67,
+          "description": "a supplied no-intercept design refits its public panel statistic"
+        },
+        {
+          "line": 81,
+          "description": "matched multipliers refit panel ATT with unit, positive and zero weights"
+        },
+        {
+          "line": 116,
+          "description": "public improved panel bootstrap draws and uncertainty match direct refits"
+        }
+      ],
+      "r_assertion_lines": [
+        60,
+        61,
+        63,
+        64,
+        77,
+        78,
+        104,
+        109,
+        110,
+        150,
+        151,
+        153,
+        154,
+        155,
+        156
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "IPT continued-loss gradients/Hessians, exponential/tail join, full weight scaling, and real nlm fallback satisfy weighted calibration moments.",
+      "python_tests": [],
+      "not_applicable_intents": [
+        "csdid's dr dispatch is traditional logit plus outcome regression; no IPT optimizer, calibrated objective, improved estimator, or IPT bootstrap helper is called."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_ipt_fallback_objective.R",
+      "r_sha256": "ac115655168fff211bcf8d436def26e3da74e7233da738e202ba4a1278780555",
+      "r_tests": [
+        {
+          "line": 23,
+          "description": "IPT objective derivatives agree in the exponential, tail and join regions"
+        },
+        {
+          "line": 59,
+          "description": "the entire IPT fallback criterion is weighted"
+        },
+        {
+          "line": 99,
+          "description": "the actual nlm fallback solves weighted IPT after primary optimizer failure"
+        }
+      ],
+      "r_assertion_lines": [
+        41,
+        43,
+        49,
+        50,
+        52,
+        66,
+        70,
+        115,
+        117,
+        119,
+        120,
+        124,
+        125,
+        127,
+        128
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "IPT range certificates refresh with coefficients/caller variables; tiny and signed-zero weights, named derivatives and primary/fallback routes preserve original objective arithmetic.",
+      "python_tests": [],
+      "not_applicable_intents": [
+        "csdid's dr dispatch is traditional logit plus outcome regression; no IPT optimizer, calibrated objective, improved estimator, or IPT bootstrap helper is called."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_ipt_optimized_guards.R",
+      "r_sha256": "b5dc3acc3db40f97a13881cc025afbde4c327d37f6f35b30d30bb230a1442329",
+      "r_tests": [
+        {
+          "line": 3,
+          "description": "repeated coefficient evaluations cannot retain a range certificate"
+        },
+        {
+          "line": 30,
+          "description": "tiny positive weights and signed zero weights stay distinct"
+        },
+        {
+          "line": 51,
+          "description": "reused caller variables cannot contaminate independent objectives"
+        },
+        {
+          "line": 88,
+          "description": "continued objectives use declared n after zero-weight filtering"
+        },
+        {
+          "line": 111,
+          "description": "both optimizer routes refresh coefficient-dependent arithmetic"
+        }
+      ],
+      "r_assertion_lines": [
+        16,
+        17,
+        19,
+        20,
+        23,
+        24,
+        41,
+        42,
+        46,
+        47,
+        74,
+        75,
+        77,
+        79,
+        80,
+        82,
+        105,
+        106,
+        107,
+        129,
+        138,
+        145,
+        147,
+        148,
+        149
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "IPT objectives/derivatives survive overflow, underflow, cancellation, subnormal products, weight mantissas and named matrix attributes without losing finite answers.",
+      "python_tests": [],
+      "not_applicable_intents": [
+        "csdid's dr dispatch is traditional logit plus outcome regression; no IPT optimizer, calibrated objective, improved estimator, or IPT bootstrap helper is called."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_ipt_weighted_arithmetic.R",
+      "r_sha256": "b852328a9689d55178966c067fa5cb0e93c08487ebfe281450cef8eb0460340d",
+      "r_tests": [
+        {
+          "line": 9,
+          "description": "all-zero continued derivatives preserve named and unnamed attributes"
+        },
+        {
+          "line": 26,
+          "description": "primary weighted exponentials survive intermediate overflow and underflow"
+        },
+        {
+          "line": 54,
+          "description": "ordinary no-intercept zero rows keep the ordinary calculation path"
+        },
+        {
+          "line": 79,
+          "description": "representable derivatives survive an underflowing control mass"
+        },
+        {
+          "line": 102,
+          "description": "primary means remain finite when an unnormalized Hessian sum overflows"
+        },
+        {
+          "line": 116,
+          "description": "continued controls avoid cancellation and overflowing tail polynomials"
+        },
+        {
+          "line": 138,
+          "description": "subnormal tail scores cannot erase a representable gradient contrast"
+        },
+        {
+          "line": 149,
+          "description": "continued Hessians recover subnormal intermediates in either column order"
+        },
+        {
+          "line": 171,
+          "description": "continued control values preserve the original join and declared n"
+        },
+        {
+          "line": 190,
+          "description": "extreme-range values and derivatives describe the same criteria"
+        },
+        {
+          "line": 218,
+          "description": "real optimizers can use the repaired positive-weight criteria"
+        },
+        {
+          "line": 243,
+          "description": "an unrelated subnormal row cannot erase finite ordinary value differences"
+        },
+        {
+          "line": 270,
+          "description": "ordinary value and derivative contrasts retain the actual weight mantissas"
+        },
+        {
+          "line": 293,
+          "description": "two exceptional products retain differences in their weight mantissas"
+        },
+        {
+          "line": 310,
+          "description": "recovered tiny terms combine with cancellation before the original divisor"
+        },
+        {
+          "line": 326,
+          "description": "exponential Hessian reliability follows the actual multiplication order"
+        },
+        {
+          "line": 344,
+          "description": "exceptional objectives remain nonflat inside a rounded-log bin"
+        },
+        {
+          "line": 359,
+          "description": "far-out-of-range indices have bounded recovery and exact zero derivatives"
+        },
+        {
+          "line": 371,
+          "description": "opposing extended overflow terms do not produce a false signed infinity"
+        },
+        {
+          "line": 389,
+          "description": "cutoff infinities retain known same-sign and bounded-opposition results"
+        }
+      ],
+      "r_assertion_lines": [
+        4,
+        5,
+        20,
+        21,
+        22,
+        29,
+        35,
+        37,
+        38,
+        39,
+        40,
+        47,
+        49,
+        50,
+        51,
+        68,
+        70,
+        72,
+        75,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        98,
+        99,
+        107,
+        111,
+        112,
+        113,
+        119,
+        120,
+        121,
+        124,
+        125,
+        126,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        146,
+        158,
+        159,
+        167,
+        168,
+        183,
+        184,
+        185,
+        213,
+        214,
+        226,
+        227,
+        228,
+        238,
+        239,
+        240,
+        257,
+        258,
+        261,
+        262,
+        263,
+        264,
+        266,
+        267,
+        280,
+        281,
+        286,
+        287,
+        288,
+        289,
+        303,
+        304,
+        305,
+        306,
+        316,
+        317,
+        322,
+        323,
+        337,
+        338,
+        339,
+        340,
+        350,
+        351,
+        354,
+        356,
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        381,
+        382,
+        383,
+        384,
+        396,
+        397
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "Zero-weight extreme rows cannot alter IPT objectives/derivatives; declared n and continuation cutoff remain unchanged.",
+      "python_tests": [],
+      "not_applicable_intents": [
+        "csdid's dr dispatch is traditional logit plus outcome regression; no IPT optimizer, calibrated objective, improved estimator, or IPT bootstrap helper is called."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_ipt_zero_weight_arithmetic.R",
+      "r_sha256": "ba9c7b331485476e4deadcbcb79b1a21d5b05adcd29752e393de96481a74ebc9",
+      "r_tests": [
+        {
+          "line": 3,
+          "description": "zero-weight extreme rows cannot corrupt either IPT criterion"
+        },
+        {
+          "line": 32,
+          "description": "an all-zero-weight criterion is zero even at extreme finite indices"
+        },
+        {
+          "line": 46,
+          "description": "excluding zero weights preserves model dimension and original continuation"
+        }
+      ],
+      "r_assertion_lines": [
+        19,
+        20,
+        21,
+        23,
+        24,
+        26,
+        37,
+        38,
+        39,
+        41,
+        42,
+        43,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "Non-normalized ipw_did_rc differentiates its raw-moment normalized-weight functional, preserves zero-weight/scaling invariance, and bootstraps the matching IF.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_normalized_ipw_influence_differentiates_refitted_observation_weights",
+          "line": 82
+        },
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_common_weight_scale_preserves_att_and_full_influence",
+          "line": 47
+        },
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_zero_weight_rows_preserve_observation_contributions_and_se",
+          "line": 61
+        }
+      ],
+      "not_applicable_intents": [
+        "R ipw_did_rc / normalized=FALSE is a different estimand from csdid's std_ipw_did_rc. Its closed-form atom target is not ported to normalized IPW. New tests reuse the derivative/invariance strategy on the estimator actually dispatched."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_ipw_rc_weight_normalization.R",
+      "r_sha256": "067f4feec4f029f8ec61708ed465aacd96955665553a42a419c691fcbf72666e",
+      "r_tests": [
+        {
+          "line": 28,
+          "description": "unequal observation weights have the influence of the normalized functional"
+        },
+        {
+          "line": 48,
+          "description": "zero-weight rows and common weight scaling preserve IPW inference"
+        },
+        {
+          "line": 69,
+          "description": "constant weights and zero ATT retain their analytic influences"
+        },
+        {
+          "line": 93,
+          "description": "weighted IPW influence agrees with fully refitted empirical derivatives"
+        },
+        {
+          "line": 122,
+          "description": "the multiplier bootstrap uses the normalized-functional influence"
+        }
+      ],
+      "r_assertion_lines": [
+        33,
+        34,
+        37,
+        38,
+        44,
+        45,
+        54,
+        55,
+        56,
+        60,
+        61,
+        62,
+        65,
+        77,
+        78,
+        80,
+        88,
+        89,
+        90,
+        119,
+        130,
+        133
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "Non-normalized RC IPW exponential-weight bootstrap equals direct nuisance-refitted raw-moment targets, with active trimming and matching draws/RNG/CI.",
+      "python_tests": [],
+      "not_applicable_intents": [
+        "Neither non-normalized RC IPW nor the exponential-weight refit bootstrap is dispatched by csdid."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_ipw_rc_weighted_bootstrap.R",
+      "r_sha256": "1129743ca3854524c5b14e8a8d86b7c7d7c33cdc0b5b2180fc090234a1ab2a76",
+      "r_tests": [
+        {
+          "line": 30,
+          "description": "a unit-weight bootstrap draw agrees with an independent raw-moment target"
+        },
+        {
+          "line": 56,
+          "description": "weighted bootstrap helper draws equal direct point-estimator refits"
+        },
+        {
+          "line": 84,
+          "description": "the trimming fixture contains separated retained and excluded controls"
+        },
+        {
+          "line": 101,
+          "description": "public weighted-bootstrap draws, uncertainty and RNG match direct refits"
+        }
+      ],
+      "r_assertion_lines": [
+        44,
+        45,
+        46,
+        53,
+        77,
+        78,
+        97,
+        98,
+        131,
+        132,
+        134,
+        135,
+        136,
+        137
+      ]
+    },
+    {
+      "status": "covered",
+      "assertion_intent": "With no covariates, supported DR/IPW/OR share DID point estimates and within-design standard errors; panel and RC standard errors are compared only within each design.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_no_covariate_public_methods_share_closed_form_att_and_influence",
+          "line": 144
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_drdid.py",
+          "test": "test_panel_dr_equals_ipw_intercept_only",
+          "line": 122
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_drdid.py",
+          "test": "test_rc_dr_equals_ipw_intercept_only",
+          "line": 209
+        }
+      ],
+      "not_applicable_intents": [
+        "Improved/IPT branches are unsupported; tests do not assert panel and RC variances are equal."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_nocovariates.R",
+      "r_sha256": "26cef99b13a82504fd362eaa02ed0d84df0b84c5b62c363b22cc7aff8b2336b7",
+      "r_tests": [
+        {
+          "line": 3,
+          "description": "All estimation methods agree when there are no covariates"
+        }
+      ],
+      "r_assertion_lines": [
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        180,
+        181,
+        182,
+        185,
+        186,
+        187
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "R S3 print/summary methods emit output for DR/IPW/OR results and bootstrap variants.",
+      "python_tests": [],
+      "not_applicable_intents": [
+        "R result classes/S3 print/summary and low-level scalar output objects are not csdid's pandas/ATTgt output interface. Numerical output is covered separately."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_output.R",
+      "r_sha256": "a1dabafc2cd0064349d6f853f6b04ddea16cb4e54af68c0843e228cd3eeb676e",
+      "r_tests": [
+        {
+          "line": 3,
+          "description": "Check if output is printed"
+        }
+      ],
+      "r_assertion_lines": [
+        101,
+        102,
+        112,
+        113,
+        123,
+        124,
+        136,
+        137,
+        148,
+        149,
+        159,
+        160,
+        171,
+        172,
+        178,
+        179,
+        186,
+        187
+      ]
+    },
+    {
+      "status": "covered",
+      "assertion_intent": "Missing required X/weights/outcomes exclude matched panel units before fitting; unused missing columns do not exclude data; full ATT/SE/IF match independently retained sample under permutation/imbalance.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_missing_inputs_match_independently_retained_rows_and_units",
+          "line": 243
+        },
+        {
+          "path": "csdid/test_csdid/test_upstream_did_sync.py",
+          "test": "test_missing_entire_cohort_drops_only_that_cohort",
+          "line": 69
+        },
+        {
+          "path": "csdid/test_csdid/test_upstream_did_sync.py",
+          "test": "test_positive_weight_mean_is_checked_on_finite_sample",
+          "line": 160
+        }
+      ],
+      "not_applicable_intents": [
+        "R DRDID rejects retained time-varying X/weights; csdid supports them.",
+        "Exact exponential-weight bootstrap draws after filtering are not a supported mode.",
+        "The complete-pair counterpart explicitly uses allow_unbalanced_panel=False; csdid's allow_unbalanced_panel=True intentionally permits RC routing."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_panel_missing_covariates_weights.R",
+      "r_sha256": "605ecaf390d56383a7e8ab6c265a0884bd503b16143d9db05ca4235d97369a8b",
+      "r_tests": [
+        {
+          "line": 27,
+          "description": "panel covariate and weight missingness excludes matched units first"
+        },
+        {
+          "line": 53,
+          "description": "retained observed covariate and weight changes are still rejected"
+        },
+        {
+          "line": 65,
+          "description": "missing panel inputs preserve bootstrap draws and RNG after exclusion"
+        },
+        {
+          "line": 77,
+          "description": "missing panel inputs still trigger retained-group size checks"
+        }
+      ],
+      "r_assertion_lines": [
+        42,
+        45,
+        48,
+        59,
+        72,
+        73,
+        82
+      ]
+    },
+    {
+      "status": "covered",
+      "assertion_intent": "Missing outcomes cannot pair different units; weighted full inference matches independently retained complete panel units; RC drops incomplete rows individually and IF positions match surviving IDs.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_missing_inputs_match_independently_retained_rows_and_units",
+          "line": 243
+        },
+        {
+          "path": "csdid/test_csdid/test_performance_estimation.py",
+          "test": "test_panel_shift_preserves_frames_and_never_crosses_unit_boundaries",
+          "line": 77
+        },
+        {
+          "path": "csdid/test_csdid/test_performance_estimation.py",
+          "test": "test_fast_arrays_preserve_alignment_layout_and_influence_positions",
+          "line": 195
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_preprocess.py",
+          "test": "test_validate_rejects_duplicate_id_time",
+          "line": 123
+        }
+      ],
+      "not_applicable_intents": [
+        "R wrapper minimum-group policy differs from csdid's staggered-cohort warning/guard policy.",
+        "R low-level and wrapper no-intercept rejection is not a blanket csdid formula restriction."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_panel_missing_outcomes.R",
+      "r_sha256": "e6c98821812ed4435fc3cf531435dfe9389d38c1b12d6efaab7160f9ba8531be",
+      "r_tests": [
+        {
+          "line": 51,
+          "description": "missing outcomes cannot pair outcomes belonging to different units"
+        },
+        {
+          "line": 67,
+          "description": "panel filtering keeps outcomes, covariates, and weights aligned"
+        },
+        {
+          "line": 109,
+          "description": "weighted panel inference matches explicitly retained complete units"
+        },
+        {
+          "line": 124,
+          "description": "panel group-size checks use units retained after missing outcomes"
+        },
+        {
+          "line": 135,
+          "description": "panel designs with no independent columns are rejected before fitting"
+        },
+        {
+          "line": 146,
+          "description": "complete panel data still match the corresponding low-level estimators"
+        },
+        {
+          "line": 162,
+          "description": "repeated cross sections still drop missing outcome rows individually"
+        }
+      ],
+      "r_assertion_lines": [
+        45,
+        46,
+        47,
+        59,
+        61,
+        62,
+        63,
+        94,
+        97,
+        98,
+        99,
+        101,
+        102,
+        103,
+        104,
+        105,
+        115,
+        118,
+        119,
+        120,
+        130,
+        140,
+        157,
+        158,
+        168,
+        172,
+        173
+      ]
+    },
+    {
+      "status": "partial",
+      "assertion_intent": "Role/formula renaming preserves full estimates/designs/weights/influence, including transformed covariates and bootstrap RNG.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_att_gt.py",
+          "test": "test_column_naming_variations",
+          "line": 786
+        },
+        {
+          "path": "csdid/test_csdid/test_user_bug_fixes.py",
+          "test": "test_column_named_t1_does_not_crash",
+          "line": 28
+        },
+        {
+          "path": "csdid/test_csdid/test_performance_estimation.py",
+          "test": "test_fast_arrays_preserve_alignment_layout_and_influence_positions",
+          "line": 195
+        }
+      ],
+      "not_applicable_intents": [
+        "R DRDID permits names such as w/post for outcomes; csdid intentionally rejects these reserved names. A direct outcome-w probe raised the documented validation error, not a numerical mismatch.",
+        "Exponential-weight bootstrap alias invariance is not a csdid mode."
+      ],
+      "remaining_gaps": [
+        "For permitted ordinary role aliases, current tests check execution/alignment but do not systematically compare full ATT/SE/IF under all transformed-covariate role renamings."
+      ],
+      "r_file": "tests/testthat/test_preprocess_column_names.R",
+      "r_sha256": "b21059d27a920bbdc20cfb915eaee68c9587288206f9a3abd07d86f3009f90bd",
+      "r_tests": [
+        {
+          "line": 24,
+          "description": "public estimates preserve outcome and transformed covariate aliases"
+        },
+        {
+          "line": 46,
+          "description": "preprocessing keeps role names and formula inputs on original data"
+        },
+        {
+          "line": 64,
+          "description": "alias renaming preserves weighted-bootstrap draws and RNG"
+        }
+      ],
+      "r_assertion_lines": [
+        38,
+        58,
+        59,
+        76,
+        77
+      ]
+    },
+    {
+      "status": "covered",
+      "assertion_intent": "R public RC wrappers reproduce direct low-level DR/IPW/OR point estimates and standard errors on the same explicit design.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_unit_attgt_shared.py",
+          "test": "test_select_estimators_dr",
+          "line": 98
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_attgt_shared.py",
+          "test": "test_select_estimators_ipw",
+          "line": 104
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_attgt_shared.py",
+          "test": "test_select_estimators_reg",
+          "line": 110
+        },
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_no_covariate_public_methods_share_closed_form_att_and_influence",
+          "line": 144
+        },
+        {
+          "path": "csdid/test_csdid/test_upstream_drdid_sync.py",
+          "test": "test_rc_guard_checks_only_the_outcome_designs_actually_fitted",
+          "line": 93
+        },
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_weighted_public_two_by_two_matches_explicit_estimator_inputs",
+          "line": 184
+        }
+      ],
+      "not_applicable_intents": [
+        "R improved and non-normalized-IPW wrapper branches are not dispatched."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_rc.R",
+      "r_sha256": "02b69918e4996607b3cce299eb7267d71d40e9f794ec7f5893cdac23329a284f",
+      "r_tests": [
+        {
+          "line": 3,
+          "description": "RC estimators coincide with drdid function"
+        }
+      ],
+      "r_assertion_lines": [
+        171,
+        172,
+        173,
+        174,
+        175,
+        178,
+        179,
+        180,
+        181,
+        182
+      ]
+    },
+    {
+      "status": "covered",
+      "assertion_intent": "Traditional DR RC influence differentiates the fully refitted ATT for observations in every treated/control-by-period cell.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_upstream_drdid_sync.py",
+          "test": "test_rc_if_matches_refitted_empirical_derivatives",
+          "line": 42
+        },
+        {
+          "path": "csdid/test_csdid/test_upstream_drdid_sync.py",
+          "test": "test_rc_period_reversal_negates_att_and_influence",
+          "line": 69
+        }
+      ],
+      "not_applicable_intents": [
+        "The alternative drdid_rc1 variant is not dispatched. Existing Python tests additionally cover unequal/zero weights and active trimming."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_rc_inffunc.R",
+      "r_sha256": "1e5a1f554df756824379e8e1d0e81e505c13b2c41b4d989621444bf13668b645",
+      "r_tests": [
+        {
+          "line": 35,
+          "description": "drdid_rc and drdid_rc1 influence functions match numerical derivatives"
+        }
+      ],
+      "r_assertion_lines": [
+        45
+      ]
+    },
+    {
+      "status": "partial",
+      "assertion_intent": "Six core two-by-two estimators reproduce fixed numerical ATT/SE targets; IF dimensions/mean/SE and singular/negative-weight guards are pinned.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_r_parity.py",
+          "test": "test_attgt_matches_r",
+          "line": 84
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_drdid.py",
+          "test": "test_drdid_panel_att_closed_form",
+          "line": 107
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_drdid.py",
+          "test": "test_ipw_panel_att_closed_form",
+          "line": 115
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_drdid.py",
+          "test": "test_drdid_rc_att_closed_form",
+          "line": 201
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_drdid.py",
+          "test": "test_ipw_rc_att_closed_form",
+          "line": 193
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_drdid.py",
+          "test": "test_panel_if_mean_zero",
+          "line": 148
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_drdid.py",
+          "test": "test_rc_if_mean_zero",
+          "line": 234
+        },
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_zero_weight_rows_preserve_observation_contributions_and_se",
+          "line": 61
+        },
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_each_undersized_rc_outcome_cell_is_guarded_before_estimation",
+          "line": 215
+        }
+      ],
+      "not_applicable_intents": [
+        "Improved, locally-efficient _rc1 and non-normalized IPW numerical locks are unsupported variants.",
+        "Low-level singular-error policy differs from public csdid warning-and-NA guards."
+      ],
+      "remaining_gaps": [
+        "The precise R set.seed(20240115) six-estimator lock dataset/numbers are not copied into this file. Historical R-did fixtures and independent analytic/derivative tests provide numerical anchors; new current-source fixtures are being maintained separately by the parent task."
+      ],
+      "r_file": "tests/testthat/test_regression_lock.R",
+      "r_sha256": "9a2a26e29216e71af217e849c73a33046474084d5272418fa0bff95ab96d6555",
+      "r_tests": [
+        {
+          "line": 25,
+          "description": "core estimators reproduce locked ATT / se values (numeric regression lock)"
+        },
+        {
+          "line": 42,
+          "description": "variant estimators reproduce locked ATT / se values (imp / locally-efficient / ipw)"
+        },
+        {
+          "line": 61,
+          "description": "trim.level changes the estimate when the propensity score is extreme"
+        },
+        {
+          "line": 72,
+          "description": "influence-function analytic invariants hold (mean(IF)=0, se = sd(IF) scaling)"
+        },
+        {
+          "line": 81,
+          "description": "rank-deficient designs are rejected by every core estimator (incl. std_ipw_did_rc)"
+        },
+        {
+          "line": 96,
+          "description": "negative weights are rejected"
+        }
+      ],
+      "r_assertion_lines": [
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        67,
+        68,
+        69,
+        76,
+        77,
+        78,
+        87,
+        88,
+        89,
+        90,
+        92,
+        93,
+        99,
+        100
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "Improved estimators require verified original-IPT balance, accept valid candidates regardless of optimizer status, recover through validated fallback, and never silently substitute logit or redraw failed bootstrap samples.",
+      "python_tests": [],
+      "not_applicable_intents": [
+        "csdid's dr dispatch is traditional logit plus outcome regression; no IPT optimizer, calibrated objective, improved estimator, or IPT bootstrap helper is called."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_required_ipt_fit.R",
+      "r_sha256": "1c1299617754b836b4ba0c1dcfc5cb45faee5bc4df5c9ed16dff1ea05294a1ca",
+      "r_tests": [
+        {
+          "line": 56,
+          "description": "ordinary IPT validation is invariant to equivalent model coordinates"
+        },
+        {
+          "line": 89,
+          "description": "IPT validation handles zero weights and rejects nonfinite or unidentified fits"
+        },
+        {
+          "line": 100,
+          "description": "an inaccurate near-collinear SVD span cannot certify IPT balance"
+        },
+        {
+          "line": 140,
+          "description": "control curvature cannot amplify an unresolved span error into false success"
+        },
+        {
+          "line": 171,
+          "description": "forward error in fitted indices cannot hide original IPT imbalance"
+        },
+        {
+          "line": 194,
+          "description": "a verified primary candidate is accepted regardless of optimizer status"
+        },
+        {
+          "line": 207,
+          "description": "invalid primary candidates and exceptions can recover through verified IPT"
+        },
+        {
+          "line": 225,
+          "description": "unsuccessful candidates never silently select ordinary logit"
+        },
+        {
+          "line": 258,
+          "description": "a continued-loss optimum is rejected unless it solves original IPT"
+        },
+        {
+          "line": 281,
+          "description": "failed logit initialization still permits a verified IPT fit"
+        },
+        {
+          "line": 297,
+          "description": "real IPT solvers preserve their solution under common weight scaling"
+        },
+        {
+          "line": 323,
+          "description": "all improved estimators stop when no finite original-IPT fit exists"
+        },
+        {
+          "line": 344,
+          "description": "all improved weighted helpers stop on a failed draw without redrawing"
+        }
+      ],
+      "r_assertion_lines": [
+        58,
+        63,
+        72,
+        76,
+        83,
+        84,
+        86,
+        91,
+        94,
+        96,
+        119,
+        128,
+        129,
+        130,
+        131,
+        132,
+        136,
+        137,
+        164,
+        165,
+        166,
+        167,
+        168,
+        186,
+        187,
+        188,
+        191,
+        201,
+        202,
+        203,
+        218,
+        219,
+        220,
+        241,
+        242,
+        251,
+        254,
+        255,
+        265,
+        271,
+        277,
+        278,
+        290,
+        291,
+        292,
+        293,
+        309,
+        310,
+        316,
+        318,
+        319,
+        320,
+        340,
+        354,
+        358,
+        369,
+        372
+      ]
+    },
+    {
+      "status": "covered",
+      "assertion_intent": "Supported estimators preserve finite estimates/full IF under common positive weight scaling and zero-weight rows; public preprocessing rejects negative/all-zero retained weights and excludes incomplete rows.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_common_weight_scale_preserves_att_and_full_influence",
+          "line": 47
+        },
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_zero_weight_rows_preserve_observation_contributions_and_se",
+          "line": 61
+        },
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_missing_inputs_match_independently_retained_rows_and_units",
+          "line": 243
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_preprocess.py",
+          "test": "test_validate_rejects_negative_weights",
+          "line": 95
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_preprocess.py",
+          "test": "test_validate_rejects_nonpositive_mean_weights",
+          "line": 102
+        },
+        {
+          "path": "csdid/test_csdid/test_upstream_did_sync.py",
+          "test": "test_positive_weight_mean_is_checked_on_finite_sample",
+          "line": 160
+        },
+        {
+          "path": "csdid/test_csdid/test_upstream_did_sync.py",
+          "test": "test_negative_weight_on_excluded_row_matches_explicit_deletion",
+          "line": 171
+        }
+      ],
+      "not_applicable_intents": [
+        "R low-level raw vector length/nonfinite validation is not the csdid public column-based input contract. csdid preprocesses finite rows before calling internal estimators.",
+        "Regression kernels belong to external drdid; public regression behavior, not dependency internals, is exercised."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_sampling_weight_validation.R",
+      "r_sha256": "2a7ed895e75f77debabb9f559478ee902c39d54c82292d1fd1cc639663e0bdb7",
+      "r_tests": [
+        {
+          "line": 13,
+          "description": "all public low-level methods reject invalid raw weights"
+        },
+        {
+          "line": 19,
+          "description": "zero weights and common positive rescaling preserve estimates"
+        },
+        {
+          "line": 28,
+          "description": "wrapper normalization cannot turn all-negative weights positive"
+        },
+        {
+          "line": 38,
+          "description": "RC missing weights retain complete-row exclusion"
+        }
+      ],
+      "r_assertion_lines": [
+        17,
+        23,
+        24,
+        25,
+        35,
+        44,
+        46
+      ]
+    },
+    {
+      "status": "covered",
+      "assertion_intent": "Numeric column-matrix treatment retains vector behavior for owned DR/IPW kernels; public cohort validation prevents unsupported treatment inputs from reaching dispatched estimators.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_column_treatment_indicator_preserves_vector_result",
+          "line": 113
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_preprocess.py",
+          "test": "test_validate_rejects_negative_gname",
+          "line": 90
+        },
+        {
+          "path": "csdid/test_csdid/test_unit_preprocess.py",
+          "test": "test_validate_rejects_reversible_treatment",
+          "line": 130
+        }
+      ],
+      "not_applicable_intents": [
+        "csdid accepts cohort/treatment-time gname, not R DRDID's binary dname public API; internal D is constructed as a boolean group comparison.",
+        "Direct external reg_did logical/vector input contracts are dependency-owned and are not needed by public csdid dispatch."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_treatment_indicator_validation.R",
+      "r_sha256": "3e2e9c506835bf079504b7dfbc90bc599a1f9e3a9056f3b3a69990b0500410d7",
+      "r_tests": [
+        {
+          "line": 13,
+          "description": "low-level estimators reject nonbinary treatment without recoding"
+        },
+        {
+          "line": 19,
+          "description": "supported logical treatment in OR estimators retains its behavior"
+        },
+        {
+          "line": 27,
+          "description": "public wrappers reject alternative numeric treatment codes"
+        },
+        {
+          "line": 36,
+          "description": "numeric column-matrix treatment retains vector behavior"
+        }
+      ],
+      "r_assertion_lines": [
+        17,
+        23,
+        24,
+        32,
+        41,
+        42
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "One/two-covariate TWFE weighted-WLS agreement, no-covariate fallback, optional IF and unit/row bootstrap dimensions.",
+      "python_tests": [],
+      "not_applicable_intents": [
+        "No TWFE estimator is exposed or dispatched by csdid."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_twfe_covariate_dimensions.R",
+      "r_sha256": "5f9185fecb76bd945b40e6a921725f237c14e54bd6d0b01e2f3ae6159bea5adc",
+      "r_tests": [
+        {
+          "line": 49,
+          "description": "an intercept and one covariate agree with independent weighted WLS"
+        },
+        {
+          "line": 70,
+          "description": "one-covariate bootstrap draws use the same unit or row weights"
+        },
+        {
+          "line": 106,
+          "description": "intercept-only inputs keep the no-covariate TWFE path"
+        },
+        {
+          "line": 133,
+          "description": "two-covariate fits and optional IF output retain their behavior"
+        }
+      ],
+      "r_assertion_lines": [
+        58,
+        59,
+        60,
+        61,
+        62,
+        64,
+        96,
+        97,
+        98,
+        99,
+        100,
+        118,
+        119,
+        120,
+        126,
+        127,
+        140,
+        141,
+        142,
+        144
+      ]
+    },
+    {
+      "status": "not applicable",
+      "assertion_intent": "Panel TWFE paired-outcome covariance, weighted analytical IF/SE and finite differences, zero variance, paired multiplier/weighted bootstrap, and complete-input dimensional validation.",
+      "python_tests": [],
+      "not_applicable_intents": [
+        "No TWFE estimator is exposed or dispatched by csdid."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_twfe_panel_inference.R",
+      "r_sha256": "31331e041fb856121b1cc6f749a79ceeb9c14449aab32ecfbd8b9d704fa941d8",
+      "r_tests": [
+        {
+          "line": 43,
+          "description": "constant within-group changes have zero panel TWFE sampling variance"
+        },
+        {
+          "line": 62,
+          "description": "panel TWFE influence values match weighted outcome-change DID"
+        },
+        {
+          "line": 85,
+          "description": "panel TWFE influence values differentiate individual weights"
+        },
+        {
+          "line": 104,
+          "description": "panel covariance accounts for both signs of serial outcome correlation"
+        },
+        {
+          "line": 129,
+          "description": "paired multiplier bootstrap draws retain the same fixed-seed values"
+        },
+        {
+          "line": 147,
+          "description": "weighted bootstrap still refits the same panel TWFE point estimator"
+        },
+        {
+          "line": 165,
+          "description": "the no-covariate panel fallback retains its existing inference"
+        },
+        {
+          "line": 191,
+          "description": "direct panel TWFE calls reject incomplete individuals before fitting"
+        },
+        {
+          "line": 208,
+          "description": "zero-weight individuals cannot have missing panel outcomes or covariates"
+        },
+        {
+          "line": 220,
+          "description": "direct panel TWFE inputs must have one entry or row per individual"
+        }
+      ],
+      "r_assertion_lines": [
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        78,
+        99,
+        117,
+        118,
+        119,
+        122,
+        123,
+        125,
+        140,
+        141,
+        142,
+        143,
+        144,
+        157,
+        158,
+        159,
+        161,
+        170,
+        171,
+        172,
+        182,
+        183,
+        184,
+        185,
+        188,
+        203,
+        216,
+        228,
+        235,
+        240,
+        243
+      ]
+    },
+    {
+      "status": "covered",
+      "assertion_intent": "Panel long-form wrappers agree with explicitly supplied paired outcomes and designs in wide form, for ATT and SE.",
+      "python_tests": [
+        {
+          "path": "csdid/test_csdid/test_performance_estimation.py",
+          "test": "test_panel_shift_preserves_frames_and_never_crosses_unit_boundaries",
+          "line": 77
+        },
+        {
+          "path": "csdid/test_csdid/test_performance_estimation.py",
+          "test": "test_fast_arrays_preserve_alignment_layout_and_influence_positions",
+          "line": 195
+        },
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_no_covariate_public_methods_share_closed_form_att_and_influence",
+          "line": 144
+        },
+        {
+          "path": "csdid/test_csdid/test_drdid_test_alignment.py",
+          "test": "test_weighted_public_two_by_two_matches_explicit_estimator_inputs",
+          "line": 184
+        }
+      ],
+      "not_applicable_intents": [
+        "csdid has a long-form ATTgt API; explicit y1/y0 arrays enter internal two-by-two kernels, not a second public wide-form wrapper.",
+        "Improved/IPT branch is unsupported."
+      ],
+      "remaining_gaps": [],
+      "r_file": "tests/testthat/test_widelong.R",
+      "r_sha256": "764ebaf098c9ca63d787b2047c3c8adc222a7a399d9d8b48b32023022e5c1ce4",
+      "r_tests": [
+        {
+          "line": 3,
+          "description": "Data structure (wide vs long) does not affect results"
+        }
+      ],
+      "r_assertion_lines": [
+        145,
+        146,
+        147,
+        148,
+        151,
+        152,
+        153,
+        154
+      ]
+    }
+  ],
+  "audit_completed": "2026-10-24"
+}

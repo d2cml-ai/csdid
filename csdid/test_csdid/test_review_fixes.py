@@ -50,7 +50,7 @@ class TestFactorCovariates:
     @pytest.mark.parametrize("panel", [True, False])
     def test_factor_faster_mode_matches_standard(self, panel):
         d = self._data()
-        common = dict(yname='y', tname='year', idname='id', gname='group', data=d,
+        common = dict(yname='y', tname='year', idname="id" if panel else None, gname='group', data=d,
                       control_group='nevertreated', xformla='y~C(cat)', panel=panel)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')

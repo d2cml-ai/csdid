@@ -330,7 +330,7 @@ def test_unbalanced_data_rcs_works(sim_data, em):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         result = ATTgt(
-            yname="Y", tname="period", idname="id", gname="G",
+            yname="Y", tname="period", idname=None, gname="G",
             data=data, panel=False,
         ).fit(est_method=em, bstrap=False)
 

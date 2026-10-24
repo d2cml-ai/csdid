@@ -4,7 +4,9 @@ import numpy as np
 from scipy.stats import norm
 
 
-from csdid.aggte_fnc.utils import get_agg_inf_func, get_se, wif, AGGTEobj
+from csdid.aggte_fnc.utils import (
+    get_agg_inf_func, get_se, wif, AGGTEobj, _make_cached_get_se,
+)
 from csdid.utils.mboot import mboot
 import warnings
 import numbers
@@ -156,6 +158,12 @@ def compute_aggte(MP,
     if balance_e is not None:
         _validate_nonnegative_whole_number(balance_e, "balance_e")
     _validate_alp(alp, "alp")
+    get_se_for_call = _make_cached_get_se(get_se)
+
+    if not np.any(group <= t):
+        raise ValueError(
+            "No post-treatment ATT(g,t) cells are available: all cells have t < g."
+        )
 
     # Removing missing values
     if na_rm:
@@ -169,13 +177,9 @@ def compute_aggte(MP,
         if typec == "group":
             gnotna = []
             for g in glist:
-                # AGG-grp-maxe (O6-F4): restrict to the SAME max_e window the
-                # group-specific estimate uses below; mirrors R
-                # compute.aggte.R:169-181 `(t <= (group + max_e))`. Without it, a
-                # group whose only non-NA post cell is PAST max_e survives this
-                # filter but then has an empty in-window selection -> att.egt=NaN
-                # and overall_att=NaN. No-op when max_e=Inf.
-                indices = np.where((group == g) & (g <= t) & (t <= (g + max_e)))
+                # Apply the same original-time window as the group estimate.
+                indices = np.where((group == g) & (g <= t) &
+                                   (t <= g + max_e) & (t >= g + min_e))
                 is_not_na = np.any(~np.isnan(att[indices]))
                 gnotna.append(is_not_na)
             
@@ -201,7 +205,16 @@ def compute_aggte(MP,
     if (not na_rm) and np.any(np.isnan(att)):
         raise ValueError("Missing values at att_gt found. If you want to remove these, set `na_rm = True`.")
 
-    if panel:
+    # Varying weights route balanced panels through the RC estimators, setting
+    # dp['panel'] to False. The sampling design remains a balanced panel, whose
+    # aggregation cohort masses use first-period weights (as in R did). Detect
+    # balance on the retained, duplicate-free sample so genuine unbalanced
+    # panels and repeated cross sections keep their existing weight convention.
+    balanced_varying_weights = (
+        dp.get('input_panel', False) and dp.get('fix_weights') == 'varying'
+        and len(data) == n * len(tlist)
+    )
+    if panel or balanced_varying_weights:
         dta = data[data[tname] == tlist[0]]
     else:
         dta_cols = [idname, gname, "w1"]
@@ -226,10 +239,19 @@ def compute_aggte(MP,
         return originalgtlist[uniquet.index(t) if t in uniquet else -1]
     
     # Function to switch between "original" t values and new t values
+    time_lookup = {value: i + 1 for i, value in enumerate(originalgtlist)}
+    # Mixed NumPy float/int scalars can compare equal with different hashes
+    # beyond exact floating-point precision. Preserve the original comparison.
+    for values in (originalt, originalgroup, originalglist):
+        if values.dtype != originalgtlist.dtype:
+            for value in np.unique(values):
+                if value in time_lookup:
+                    continue
+                matches = np.flatnonzero(originalgtlist == value)
+                if matches.size:
+                    time_lookup[value] = int(matches[0]) + 1
     def orig2t(orig):
-        new_t = [uniquet[i] for i in range(len(originalgtlist)) if originalgtlist[i] == orig]
-        out = new_t[0] if new_t else None
-        return out
+        return time_lookup.get(orig)
     
     t     = [orig2t(orig) for orig in originalt]
     group = [orig2t(orig) for orig in originalgroup]
@@ -252,10 +274,18 @@ def compute_aggte(MP,
     pg = [pg[glist.index(g)] for g in group]  
     
     # Which group time average treatment effects are post-treatment
-    keepers = [i for i in range(len(group)) if group[i] <= t[i] <= (group[i] + max_e)] ### added second condition to allow for limit on longest period included in att
+    event_time = originalt - originalgroup
+    in_window = (originalgroup <= originalt) & (event_time >= min_e) & (event_time <= max_e)
+    keepers = np.flatnonzero(in_window)
     
     # n x 1 vector of group variable
     G = [orig2t(g) for g in dta[gname].to_numpy()]
+
+    if typec in ("simple", "group") and balance_e is not None:
+        warnings.warn(
+            f'`balance_e` is ignored for type = "{typec}"; '
+            'it only applies to type = "dynamic".'
+        )
 
 # =============================================================================
 #  simple
@@ -271,8 +301,8 @@ def compute_aggte(MP,
             raise ValueError(
                 "No valid att_gt() estimates found for this aggregation. "
                 "This may happen if all estimates for a particular group or "
-                "time period are NA, or the requested max_e window excludes "
-                "every post-treatment period."
+                "time period are NA, or the requested event-time window excludes "
+                "every post-treatment period. Adjust 'min_e'/'max_e'."
             )
         # Simple ATT
         # Averages all post-treatment ATT(g,t) with weights given by group size
@@ -292,7 +322,7 @@ def compute_aggte(MP,
                                      wif = simple_wif )[:, None]
     
         # Get standard errors from the overall influence function
-        simple_se = get_se(simple_if, dp)
+        simple_se = get_se_for_call(simple_if, dp)
         
         # AGG-sentinel (O5-F-A / C3-F7): use np.nan, not None, for the
         # degenerate-SE sentinel so downstream `overall_att + cval*overall_se`
@@ -319,20 +349,28 @@ def compute_aggte(MP,
         group = np.array(group)
         t = np.array(t) 
         pg = np.array(pg) 
-        selective_att_g = [np.mean(att[( group== g) & (t >= g) & (t <= (group + max_e))]) for g in glist]
+        empty_groups = [originalglist[i] for i, g in enumerate(glist)
+                        if not np.any((group == g) & in_window)]
+        if empty_groups:
+            raise ValueError(
+                "No group-time average treatment effects fall within the requested "
+                f"window for group(s) {', '.join(map(str, empty_groups))}. "
+                "Adjust 'min_e'/'max_e', or set `na_rm = True` to drop those groups."
+            )
+        selective_att_g = [np.mean(att[(group == g) & in_window]) for g in glist]
         selective_att_g = np.asarray(selective_att_g)
         selective_att_g[np.isnan(selective_att_g)] = None
     
         selective_se_inner = [None] * len(glist)
         for i, g in enumerate(glist):
-            whichg = np.where(np.logical_and.reduce((group == g, g <= t, t <= (group + max_e))))[0]
+            whichg = np.flatnonzero((group == g) & in_window)
             weightsg =  pg[whichg] / np.sum(pg[whichg])
             inf_func_g = get_agg_inf_func(att = att , 
                                             inffunc = inffunc , 
                                             whichones = whichg ,
                                             weights_agg = weightsg , 
                                             wif = None)[:, None]
-            se_g = get_se(inf_func_g, dp)
+            se_g = get_se_for_call(inf_func_g, dp)
             selective_se_inner[i] = {'inf_func': inf_func_g, 'se': se_g}
             
         # recover standard errors separately by group   
@@ -390,7 +428,7 @@ def compute_aggte(MP,
                                               wif = selective_wif)[:, None]    
         
         # get overall standard error        
-        selective_se = get_se(selective_inf_func, dp)
+        selective_se = get_se_for_call(selective_inf_func, dp)
         # AGG-sentinel (O5-F-A / C3-F7): np.nan, not None, so AGGTEobj's
         # `overall_att + cval*overall_se` degrades to NaN instead of crashing
         # with `float * None`. Mirrors R `selective.se <- NA`.
@@ -473,7 +511,7 @@ def compute_aggte(MP,
                                           whichones   = whiche, 
                                           weights_agg = pge, 
                                           wif         = wif_e)[:, None]
-            se_e = get_se(inf_func_e, dp)
+            se_e = get_se_for_call(inf_func_e, dp)
             dynamic_se_inner.append({'inf_func': inf_func_e, 'se': se_e})
 
         dynamic_se_e = np.array([item['se'] for item in dynamic_se_inner]).T
@@ -510,7 +548,7 @@ def compute_aggte(MP,
                                             weights_agg = np.repeat(1 / np.sum(epos), np.sum(epos)),
                                             wif=None)[:, None]
         
-        dynamic_se = get_se(dynamic_inf_func, dp)
+        dynamic_se = get_se_for_call(dynamic_inf_func, dp)
         if not np.isnan(dynamic_se):
             if dynamic_se <= np.sqrt(np.finfo(float).eps) * 10:
                 dynamic_se = np.nan
@@ -591,7 +629,7 @@ def compute_aggte(MP,
                                             whichones=which_t, 
                                             weights_agg=pgt, 
                                             wif=wif_t)[:, None]
-            se_t = get_se(inf_func_t, dp)
+            se_t = get_se_for_call(inf_func_t, dp)
             calendar_se_inner.append({"inf_func": inf_func_t, "se": se_t})
     
     
@@ -641,7 +679,7 @@ def compute_aggte(MP,
         calendar_inf_func = np.array(calendar_inf_func)
         
         # get overall standard error
-        calendar_se = get_se(calendar_inf_func, dp)
+        calendar_se = get_se_for_call(calendar_inf_func, dp)
         if not np.isnan(calendar_se):
             if calendar_se <= np.sqrt(np.finfo(float).eps) * 10:
                 calendar_se = np.nan

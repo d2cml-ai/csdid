@@ -11,8 +11,6 @@ from csdid.utils.mboot import mboot
 from csdid.plots.gplot import gplot, splot
 
 
-import matplotlib.pyplot as plt
-
 import warnings
 
 import numpy as np, pandas as pd
@@ -252,7 +250,7 @@ class ATTgt:
   xformla: str = None, panel = True, allow_unbalanced_panel = False,
   clustervar = None, weights_name = None, anticipation = 0,
   cband = False, biters = 1000, alp = 0.05, compute_inffunc = True,
-  fix_weights = None, faster_mode = False,
+  fix_weights = None, faster_mode = True,
   print_details = False, pl = False, cores = 1, **kwargs
   ):
     # v7-O1..O4: accept R `att_gt`'s extra formals for call-site compatibility.
@@ -361,7 +359,6 @@ class ATTgt:
     dp['biters'] = biters
     dp['alp'] = alp
     dp['true_repeated_cross_sections'] = dp['true_rep_cross_section']
-    dp['cband'] = cband
     self.faster_mode = bool(faster_mode)
     self.dp = dp
 
@@ -423,7 +420,9 @@ class ATTgt:
       if bstrap:
         # v7-O2/O3: thread pl/cores through to the multiplier bootstrap.
         ref_se = mboot(inffunc.T, dp, pl=self.pl, cores=self.cores)
-        crit_val, se = ref_se['crit_val'], ref_se['se']
+        se = ref_se['se']
+        if dp['cband']:
+          crit_val = ref_se['crit_val']
         V = ref_se['V']
       else:
         # Analytical cluster-robust SEs when a cluster variable is set (matches R).
@@ -568,6 +567,8 @@ class ATTgt:
                 grtitle="Group"
                 ):
 
+    import matplotlib.pyplot as plt
+
     did_object = self.did_object
 
     grp = did_object['group']
@@ -625,6 +626,8 @@ class ATTgt:
                    ref_line=0, 
                    theming=True,
                    **kwargs):
+
+    import matplotlib.pyplot as plt
 
     did_object = self.atte
 

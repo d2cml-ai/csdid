@@ -5,8 +5,6 @@ Created on Sun Jun 11 16:17:07 2023
 @author: Carlos Guevara
 """
 
-import matplotlib.pyplot as plt
-
 # get_ipython().run_line_magic('matplotlib', 'qt') # To aopen separate window
 # get_ipython().run_line_magic('matplotlib', 'inline') # In line graph
 

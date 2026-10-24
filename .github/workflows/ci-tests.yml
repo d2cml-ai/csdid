@@ -10,13 +10,13 @@ on:
 
 jobs:
   test:
-    name: "Test vs R::did"
+    name: "Tests (Python ${{ matrix.python-version }})"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        python-version: ["3.8"]
+        python-version: ["3.8", "3.12"]
 
     steps:
       - name: Checkout source
@@ -27,16 +27,24 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: x64
 
-      - name: Install Dependencies
-        run: pip install -r requirements.txt; pip install git+https://github.com/d2cml-ai/DRDID
+      - name: Install legacy dependency set
+        if: matrix.python-version == '3.8'
+        run: pip install -r requirements.txt
+
+      # requirements.txt pins NumPy 1.24.3, which predates Python 3.12 wheels.
+      # Exercise current compatible dependencies in the modern lane instead.
+      - name: Install current dependency set
+        if: matrix.python-version == '3.12'
+        run: pip install pytest .
+
+      - name: Install DRDID reference implementation
+        run: pip install git+https://github.com/d2cml-ai/DRDID
 
       - name: Install package
         run: pip install .
 
-      # The live Python<->R differential test (test/test_vs_r.py) was removed:
-      # building rpy2 + installing R/`did` in CI is unreliable, and parity with R
-      # `did` is validated far more thoroughly offline (the differential audit
-      # compares to R at ~1e-9 across many cases). CI runs the package's own
-      # self-contained test suite, which needs no R.
+      # Committed, source-pinned R fixtures exercise complete numerical output
+      # and influence functions in both modes without installing R in CI.
+      # Missing fixtures, changed support/masks, or numerical mismatches fail.
       - name: Run tests
         run: pytest csdid/test_csdid/ -m "not slow"
