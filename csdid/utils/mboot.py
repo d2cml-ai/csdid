@@ -7,6 +7,33 @@ import pandas as pd
 
 from csdid.utils.bmisc import multiplier_bootstrap
 
+
+def _cluster_sums_by_label(inf_func, cluster_labels):
+    """Group IF rows once, retaining the original within-cluster sum order."""
+    cluster_ids = np.unique(cluster_labels)
+    cluster_if = np.zeros((len(cluster_ids), inf_func.shape[1]))
+    # With few clusters, the original masks cost less than building sorted
+    # groups. Object arrays also retain the old route: sorting object NaNs with
+    # and without inverse codes can produce different unique-label sequences.
+    if len(cluster_ids) <= 16 or np.asarray(cluster_labels).dtype.kind == "O":
+        for i, label in enumerate(cluster_ids):
+            cluster_if[i] = inf_func[cluster_labels == label].sum(axis=0)
+        return cluster_if
+
+    _, codes = np.unique(cluster_labels, return_inverse=True)
+    order = np.argsort(codes, kind="stable")
+    ends = np.cumsum(np.bincount(codes, minlength=len(cluster_ids)))
+    start = 0
+    for i, (label, end) in enumerate(zip(cluster_ids, ends)):
+        rows = order[start:end]
+        # Match the former equality mask, including its empty NaN/NaT groups.
+        # Checking only this group's rows avoids rescanning all observations.
+        rows = rows[cluster_labels[rows] == label]
+        cluster_if[i] = inf_func[rows].sum(axis=0)
+        start = end
+    return cluster_if
+
+
 def mboot(inf_func, DIDparams, pl=False, cores=1):
     # Setup needed variables
     data            = DIDparams['data'] 
@@ -87,14 +114,8 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
         cluster_labels = cluster_vec.reindex(unit_ids).values
         
         # Aggregate IF to cluster sums
-        cluster_ids = np.unique(cluster_labels)
-        n_clusters = len(cluster_ids)
-        
-        # Sum influence functions by cluster
-        cluster_if = np.zeros((n_clusters, inf_func.shape[1]))
-        for i, c in enumerate(cluster_ids):
-            mask = cluster_labels == c
-            cluster_if[i] = inf_func[mask].sum(axis=0)
+        cluster_if = _cluster_sums_by_label(inf_func, cluster_labels)
+        n_clusters = len(cluster_if)
         
         bres = np.sqrt(n_clusters) * run_multiplier_bootstrap(cluster_if, biters, pl, cores)
 

@@ -3,6 +3,50 @@ import statsmodels.api as sm
 import warnings
 
 
+# Reuse is restricted to the original deterministic statsmodels implementation.
+# A caller replacing GLM (or its solver) must still see every cell's fit.
+_ORIGINAL_GLM = sm.GLM
+_ORIGINAL_GLM_FIT = sm.GLM.fit
+_ORIGINAL_GLM_IRLS = sm.GLM._fit_irls
+_ORIGINAL_BINOMIAL = sm.families.Binomial
+
+
+def _panel_pscore_cache_available():
+    return (sm.GLM is _ORIGINAL_GLM
+            and sm.GLM.fit is _ORIGINAL_GLM_FIT
+            and sm.GLM._fit_irls is _ORIGINAL_GLM_IRLS
+            and sm.families.Binomial is _ORIGINAL_BINOMIAL)
+
+
+def _fit_panel_pscore(D, int_cov, i_weights, cache):
+    """Fit the unchanged weighted logit, optionally reusing a clean fit.
+
+    The caller owns an entry for one exact (sample, design, weights) combination.
+    Warning-producing and nonconverged fits are never cached. Forward warnings
+    already accepted by the caller's filters through its original warning sink;
+    applying the filters a second time could suppress an accepted warning.
+    """
+    if cache is not None and 'fit' in cache:
+        return cache['fit']
+
+    pscore_model = sm.GLM(D, int_cov, family=sm.families.Binomial(), freq_weights=i_weights)
+    if cache is None:
+        return pscore_model.fit()
+    caught = []
+    try:
+        with warnings.catch_warnings(record=True) as caught:
+            result = pscore_model.fit()
+    finally:
+        # Forward after leaving the recorder, including before propagating an
+        # exception following an earlier warning.
+        for warning in caught:
+            warnings.showwarning(warning.message, warning.category, warning.filename,
+                                 warning.lineno, warning.file, warning.line)
+    if not caught and result.converged and np.all(np.isfinite(result.params)):
+        cache['fit'] = result
+    return result
+
+
 def _add_intercept(covariates, n):
     if covariates is None:
         return np.ones((n, 1))
@@ -22,7 +66,8 @@ def _trim_pscore(ps_fit, D, trim_level):
     return ps_fit, trim_ps
 
 
-def std_ipw_did_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.995):
+def std_ipw_did_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.995,
+                      *, _pscore_cache=None):
     D = np.asarray(D).flatten()
     n = len(D)
     delta_y = np.asarray(y1 - y0).flatten()
@@ -36,8 +81,7 @@ def std_ipw_did_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.9
             raise ValueError("i_weights must be non-negative")
     i_weights = i_weights / np.mean(i_weights)
 
-    pscore_model = sm.GLM(D, int_cov, family=sm.families.Binomial(), freq_weights=i_weights)
-    pscore_results = pscore_model.fit()
+    pscore_results = _fit_panel_pscore(D, int_cov, i_weights, _pscore_cache)
     if not pscore_results.converged:
         warnings.warn("glm algorithm did not converge")
     if np.any(np.isnan(pscore_results.params)):
@@ -71,7 +115,8 @@ def std_ipw_did_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.9
     return ipw_att, att_inf_func
 
 
-def drdid_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.995):
+def drdid_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.995,
+                *, _pscore_cache=None):
     D = np.asarray(D).flatten()
     n = len(D)
     deltaY = np.asarray(y1 - y0).flatten()
@@ -85,8 +130,7 @@ def drdid_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.995):
             raise ValueError("i_weights must be non-negative")
     i_weights = i_weights / np.mean(i_weights)
 
-    pscore_model = sm.GLM(D, int_cov, family=sm.families.Binomial(), freq_weights=i_weights)
-    pscore_results = pscore_model.fit()
+    pscore_results = _fit_panel_pscore(D, int_cov, i_weights, _pscore_cache)
     if not pscore_results.converged:
         warnings.warn("glm algorithm did not converge")
     if np.any(np.isnan(pscore_results.params)):
@@ -139,6 +183,11 @@ def drdid_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.995):
 
     dr_att_inf_func = inf_treat - inf_control
     return dr_att, dr_att_inf_func
+
+
+# Freeze these beside their definitions, before callers can replace them and
+# subsequently import the faster group-time implementation.
+_ORIGINAL_PANEL_ESTIMATORS = (drdid_panel, std_ipw_did_panel)
 
 
 def std_ipw_did_rc(y, post, D, covariates=None, i_weights=None, trim_level=0.995):

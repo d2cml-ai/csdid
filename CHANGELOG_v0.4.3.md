@@ -41,6 +41,12 @@ Unrelated R estimators and anticipation changes absent from the controlling
 - Avoid repeated sorting and grouping of validated standard-path panel cells.
 - Align fast-path period arrays once and use masks for each comparison,
   preserving unit order and covariate matrix layout.
+- Reuse identical balanced-panel DR/IPW overlap checks and propensity fits in
+  faster mode. Cache keys include the exact sample, covariates, and weights;
+  retained model state is bounded to one fit per cohort and public call.
+- Group bootstrap influence rows by cluster once while preserving their
+  original summation order. Small cluster counts and object labels retain
+  the original loop.
 - Use direct original-time lookups, reuse aggregation weight-influence
   calculations, and cache cluster metadata within each aggregation call.
 - Generate the same bootstrap multiplier draws with fewer temporary arrays,
@@ -54,8 +60,23 @@ measurements and reproduction instructions are in
 
 ## Validation
 
-The complete suite passes 1,428 tests. Five paired benchmark rounds preserve
-complete outputs and random state in both modes; measured workflow gains range
-from 1.22x to 2.02x on the recorded machine. Current-source R comparisons and
-their remaining solver precision differences are documented in
+The complete suite passes 1,581 tests. The initial performance changes improved
+the measured workflows by 1.22x to 2.02x. A further audit against that already
+optimized baseline measured faster-mode gains of 1.93x for the core analytical
+panel, 2.57x with 12 covariates, 2.72x with 24 periods, and 3.84x with 3,000
+bootstrap clusters. These are medians of five serial rounds on the recorded
+machine, not universal speed guarantees.
+
+The additional optimizations preserve exact outputs, complete influence
+functions, warnings, and random state in the 84-configuration comparison grid
+and 36 independent adverse cases. Regression tests cover cache eligibility,
+warning filters, custom hooks, missing cluster labels, and numerical reduction
+order. This is empirical evidence within the tested environments, not a
+proof of equivalence for all possible inputs or future dependencies. The
+result-changing fixes listed above are separate from these optimizations.
+See the [performance audit](csdid/test_csdid/PERFORMANCE_AUDIT_20261023.md) for
+raw measurements, source hashes, R/PyFixest comparisons, and remaining limits.
+
+Current-source R comparisons and their remaining solver precision differences
+are documented in
 [UPSTREAM_SYNC_v0.4.3.md](csdid/test_csdid/UPSTREAM_SYNC_v0.4.3.md).

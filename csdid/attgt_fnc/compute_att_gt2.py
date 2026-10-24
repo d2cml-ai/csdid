@@ -17,8 +17,24 @@ from drdid import reg_did
 from csdid.attgt_fnc import drdid_trim
 from csdid.attgt_fnc.compute_att_gt_shared import (
     select_estimators, last_pretreatment_index, plan_cell, rcond_check_fail,
-    drdid_design_singular, overlap_check_fail, BREAK, BASE_ZERO)
+    drdid_design_singular, overlap_check_fail, BREAK, BASE_ZERO,
+    _ORIGINAL_PANEL_GUARDS)
 import warnings
+
+
+_CACHEABLE_PANEL_ESTIMATORS = drdid_trim._ORIGINAL_PANEL_ESTIMATORS
+
+
+def _period_cache_keys(period_arrays):
+    """Share the first period's key only for exactly unchanged arrays.
+
+    Period identities already permit post-treatment reuse with time-varying
+    data. Comparing each period to the first also covers time-invariant inputs
+    in linear time, without hashes or tolerance-based equality.
+    """
+    first = period_arrays[0]
+    return {p: (0 if values.dtype == first.dtype and np.array_equal(values, first)
+                else p) for p, values in period_arrays.items()}
 
 
 def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=True):
@@ -65,6 +81,12 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
     apply_guard = not callable(est_method)
     # Propensity-overlap guard (matches R): dr/ipw only.
     apply_overlap = (not callable(est_method)) and est_method in ("dr", "ipw")
+    cache_nuisance = (panel and apply_overlap and len(xcov_cols) > 1
+                      and any(est_panel is original for original in _CACHEABLE_PANEL_ESTIMATORS)
+                      and all(current is original for current, original in zip(
+                          (overlap_check_fail, rcond_check_fail, drdid_design_singular),
+                          _ORIGINAL_PANEL_GUARDS))
+                      and drdid_trim._panel_pscore_cache_available())
 
     # ─── Precompute period-indexed structures ───────────────────────────────
     if panel:
@@ -83,6 +105,9 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
             period_y[p] = pd.Series(fr[yname].to_numpy(), index=fid).reindex(unit_ids).to_numpy()
             period_w[p] = pd.Series(fr['w'].to_numpy(), index=fid).reindex(unit_ids).to_numpy()
             period_cov[p] = pd.DataFrame(fr[xcov_cols].to_numpy(), index=fid).reindex(unit_ids).to_numpy()
+        if cache_nuisance:
+            cov_keys = _period_cache_keys(period_cov)
+            weight_keys = _period_cache_keys(period_w)
     else:
         # repeated cross sections / unbalanced panel: one global design matrix
         full_cov = pd.DataFrame(data[xcov_cols].to_numpy(), index=data.index)
@@ -94,6 +119,12 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
         state['g'] = g
         _pretg = last_pretreatment_index(g, tlist, anticipation)
         pret_g = _pretg if _pretg is not None else 0
+        # Keep only the most recent design, so retained fit memory is bounded
+        # independently of the number of periods. Entries cannot leak across
+        # treatment cohorts or public fit calls. Intercept-only designs retain
+        # the uncached path because their overlap guard has no warning context.
+        nuisance_cache = ({'overlap_key': None, 'pscore_key': None, 'cov_keys': cov_keys,
+                           'weight_keys': weight_keys} if cache_nuisance else None)
 
         if not panel:
             data = data.assign(G_m=1 * (data[gname] == g))
@@ -119,7 +150,7 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
                     unit_ids, unit_g, never_treated, anticipation, tlist, tfac,
                     period_y, period_w, period_cov, global_pos, n,
                     fix_weights, est_panel, add_att_data, t_i,
-                    apply_rcond, apply_guard, est_method, apply_overlap)
+                    apply_rcond, apply_guard, est_method, apply_overlap, nuisance_cache)
             else:
                 _att_gt_rc_cell(
                     g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
@@ -138,7 +169,8 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
                        unit_ids, unit_g, never_treated, anticipation, tlist, tfac,
                        period_y, period_w, period_cov, global_pos, n,
                        fix_weights, est_att_f, add_att_data, t_i, apply_rcond=False,
-                       apply_guard=False, est_method="dr", apply_overlap=False):
+                       apply_guard=False, est_method="dr", apply_overlap=False,
+                       nuisance_cache=None):
     Gm = (unit_g == g)
     if never_treated:
         Cm = (unit_g == 0)
@@ -160,14 +192,39 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
     covariates = np.asfortranarray(period_cov[earlier_idx][mask])
 
     if fix_weights == "base_period":
-        w = period_w[pret_g][mask]
+        weight_idx = pret_g
     elif fix_weights == "first_period":
-        w = period_w[0][mask]
+        weight_idx = 0
     else:
-        w = period_w[earlier_idx][mask]
+        weight_idx = earlier_idx
+    w = period_w[weight_idx][mask]
+
+    pscore_cache = None
+    if nuisance_cache is not None:
+        # Treatment labels are fixed within the cohort; the exact mask captures
+        # changing not-yet-treated controls, including gaps between cohorts.
+        overlap_key = (nuisance_cache['cov_keys'][earlier_idx], mask.tobytes())
+        pscore_key = (overlap_key, nuisance_cache['weight_keys'][weight_idx])
+        if pscore_key != nuisance_cache['pscore_key']:
+            nuisance_cache['pscore_key'] = pscore_key
+            nuisance_cache['pscore'] = {}
+        pscore_cache = nuisance_cache['pscore']
 
     # Propensity-overlap guard (matches R), checked before the singular guard.
-    if apply_overlap and overlap_check_fail(covariates, G):
+    overlap_failed = False
+    if apply_overlap:
+        if nuisance_cache is None or overlap_key != nuisance_cache['overlap_key']:
+            overlap_failed = overlap_check_fail(covariates, G)
+            if nuisance_cache is not None:
+                nuisance_cache['overlap_key'] = overlap_key
+                nuisance_cache['overlap_failed'] = overlap_failed
+        else:
+            overlap_failed = nuisance_cache['overlap_failed']
+            # The original guard enters this context even for a clean fit.
+            # Keep its warning-registry behavior when skipping that fit.
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+    if overlap_failed:
         warnings.warn(
             f"overlap condition violated for group {g} in time period {tn}")
         add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
@@ -186,7 +243,12 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
         return
 
     try:
-        att_gt, att_inf_func = est_att_f(ypost, ypre, G, i_weights=w, covariates=covariates)
+        if pscore_cache is None:
+            att_gt, att_inf_func = est_att_f(ypost, ypre, G, i_weights=w, covariates=covariates)
+        else:
+            att_gt, att_inf_func = est_att_f(
+                ypost, ypre, G, i_weights=w, covariates=covariates,
+                _pscore_cache=pscore_cache)
     except Exception as e:
         warnings.warn(
             f"Estimation failed for group {g} in time period {tn}: {e}. "

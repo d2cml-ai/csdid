@@ -1,5 +1,10 @@
 # `faster_mode` and 0.4.3 performance validation
 
+The subsequent [PyFixest/R performance audit](PERFORMANCE_AUDIT_20261023.md)
+measures additional improvements against commit `972dbd0`, including nuisance-fit
+reuse, bootstrap cluster grouping, larger stress workloads, and current-source
+R comparisons. The measurements below describe the earlier optimization round.
+
 `ATTgt` defaults to `faster_mode=True` in 0.4.3. Pass `faster_mode=False` to
 select the standard computation path. Both modes remain tested across panel,
 repeated cross sections, unbalanced panels, estimators, control groups, weights,

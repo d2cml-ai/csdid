@@ -180,6 +180,9 @@ def drdid_design_singular(int_cov, i_weights, treated, est_method, post=None):
     return False
 
 
+_ORIGINAL_PANEL_GUARDS = (overlap_check_fail, rcond_check_fail, drdid_design_singular)
+
+
 def last_pretreatment_index(g, tlist, anticipation):
     """Index of the last period that is pre-treatment for cohort ``g``.
 
