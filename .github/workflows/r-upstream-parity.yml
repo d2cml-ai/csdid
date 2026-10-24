@@ -1,0 +1,169 @@
+name: R upstream parity
+
+on:
+  schedule:
+    # Off the busy start of the hour; schedules activate on the default branch.
+    - cron: '37 6 * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [r-upstream-updated]
+  pull_request:
+    # No base-branch restriction: also validate stacked pull requests.
+    paths:
+      - '.github/workflows/r-upstream-parity.yml'
+      - 'csdid/att_gt.py'
+      - 'csdid/attgt_fnc/**'
+      - 'csdid/aggte_fnc/**'
+      - 'csdid/utils/**'
+      - 'csdid/test_csdid/upstream_sync/**'
+      - 'csdid/test_csdid/r_ref/current/**'
+      - 'csdid/test_csdid/r_reference_checks.py'
+      - 'csdid/test_csdid/r_test_alignment_*.json'
+      - 'csdid/test_csdid/test_r*.py'
+      - 'csdid/test_csdid/test_upstream*.py'
+      - 'csdid/test_csdid/test_drdid_test_alignment.py'
+      - 'csdid/test_csdid/test_current_r_hessian.py'
+      - 'setup.py'
+      - 'requirements*.txt'
+      - 'pyproject.toml'
+      - 'pytest.ini'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r-upstream-parity-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  parity:
+    name: Python self-tests and current R upstream parity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+        working-directory: csdid
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - name: Initialize report directory
+        working-directory: ${{ runner.temp }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/r-upstream-parity"
+          printf 'REPORT_DIR=%s\n' "$RUNNER_TEMP/r-upstream-parity" >> "$GITHUB_ENV"
+
+      - name: Check out csdid
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          path: csdid
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Omitting ref checks out each official repository's default branch once.
+      # Full history lets the runner inspect changes since the reviewed pins.
+      # Dispatch payloads cannot select repositories, refs, or executable code.
+      - name: Check out current R did
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: bcallaway11/did
+          path: upstream/did
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check out current R DRDID
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: pedrohcgs/DRDID
+          path: upstream/DRDID
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: csdid/setup.py
+
+      - name: Record checked-out commits
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          workspace = Path(os.environ['GITHUB_WORKSPACE'])
+          output = Path(os.environ['REPORT_DIR'])
+          output.mkdir(parents=True, exist_ok=True)
+          paths = {'csdid': 'csdid', 'did': 'upstream/did', 'DRDID': 'upstream/DRDID'}
+          commits = {
+              name: subprocess.check_output(
+                  ['git', '-C', str(workspace / path), 'rev-parse', 'HEAD'], text=True).strip()
+              for name, path in paths.items()
+          }
+          (output / 'checkout-heads.json').write_text(json.dumps(commits, indent=2) + '\n')
+          PY
+
+      - name: Install Python package and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest .
+
+      - name: Run canonical Python tests and automation failure tests
+        run: |
+          python -m pytest csdid/test_csdid/ -m 'not slow' -q \
+            --junitxml="$REPORT_DIR/selftests-junit.xml" \
+            2>&1 | tee "$REPORT_DIR/selftests.log"
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - name: Install the frozen R checkouts and their dependencies
+        uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          working-directory: csdid
+          packages: |
+            local::${{ github.workspace }}/upstream/DRDID
+            local::${{ github.workspace }}/upstream/did
+            any::pkgload
+            any::digest
+            any::jsonlite
+            any::testthat
+          dependencies: '"hard"'
+          install-pandoc: false
+          install-quarto: false
+
+      - name: Audit upstream test drift and compare complete numerical output
+        run: |
+          python csdid/test_csdid/upstream_sync/run.py \
+            --did "$GITHUB_WORKSPACE/upstream/did" \
+            --drdid "$GITHUB_WORKSPACE/upstream/DRDID" \
+            --output "$REPORT_DIR/comparison"
+
+      - name: Publish run summary
+        if: always()
+        working-directory: ${{ runner.temp }}
+        run: |
+          if [ -f "$REPORT_DIR/comparison/summary.md" ]; then
+            cat "$REPORT_DIR/comparison/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            printf '%s\n' 'R upstream parity did not produce a report. Check the failed setup or Python self-test step and the uploaded logs.' > "$REPORT_DIR/summary.md"
+            cat "$REPORT_DIR/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload complete parity reports and logs
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: r-upstream-parity-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r-upstream-parity/
+          if-no-files-found: warn
+          retention-days: 14

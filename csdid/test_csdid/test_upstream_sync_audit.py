@@ -1,0 +1,272 @@
+"""Exercise the offline drift gate against real, temporary Git histories."""
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+import pytest
+
+
+AUDIT_PATH = Path(__file__).parent / "upstream_sync" / "audit.py"
+_SPEC = importlib.util.spec_from_file_location("upstream_sync_audit", AUDIT_PATH)
+audit_module = importlib.util.module_from_spec(_SPEC)
+_SPEC.loader.exec_module(audit_module)
+
+
+def _git(repo, *args):
+    return subprocess.run(["git", "-C", str(repo), *args], check=True,
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode().strip()
+
+
+def _write(path, text):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def _json(path, value):
+    _write(path, json.dumps(value))
+
+
+def _sha(text):
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def _commit(repo):
+    _git(repo, "add", "--all")
+    _git(repo, "commit", "-m", "test checkpoint")
+    return _git(repo, "rev-parse", "HEAD")
+
+
+@pytest.fixture
+def histories(tmp_path):
+    repos, crosswalks, sources = {}, {}, {}
+    texts = {
+        "tests/testthat/test-existing.R": 'test_that("existing assertion", {\n  expect_equal(1, 1)\n})\n',
+        "tests/testthat/test-removed.R": 'testthat::test_that("removed assertion", { expect_true(TRUE) })\n',
+    }
+    for package in ("did", "DRDID"):
+        repo = tmp_path / package
+        repo.mkdir()
+        _git(repo, "init")
+        _git(repo, "config", "user.name", "Audit Test")
+        _git(repo, "config", "user.email", "audit-test@example.invalid")
+        _git(repo, "config", "commit.gpgsign", "false")
+        for path, text in texts.items():
+            _write(repo / path, text)
+        _write(repo / "tests/testthat/helper-fixture.R", "make_fixture <- function() 1\n")
+        _write(repo / "tests/testthat/_snaps/output.md", "baseline snapshot\n")
+        _write(repo / "R/estimator.R", "estimate <- function() 1\n")
+        commit = _commit(repo)
+        sources[package] = {"commit": commit, "files_sha256": {
+            "R/estimator.R": _sha("estimate <- function() 1\n"),
+        }}
+        is_did = package == "did"
+        crosswalk = {
+            "schema_version": 1,
+            "r_commit" if is_did else "r_revision": commit,
+            "entries" if is_did else "files": [
+                {"r_file": path, "status": "partial", "python_tests": ["test_original_intent"],
+                 "remaining_gaps": ["another assertion still requires review"],
+                 "r_file_sha256" if is_did else "r_sha256": _sha(text)}
+                for path, text in texts.items()
+            ],
+        }
+        crosswalk_path = tmp_path / f"{package}-crosswalk.json"
+        _json(crosswalk_path, crosswalk)
+        repos[package] = repo
+        crosswalks[package] = crosswalk_path
+    manifest = tmp_path / "manifest.json"
+    _json(manifest, {"schema_version": 1, "sources": sources})
+    return {"repos": repos, "crosswalks": crosswalks, "manifest": manifest,
+            "sources": sources, "texts": texts, "root": tmp_path}
+
+
+def _audit(history):
+    return audit_module.audit(history["repos"]["did"], history["repos"]["DRDID"],
+                              history["manifest"], history["crosswalks"]["did"],
+                              history["crosswalks"]["DRDID"])
+
+
+def _args(history):
+    return ["--did", str(history["repos"]["did"]), "--drdid", str(history["repos"]["DRDID"]),
+            "--baseline", str(history["manifest"]),
+            "--did-crosswalk", str(history["crosswalks"]["did"]),
+            "--drdid-crosswalk", str(history["crosswalks"]["DRDID"]),
+            "--output", str(history["root"] / "report.json"),
+            "--summary", str(history["root"] / "summary.md")]
+
+
+def test_unchanged_histories_and_cli_are_deterministic(histories):
+    report = _audit(histories)
+    assert report["status"] == "unchanged"
+    assert report["exit_code"] == 0
+    for package, result in report["packages"].items():
+        assert result["baseline_commit"] == result["current_commit"] == histories["sources"][package]["commit"]
+        assert result["baseline_crosswalk_test_count"] == 2
+        assert result["test_changes"] == result["source_changes"] == []
+    # Exercise the standalone entry point from an unrelated working directory.
+    command = [sys.executable, str(AUDIT_PATH.resolve()), *_args(histories)]
+    first = subprocess.run(command, cwd=histories["root"], capture_output=True, text=True)
+    assert first.returncode == 0, first.stderr
+    json_bytes = (histories["root"] / "report.json").read_bytes()
+    markdown_bytes = (histories["root"] / "summary.md").read_bytes()
+    assert json.loads(json_bytes) == report
+    assert audit_module.main(_args(histories)) == 0
+    assert (histories["root"] / "report.json").read_bytes() == json_bytes
+    assert (histories["root"] / "summary.md").read_bytes() == markdown_bytes
+    assert audit_module.DEFAULT_BASELINE == AUDIT_PATH.resolve().parents[1] / "r_ref/current/manifest.json"
+
+
+def test_source_changes_are_separate_and_do_not_trigger_test_drift(histories):
+    repo = histories["repos"]["DRDID"]
+    updated = "estimate <- function() 2\n"
+    _write(repo / "R/estimator.R", updated)
+    _write(repo / "NEWS.md", "A code change.\n")
+    current = _commit(repo)
+    report = _audit(histories)
+    assert report["status"] == "source_only_changes"
+    assert report["exit_code"] == 0
+    result = report["packages"]["DRDID"]
+    assert result["current_commit"] == current
+    assert result["test_changes"] == []
+    assert [(item["path"], item["status"]) for item in result["source_changes"]] == [
+        ("NEWS.md", "added"), ("R/estimator.R", "modified"),
+    ]
+    change = result["source_changes"][1]
+    assert change["old"]["sha256"] == histories["sources"]["DRDID"]["files_sha256"]["R/estimator.R"]
+    assert change["new"]["sha256"] == _sha(updated)
+
+
+@pytest.mark.parametrize("package", ["did", "DRDID"])
+def test_added_modified_removed_tests_require_review_with_exact_evidence(histories, package):
+    repo = histories["repos"][package]
+    added = '# setup\n\ntest_that("new assertion", { expect_true(TRUE) })\n'
+    modified = '# changed setup\n  testthat::test_that("changed assertion", { expect_equal(2, 2) })\n'
+    _write(repo / "tests/testthat/test-added.R", added)
+    _write(repo / "tests/testthat/test-existing.R", modified)
+    (repo / "tests/testthat/test-removed.R").unlink()
+    _write(repo / "R/estimator.R", "estimate <- function() 3\n")
+    _commit(repo)
+    report = _audit(histories)
+    assert report["status"] == "manual_review_required"
+    assert report["exit_code"] == 3
+    result = report["packages"][package]
+    assert result["source_change_count"] == 1
+    assert result["test_change_count"] == 3
+    changes = result["test_changes"]
+    assert [(item["path"], item["status"]) for item in changes] == [
+        ("tests/testthat/test-added.R", "added"),
+        ("tests/testthat/test-existing.R", "modified"),
+        ("tests/testthat/test-removed.R", "removed"),
+    ]
+    assert all(item["coverage_review"] == "required" and item["is_testthat_file"] for item in changes)
+    assert changes[0]["old"] is None
+    assert changes[0]["new"]["sha256"] == _sha(added)
+    assert changes[0]["previous_coverage"] is None
+    assert changes[0]["new_test_that"] == [{"line": 3, "expression": added.splitlines()[2]}]
+    assert changes[1]["old"]["sha256"] == _sha(histories["texts"]["tests/testthat/test-existing.R"])
+    assert changes[1]["new"]["sha256"] == _sha(modified)
+    assert changes[1]["old_test_that"][0]["line"] == 1
+    assert changes[1]["new_test_that"] == [{"line": 2, "expression": modified.splitlines()[1].strip()}]
+    assert changes[1]["previous_coverage"]["status"] == "partial"
+    assert changes[1]["previous_coverage"]["remaining_gaps"] == ["another assertion still requires review"]
+    assert changes[2]["new"] is None
+    assert changes[2]["new_test_that"] == []
+    assert changes[2]["old"]["sha256"] == _sha(histories["texts"]["tests/testthat/test-removed.R"])
+    assert audit_module.main(_args(histories)) == 3
+    assert "Every listed test-tree change requires manual coverage review" in (histories["root"] / "summary.md").read_text()
+
+
+@pytest.mark.parametrize("path", ["tests/testthat/helper-fixture.R", "tests/testthat/_snaps/output.md",
+                                  "tests/fixtures/input.csv", "tests/testthat.R"])
+def test_helpers_fixtures_snapshots_and_runner_trigger_review_without_crosswalk_entry(histories, path):
+    repo = histories["repos"]["did"]
+    _write(repo / path, "changed test infrastructure\n")
+    _commit(repo)
+    report = _audit(histories)
+    assert report["exit_code"] == 3
+    result = report["packages"]["did"]
+    assert result["source_changes"] == []
+    assert len(result["test_changes"]) == 1
+    change = result["test_changes"][0]
+    assert change["path"] == path
+    assert change["previous_coverage"] is None
+    assert not change["is_testthat_file"]
+    assert change["new"]["sha256"] == _sha("changed test infrastructure\n")
+
+
+def test_missing_and_malformed_baselines_fail_closed_and_write_error_artifacts(histories):
+    manifest = histories["manifest"]
+    valid = manifest.read_text()
+    malformed = [None, "{", "[]", '{"schema_version":1,"schema_version":1,"sources":{}}',
+                 '{"schema_version":1,"sources":{}}',
+                 valid.replace('"schema_version": 1', '"schema_version": true'),
+                 valid.replace(histories["sources"]["did"]["commit"], "main"),
+                 valid.replace('"files_sha256"', '"missing_hashes"')]
+    for payload in malformed:
+        if payload is None:
+            manifest.unlink()
+        else:
+            manifest.write_text(payload)
+        assert audit_module.main(_args(histories)) == 2
+        report = json.loads((histories["root"] / "report.json").read_text())
+        assert report["status"] == "structural_failure"
+        assert report["exit_code"] == 2
+        assert report["error"]
+        assert "packages" not in report
+
+
+def test_unavailable_baseline_git_object_is_failure_not_empty_diff(histories):
+    manifest = json.loads(histories["manifest"].read_text())
+    manifest["sources"]["did"]["commit"] = "a" * 40
+    _json(histories["manifest"], manifest)
+    with pytest.raises(audit_module.AuditError, match="cat-file.*failed"):
+        _audit(histories)
+
+
+def test_source_manifest_hash_mismatch_fails_even_without_changes(histories):
+    manifest = json.loads(histories["manifest"].read_text())
+    manifest["sources"]["did"]["files_sha256"]["R/estimator.R"] = "0" * 64
+    _json(histories["manifest"], manifest)
+    with pytest.raises(audit_module.AuditError, match="baseline source hash mismatch"):
+        _audit(histories)
+
+
+@pytest.mark.parametrize("package,entries_key,commit_key,hash_key", [
+    ("did", "entries", "r_commit", "r_file_sha256"),
+    ("DRDID", "files", "r_revision", "r_sha256"),
+])
+def test_crosswalk_is_required_pinned_complete_and_content_verified(histories, package, entries_key, commit_key, hash_key):
+    path = histories["crosswalks"][package]
+    valid = json.loads(path.read_text())
+    path.unlink()
+    with pytest.raises(audit_module.AuditError, match="Cannot read valid JSON"):
+        _audit(histories)
+    corruptions = [
+        (lambda item: item.update({commit_key: "b" * 40}), "commit does not match"),
+        (lambda item: item[entries_key][0].update({hash_key: "0" * 64}), "crosswalk hash mismatch"),
+        (lambda item: item[entries_key].pop(), "file support differs"),
+        (lambda item: item[entries_key].append(item[entries_key][0]), "Duplicate.*crosswalk"),
+        (lambda item: item[entries_key][0].update({"r_file": "../escape.R"}), "Invalid.*crosswalk"),
+        (lambda item: item[entries_key][0].update({"status": []}), "Invalid.*crosswalk"),
+    ]
+    for mutate, message in corruptions:
+        item = json.loads(json.dumps(valid))
+        mutate(item)
+        _json(path, item)
+        with pytest.raises(audit_module.AuditError, match=message):
+            _audit(histories)
+        assert audit_module.main(_args(histories)) == 2
+        assert json.loads((histories["root"] / "report.json").read_text())["status"] == "structural_failure"
+
+
+@pytest.mark.parametrize("path,message", [
+    ("R/estimator.R", "tracked modifications"),
+    ("tests/testthat/test-untracked.R", "untracked tests"),
+])
+def test_uncommitted_evidence_cannot_silently_disappear(histories, path, message):
+    _write(histories["repos"]["did"] / path, "uncommitted change\n")
+    with pytest.raises(audit_module.AuditError, match=message):
+        _audit(histories)

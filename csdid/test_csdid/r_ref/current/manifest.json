@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_utc": "2026-10-24 03:58:13 UTC",
+  "generated_utc": "2026-10-24 13:17:31 UTC",
   "sources": {
     "did": {
       "commit": "74b88eb07f1faa644df1271055a0f77848f6550c",
@@ -180,6 +180,6 @@
     "references.json.gz": "6b48d1ba8b4629124f0d73e6b1fac9b01070b969ed2c817ad62cd88cc8f302d2",
     "r_mode_checks.json": "5e30e71e675cbd2a074e9786dd25a0c90fed999e0b83120638f0ec4462547084",
     "sessionInfo.txt": "29dfbeb74f0e38187ea97e0c19654757da319616d4db3557f603cd20fe71b3df",
-    "generate.R": "e91e7ac764a83e9988710c4c98eb595b37a97e943e22b352dd1f96c1280ee97c"
+    "generate.R": "4b0c0b595de5d468c62b8788995bc1f2c5b3aef49388685a5dc2407ca476fcf0"
   }
 }
