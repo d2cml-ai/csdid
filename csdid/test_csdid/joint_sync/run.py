@@ -44,7 +44,7 @@ def sha256(path):
 
 def tree_hashes(folder):
     folder = Path(folder)
-    return {str(path.relative_to(folder)): sha256(path)
+    return {path.relative_to(folder).as_posix(): sha256(path)
             for path in sorted(folder.rglob("*"))
             if path.is_file() and "__pycache__" not in path.parts
             and ".pytest_cache" not in path.parts and path.suffix != ".pyc"}
@@ -76,6 +76,18 @@ def verify_peer_ref(lock, requested):
     return lock["commit"]
 
 
+def bind_archived_peer_lock(csdid_source, supplied, csdid_ref):
+    path = Path(csdid_source) / "csdid/test_csdid/joint_sync/python_drdid.json"
+    if path.is_file():
+        committed = load_lock(path)
+        if committed != supplied:
+            raise ValueError("Supplied peer lock differs from the committed CSDID release configuration")
+        return dict(mode="committed_peer_lock", archived_lock_sha256=sha256(path))
+    if csdid_ref == "HEAD":
+        raise ValueError("Default CSDID HEAD must contain its reviewed Python DRDID lock")
+    return dict(mode="historical_explicit_ref_without_committed_peer_lock")
+
+
 def _git(repository, *args):
     return subprocess.check_output(["git", "-C", str(repository), *args], text=True).strip()
 
@@ -103,7 +115,7 @@ def export_commit(repository, requested, destination, archive):
 
 
 def runtime_hashes(source, package):
-    return {str(path.relative_to(source)): sha256(path)
+    return {path.relative_to(source).as_posix(): sha256(path)
             for path in sorted((source / package).rglob("*.py"))
             if "test_csdid" not in path.parts}
 
@@ -143,7 +155,7 @@ def collect_and_validate_origins(site_packages, expected, modules=None):
         path = Path(filename).resolve()
         if site_packages not in path.parents:
             raise ValueError("Runtime module imported outside installed wheels: {} at {}".format(name, path))
-        relative = str(path.relative_to(site_packages))
+        relative = path.relative_to(site_packages).as_posix()
         if relative not in expected or sha256(path) != expected[relative]:
             raise ValueError("Runtime module differs from reviewed wheel/source: " + name)
         origins[name] = str(path)
@@ -186,6 +198,8 @@ def _junit_counts(path):
     suites = [root] if root.tag == "testsuite" else list(root.findall("testsuite"))
     result = {key: sum(int(suite.attrib.get(key, 0)) for suite in suites)
               for key in ("tests", "failures", "errors", "skipped")}
+    if result["tests"] <= 0:
+        raise ValueError("Empty JUnit test collection cannot establish joint validation")
     result["by_package"] = dict(csdid=0, drdid=0)
     for case in root.iter("testcase"):
         name = case.attrib.get("classname", "")
@@ -196,6 +210,19 @@ def _junit_counts(path):
     if not all(result["by_package"].values()):
         raise ValueError("JUnit must establish execution of both complete test snapshots")
     return result
+
+
+def clean_environment(base=None):
+    """Do not let inherited selectors, plugins or fixture overrides weaken CI."""
+    environment = dict(os.environ if base is None else base)
+    for key in ("PYTHONPATH", "PYTHONHOME", "PYTHONOPTIMIZE", "PYTEST_ADDOPTS", "PYTEST_PLUGINS",
+                "CSDID_R_REFERENCE_DIR", "CSDID_R_REFERENCE_SOURCES",
+                "DRDID_R_REFERENCE", "DRDID_R_REVISION"):
+        environment.pop(key, None)
+    environment.update({name: "1" for name in THREADS})
+    environment["MPLBACKEND"] = "Agg"
+    environment["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
+    return environment
 
 
 def run(csdid, drdid, output, lock_path=DEFAULT_LOCK, csdid_ref="HEAD", drdid_ref=None,
@@ -210,12 +237,7 @@ def run(csdid, drdid, output, lock_path=DEFAULT_LOCK, csdid_ref="HEAD", drdid_re
     receipt_path = output / "receipt.json"
     def save():
         receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
-    environment = dict(os.environ)
-    for key in ("PYTHONPATH", "PYTHONHOME", "CSDID_R_REFERENCE_DIR", "CSDID_R_REFERENCE_SOURCES",
-                "DRDID_R_REFERENCE", "DRDID_R_REVISION"):
-        environment.pop(key, None)
-    environment.update({name: "1" for name in THREADS})
-    environment["MPLBACKEND"] = "Agg"
+    environment = clean_environment()
     stage = "peer-lock"
     def command(arguments, name, env=None, checked=True):
         nonlocal stage
@@ -247,6 +269,8 @@ def run(csdid, drdid, output, lock_path=DEFAULT_LOCK, csdid_ref="HEAD", drdid_re
             target = sources / package
             receipt["sources"][package] = export_commit(repository, revision, target, archives / (package + ".tar"))
             receipt["sources"][package]["runtime_files_sha256"] = runtime_hashes(target, package)
+            if package == "csdid":
+                receipt["configuration_binding"] = bind_archived_peer_lock(target, lock, csdid_ref)
         if source_version(sources / "drdid/drdid/_version_.py", "version") != lock["version"]:
             raise ValueError("DRDID source version differs from reviewed peer lock")
         save()
@@ -329,7 +353,10 @@ def run(csdid, drdid, output, lock_path=DEFAULT_LOCK, csdid_ref="HEAD", drdid_re
         test_environment = dict(environment, PYTHONPATH=os.pathsep.join(
             (str(output), str(tests), str(peer_tests), str(csdid_plain / "scripts"))))
         junit = output / "joint-junit.xml"
-        pytest_command = [executable, "-m", "pytest", "--import-mode=importlib", "-p", "origin_guard",
+        pytest_config = output / "pytest.ini"
+        pytest_config.write_text("[pytest]\naddopts =\n")
+        pytest_command = [executable, "-m", "pytest", "-c", pytest_config,
+                          "--rootdir", output, "--import-mode=importlib", "-p", "origin_guard",
                           tests, peer_tests, *extra_test_roots, "-q", "--tb=short", "--junitxml=" + str(junit)]
         if skip_slow:
             pytest_command.extend(("-m", "not slow"))

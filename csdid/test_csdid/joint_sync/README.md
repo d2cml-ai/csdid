@@ -13,6 +13,13 @@ the tests and bridge must come from those installed wheels. Plain test snapshots
 contain fixtures/helpers but no runtime source packages. Optional CSDID
 `scripts/tests` and their helpers are included when present.
 
+The supplied lock must match the lock archived in the committed CSDID tree.
+An old commit without a lock is accepted only through an explicit historical
+commit selection, and its receipt is labeled accordingly. Default/CI runs
+require committed configuration. Inherited pytest selectors, external plugins
+and reference overrides are cleared; a minimal configuration prevents parent
+directories from silently selecting a smaller suite. Empty JUnit output fails.
+
 Use clean or working Git checkouts containing the required commits. Working
 tree changes are not packaged: the driver exports the selected committed Git
 trees. No release is published, dependency requirement is weakened, R reference
