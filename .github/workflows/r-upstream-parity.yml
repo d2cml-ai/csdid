@@ -64,6 +64,32 @@ jobs:
           cache: pip
           cache-dependency-path: csdid/setup.py
 
+      - name: Read reviewed Python DRDID source
+        id: python-peer
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import os
+          from pathlib import Path
+          path = Path('csdid/test_csdid/joint_sync/run.py')
+          spec = importlib.util.spec_from_file_location('joint_gate', path)
+          gate = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(gate)
+          lock = gate.load_lock(path.with_name('python_drdid.json'))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('repository=' + lock['repository'] + '\n')
+              output.write('commit=' + lock['commit'] + '\n')
+          PY
+
+      - name: Check out reviewed Python DRDID
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: ${{ steps.python-peer.outputs.repository }}
+          ref: ${{ steps.python-peer.outputs.commit }}
+          path: upstream/python-drdid
+          fetch-depth: 0
+          persist-credentials: false
+
       - name: Record checked-out commits
         run: |
           python - <<'PY'
@@ -75,7 +101,8 @@ jobs:
           workspace = Path(os.environ['GITHUB_WORKSPACE'])
           output = Path(os.environ['REPORT_DIR'])
           output.mkdir(parents=True, exist_ok=True)
-          paths = {'csdid': 'csdid', 'did': 'upstream/did', 'DRDID': 'upstream/DRDID'}
+          paths = {'csdid': 'csdid', 'did': 'upstream/did', 'DRDID': 'upstream/DRDID',
+                   'python_drdid': 'upstream/python-drdid'}
           commits = {
               name: subprocess.check_output(
                   ['git', '-C', str(workspace / path), 'rev-parse', 'HEAD'], text=True).strip()
@@ -87,7 +114,7 @@ jobs:
       - name: Install Python package and test dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install pytest .
+          python -m pip install pytest "$GITHUB_WORKSPACE/upstream/python-drdid" .
 
       - name: Run canonical Python tests and automation failure tests
         run: |

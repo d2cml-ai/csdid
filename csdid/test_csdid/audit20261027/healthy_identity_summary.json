@@ -1,0 +1,64 @@
+{
+  "status": "bit_identical",
+  "baseline_commit": "b2e3b0baae0f4226e90e016b73cb0baf9456c3e2",
+  "workflows": 240,
+  "aggregations": 960,
+  "sampling_routes": [
+    "balanced_panel",
+    "balanced_panel_forced_varying_RC",
+    "genuine_repeated_cross_sections",
+    "unbalanced_panel"
+  ],
+  "methods": [
+    "dr",
+    "ipw",
+    "reg"
+  ],
+  "faster_modes": [
+    false,
+    true
+  ],
+  "weight_scales": [
+    1e-50,
+    1e-10,
+    1.0,
+    10000000000.0,
+    1e+50
+  ],
+  "inference": [
+    "analytic",
+    "multiplier_bootstrap_199_draws"
+  ],
+  "exact_sha256_field_comparisons": 1920,
+  "fields": {
+    "MP": 240,
+    "results": 240,
+    "simple": 240,
+    "dynamic": 240,
+    "group": 240,
+    "calendar": 240,
+    "warnings": 240,
+    "RNG": 240
+  },
+  "differences": [],
+  "scope": "Complete public MP/results/four aggregate object graphs plus warnings and NumPy RNG state. Cyclic ATTgt references inside aggte call metadata encoded by class; referenced MP/results hashed separately. Numeric arrays compare exact dtype/shape/bytes; floats compare hexadecimal representation.",
+  "dependencies": {
+    "drdid": "1.1.6",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "scipy": "1.18.1",
+    "statsmodels": "0.15.0"
+  },
+  "script_sha256": "45c1891eda3ecb94641b41c17127139a6234376a809feb6fa1b8cc224e1794d4",
+  "runtime_sha256": {
+    "csdid/aggte_fnc/compute_aggte.py": "be4c92842a6c356c72b9e5c67f40234d54e92a3fadce80bbf0b9b30b37c7b3af",
+    "csdid/aggte_fnc/utils.py": "5385765417e65c291cc7d1ba38b67809374b1814127bbf0c6e9342ba09845354",
+    "csdid/attgt_fnc/compute_att_gt.py": "07509a263025828adc46500959c52955b9fb50f5593d8dbce286ee598ae07851",
+    "csdid/attgt_fnc/compute_att_gt2.py": "69fae043bd94147a71b817dd45ad874b9943531c8a8c3d5f99cc50a17584bda6",
+    "csdid/attgt_fnc/compute_att_gt_shared.py": "3d048024cb804d8461917bfe61e822c91d4aa7cc2fda3d2d6a7d495e829aaf1b",
+    "csdid/attgt_fnc/drdid_trim.py": "8dbc44a427fd5fccfee12b69a333dc8e34c3bd59785a5653e7580c6140e255e9",
+    "csdid/attgt_fnc/preprocess_did.py": "ea36bd4ba29ee6134d2d2a3a77bc3fe92f2bb121e4874d08316f59062deeea99",
+    "csdid/utils/weights.py": "e35d418cc81369ba4728b245d9856cc2c993a4bd0854d8ef86266fe600dbdf6c"
+  },
+  "weight_dtype": "float64 for the audited ordinary workflow grid; float32 precision corrections are tested separately against R."
+}

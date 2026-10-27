@@ -1,8 +1,10 @@
 """Compare local R Git trees with the committed numerical/coverage baseline.
 
-This stdlib-only command never fetches sources or translates tests. Every change
-under tests/ requires a human coverage review, including helpers and fixtures.
-Exit codes: 0 = no test drift, 3 = test drift, 2 = invalid/unavailable evidence.
+This stdlib-only command never fetches sources or translates tests. Every
+tracked Git-tree change requires human review, including runtime sources,
+tests, helpers, fixtures, documentation and build metadata. Test and other
+source changes remain separate evidence categories.
+Exit codes: 0 = no tracked-tree drift, 3 = review required, 2 = invalid evidence.
 """
 from __future__ import annotations
 
@@ -206,8 +208,7 @@ def _audit_package(package, repo, baseline, crosswalk_path):
             test_changes.append(change)
         else:
             source_changes.append(change)
-    status = ("manual_review_required" if test_changes else
-              "source_only_changes" if source_changes else "unchanged")
+    status = "manual_review_required" if test_changes or source_changes else "unchanged"
     return {
         "baseline_commit": commit, "current_commit": head, "status": status,
         "baseline_crosswalk_test_count": len(coverage),
@@ -227,9 +228,10 @@ def audit(did, drdid, baseline=DEFAULT_BASELINE, did_crosswalk=DEFAULT_CROSSWALK
     source_drift = any(item["source_changes"] for item in packages.values())
     return {
         "schema_version": 1,
-        "status": "manual_review_required" if test_drift else "source_only_changes" if source_drift else "unchanged",
-        "exit_code": 3 if test_drift else 0,
+        "status": "manual_review_required" if test_drift or source_drift else "unchanged",
+        "exit_code": 3 if test_drift or source_drift else 0,
         "comparison": "pinned baseline Git tree versus checkout HEAD; no network access",
+        "review_drift_scope": "all tracked Git-tree paths, including runtime sources, tests, documentation and build metadata",
         "test_drift_scope": "all tracked paths under tests/, including helpers and fixtures",
         "coverage_limit": "Declarations and prior crosswalk entries are evidence for manual review; automation does not port tests or establish assertion coverage.",
         "packages": packages,
@@ -237,10 +239,11 @@ def audit(did, drdid, baseline=DEFAULT_BASELINE, did_crosswalk=DEFAULT_CROSSWALK
 
 
 def _markdown(report):
-    lines = ["# R upstream test-change audit", "", f"Status: **{report['status']}** (exit {report['exit_code']}).", ""]
+    lines = ["# R upstream change audit", "", f"Status: **{report['status']}** (exit {report['exit_code']}).", ""]
     if report["status"] == "structural_failure":
         return "\n".join(lines + [report["error"], ""])
-    lines.extend([report["coverage_limit"], "", report["test_drift_scope"] + ".", ""])
+    lines.extend([report["coverage_limit"], "", "Review scope: " + report["review_drift_scope"] + ".",
+                  "Test inventory: " + report["test_drift_scope"] + ".", ""])
     for package, result in report["packages"].items():
         lines.extend([
             f"## {package}", "",
@@ -256,7 +259,7 @@ def _markdown(report):
                 lines.append(f"| `{path}` | {change['status']} | {status} |")
             lines.extend(["", "Every listed test-tree change requires manual coverage review; prior coverage is not a new-tree verdict.", ""])
         if result["source_changes"]:
-            lines.extend(["Other tracked-file changes (reported separately):", ""])
+            lines.extend(["Other tracked-file changes (manual source review required):", ""])
             for change in result["source_changes"]:
                 lines.append(f"- {change['status']}: `{change['path']}`")
             lines.append("")

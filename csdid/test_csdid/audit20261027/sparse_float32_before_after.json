@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "description": "Independent strict proof exposed ordinary public float32 aggregation precision loss after the initial mean-underflow repair. Both float32 unit and tiny masks now agree with their exact R double representations.",
+  "before": {
+    "phase": "Mean-underflow correction present; public aggregation still reduced ordinary float32 weights in float32.",
+    "status": "failed",
+    "checks": {
+      "cross_language": {
+        "passed": 44,
+        "failed": 4
+      },
+      "python_modes": {
+        "passed": 12,
+        "failed": 0
+      },
+      "r_modes": {
+        "passed": 12,
+        "failed": 0
+      },
+      "python_weight_units": {
+        "passed": 10,
+        "failed": 2
+      },
+      "r_weight_units": {
+        "passed": 12,
+        "failed": 0
+      }
+    },
+    "maximum_cross_language_absolute_errors": {
+      "att": 1.503241975342462e-13,
+      "cell_if": 6.068034963391256e-11,
+      "cell_se": 1.191269305422793e-13,
+      "aggregate_se": 3.516648083845553e-11,
+      "aggregate_if": 3.5882548665711056e-07
+    },
+    "python_runtime_source_tree_sha256": "653c05268a28d40b3539e9f4bc576ac3e7b23abf44aaf5729b6f9945522cea1d",
+    "original_result_sha256": "bfd3647c80e40912d96c6e02c22c5cb4d488a6443af4ae2ad0ec3117ed5a83da",
+    "payload_sha256": {
+      "r_references.json.gz": "d75996a28b4d1e9717281f16ea4e4582faad00fa960e7e85bbdc35b227d7b758",
+      "python_payloads.json.gz": "3743c4f653226a8abdc8a5750f1552e3fcb7610f2ca29d40ba8fa5e3b7054b02",
+      "cases.json": "f52dfdeb2f0b9391e7a5af275aa26792d09cc70f7a1de464388b686735370b22",
+      "sessionInfo.txt": "df05ca84b8e937324e8318bd08d64c331ff494666cbe28df19eef8e1a3536b96"
+    },
+    "failing_cases": [
+      {
+        "category": "cross_language",
+        "case": "two_panel_dr_1e+00__standard vs two_panel_dr_1e+00__standard"
+      },
+      {
+        "category": "cross_language",
+        "case": "two_panel_dr_1e+00__standard vs two_panel_dr_1e+00__fast"
+      },
+      {
+        "category": "cross_language",
+        "case": "two_panel_dr_1e+00__fast vs two_panel_dr_1e+00__standard"
+      },
+      {
+        "category": "cross_language",
+        "case": "two_panel_dr_1e+00__fast vs two_panel_dr_1e+00__fast"
+      },
+      {
+        "category": "python_weight_units",
+        "case": "two_panel_dr_1e-45__fast"
+      },
+      {
+        "category": "python_weight_units",
+        "case": "two_panel_dr_1e-45__standard"
+      }
+    ],
+    "failed_contract": "Single-cohort aggregate influence must equal its cell influence; ordinary float32 baseline differed by 3.588e-7 and exceeded the unchanged strict comparison tolerance."
+  },
+  "after": {
+    "status": "passed",
+    "checks": {
+      "cross_language": {
+        "passed": 48,
+        "failed": 0
+      },
+      "python_modes": {
+        "passed": 12,
+        "failed": 0
+      },
+      "r_modes": {
+        "passed": 12,
+        "failed": 0
+      },
+      "python_weight_units": {
+        "passed": 12,
+        "failed": 0
+      },
+      "r_weight_units": {
+        "passed": 12,
+        "failed": 0
+      }
+    },
+    "maximum_cross_language_absolute_errors": {
+      "att": 1.503241975342462e-13,
+      "cell_if": 6.068034963391256e-11,
+      "cell_se": 1.191269305422793e-13,
+      "aggregate_se": 1.191269305422793e-13,
+      "aggregate_if": 6.068034963391256e-11
+    },
+    "python_runtime_source_tree_sha256": "b6273a2563eca4a428e706b76c3cf41933d4d300d280972d47f9de68a9ac3185",
+    "record": "historical_sparse_float32_validation_afa674b.json"
+  },
+  "tolerance_policy_unchanged": true,
+  "source_pins_unchanged": true,
+  "original_failed_payloads_retained_outside_repository": true,
+  "latest_installed_pair": {
+    "record": "sparse_float32_validation.json",
+    "guard": "sparse_float32_installed_guard.json",
+    "packages": {
+      "csdid": "0.4.4",
+      "drdid": "1.1.7"
+    },
+    "status": "passed"
+  }
+}

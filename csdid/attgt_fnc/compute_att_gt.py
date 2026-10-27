@@ -2,6 +2,7 @@ import numpy as np, pandas as pd
 import patsy 
 from drdid import reg_did
 from csdid.attgt_fnc import drdid_trim
+from csdid.utils.weights import _rescale_weights_if_mean_overflows
 from csdid.attgt_fnc.compute_att_gt_shared import (
     select_estimators, last_pretreatment_index, plan_cell, rcond_check_fail,
     drdid_design_singular, overlap_check_fail, rc_outcome_has_too_few_obs, BREAK, BASE_ZERO)
@@ -168,6 +169,12 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 ypost, covariates = map(np.array, [ypost, covariates])
 
                 est_att_f = est_panel
+                if apply_guard:
+                    # R and the shared standalone kernels operate on doubles.
+                    # Cast before subtraction in legacy regression kernels too.
+                    ypre = np.asarray(ypre, dtype=float)
+                    ypost = np.asarray(ypost, dtype=float)
+                    w = _rescale_weights_if_mean_overflows(np.asarray(w, dtype=float))
 
                 # Propensity-overlap guard (matches R, checked BEFORE the singular
                 # guard so its precedence/message match): NA a dr/ipw cell whose PS
@@ -320,6 +327,9 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 #-----------------------------------------------------------------------------
                 
                 est_att_f = est_rc
+                if apply_guard:
+                    Y = np.asarray(Y, dtype=float)
+                    w = _rescale_weights_if_mean_overflows(np.asarray(w, dtype=float))
 
                 if apply_rcond and rc_outcome_has_too_few_obs(
                         G, post, w, covariates.shape[1], include_treated=est_method == "dr"):

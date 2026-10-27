@@ -1,0 +1,17 @@
+{
+  "output": "/var/folders/wp/h2q1pf3x08v3wqgfz9043j300000gn/T/csdid-r-source-only-probe-20261027.jkj3egs9",
+  "source_probe_commit": "ed75856f1e9282bd177cb32865f0cdd43102cbfb",
+  "runner_exit": 3,
+  "status": "coverage_review_required",
+  "stages": {
+    "numerical_comparison": 0,
+    "r_generation": 0,
+    "test_coverage_audit": 3
+  },
+  "reviewed_references_unchanged": true,
+  "did_test_changes": 0,
+  "did_other_changes": 1,
+  "changed_paths": [
+    "R/utility_functions.R"
+  ]
+}

@@ -2,6 +2,8 @@ import numpy as np
 import statsmodels.api as sm
 import warnings
 
+from csdid.utils.weights import _normalize_weights
+
 
 # Reuse is restricted to the original deterministic statsmodels implementation.
 # A caller replacing GLM (or its solver) must still see every cell's fit.
@@ -50,7 +52,7 @@ def _fit_panel_pscore(D, int_cov, i_weights, cache):
 def _add_intercept(covariates, n):
     if covariates is None:
         return np.ones((n, 1))
-    covariates = np.asarray(covariates)
+    covariates = np.asarray(covariates, dtype=float)
     if covariates.ndim == 1:
         covariates = covariates[:, None]
     if np.all(covariates[:, 0] == 1):
@@ -92,18 +94,19 @@ def _pscore_hessian(int_cov, i_weights, ps_fit):
 
 def std_ipw_did_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.995,
                       *, _pscore_cache=None):
-    D = np.asarray(D).flatten()
+    D = np.asarray(D, dtype=float).flatten()
     n = len(D)
-    delta_y = np.asarray(y1 - y0).flatten()
+    delta_y = (np.asarray(y1, dtype=float).flatten()
+               - np.asarray(y0, dtype=float).flatten())
     int_cov = _add_intercept(covariates, n)
 
     if i_weights is None:
         i_weights = np.ones(n)
     else:
-        i_weights = np.asarray(i_weights).flatten()
+        i_weights = np.asarray(i_weights, dtype=float).flatten()
         if np.min(i_weights) < 0:
             raise ValueError("i_weights must be non-negative")
-    i_weights = i_weights / np.mean(i_weights)
+    i_weights = _normalize_weights(i_weights)
 
     pscore_results = _fit_panel_pscore(D, int_cov, i_weights, _pscore_cache)
     if not pscore_results.converged:
@@ -141,18 +144,19 @@ def std_ipw_did_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.9
 
 def drdid_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.995,
                 *, _pscore_cache=None):
-    D = np.asarray(D).flatten()
+    D = np.asarray(D, dtype=float).flatten()
     n = len(D)
-    deltaY = np.asarray(y1 - y0).flatten()
+    deltaY = (np.asarray(y1, dtype=float).flatten()
+              - np.asarray(y0, dtype=float).flatten())
     int_cov = _add_intercept(covariates, n)
 
     if i_weights is None:
         i_weights = np.ones(n)
     else:
-        i_weights = np.asarray(i_weights).flatten()
+        i_weights = np.asarray(i_weights, dtype=float).flatten()
         if np.min(i_weights) < 0:
             raise ValueError("i_weights must be non-negative")
-    i_weights = i_weights / np.mean(i_weights)
+    i_weights = _normalize_weights(i_weights)
 
     pscore_results = _fit_panel_pscore(D, int_cov, i_weights, _pscore_cache)
     if not pscore_results.converged:
@@ -215,19 +219,19 @@ _ORIGINAL_PANEL_ESTIMATORS = (drdid_panel, std_ipw_did_panel)
 
 
 def std_ipw_did_rc(y, post, D, covariates=None, i_weights=None, trim_level=0.995):
-    D = np.asarray(D).flatten()
-    y = np.asarray(y).flatten()
-    post = np.asarray(post).flatten()
+    D = np.asarray(D, dtype=float).flatten()
+    y = np.asarray(y, dtype=float).flatten()
+    post = np.asarray(post, dtype=float).flatten()
     n = len(D)
     int_cov = _add_intercept(covariates, n)
 
     if i_weights is None:
         i_weights = np.ones(n)
     else:
-        i_weights = np.asarray(i_weights).flatten()
+        i_weights = np.asarray(i_weights, dtype=float).flatten()
         if np.min(i_weights) < 0:
             raise ValueError("i_weights must be non-negative")
-    i_weights = i_weights / np.mean(i_weights)
+    i_weights = _normalize_weights(i_weights)
 
     pscore_model = sm.GLM(D, int_cov, family=sm.families.Binomial(), freq_weights=i_weights)
     pscore_results = pscore_model.fit()
@@ -278,19 +282,19 @@ def std_ipw_did_rc(y, post, D, covariates=None, i_weights=None, trim_level=0.995
 
 
 def drdid_rc(y, post, D, covariates=None, i_weights=None, trim_level=0.995):
-    D = np.asarray(D).flatten()
+    D = np.asarray(D, dtype=float).flatten()
     n = len(D)
-    y = np.asarray(y).flatten()
-    post = np.asarray(post).flatten()
+    y = np.asarray(y, dtype=float).flatten()
+    post = np.asarray(post, dtype=float).flatten()
     int_cov = _add_intercept(covariates, n)
 
     if i_weights is None:
         i_weights = np.ones(n)
     else:
-        i_weights = np.asarray(i_weights).flatten()
+        i_weights = np.asarray(i_weights, dtype=float).flatten()
         if np.min(i_weights) < 0:
             raise ValueError("i_weights must be non-negative")
-    i_weights = i_weights / np.mean(i_weights)
+    i_weights = _normalize_weights(i_weights)
 
     pscore_model = sm.GLM(D, int_cov, family=sm.families.Binomial(), freq_weights=i_weights)
     pscore_results = pscore_model.fit()

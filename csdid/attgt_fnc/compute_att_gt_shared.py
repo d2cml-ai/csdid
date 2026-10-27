@@ -14,6 +14,7 @@ import numpy as np
 
 from drdid import reg_did
 from csdid.attgt_fnc import drdid_trim
+from csdid.utils.weights import _weight_mean, _normalize_weights
 
 
 def select_estimators(est_method):
@@ -59,7 +60,7 @@ def rcond_check_fail(covariates_control, treated=None, i_weights=None):
     else:
         w = np.asarray(i_weights, dtype=float).ravel()
         with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
-            w = w / np.mean(w)
+            w = _normalize_weights(w)
         control &= np.isfinite(w) & (w > 0)
         if not control.any():
             return True
@@ -101,7 +102,7 @@ def overlap_check_fail(int_cov, treated, intercept_only=None, i_weights=None):
     if i_weights is not None:
         w = np.asarray(i_weights, dtype=float).ravel()
         with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
-            normalized = w / np.mean(w)
+            normalized = _normalize_weights(w)
         supported = np.isfinite(normalized) & (normalized > 0)
         if not supported.all():
             x, y = x[supported], y[supported]
@@ -177,7 +178,7 @@ def drdid_design_singular(int_cov, i_weights, treated, est_method, post=None):
     """
     treated = np.asarray(treated).astype(bool)
     with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
-        i_weights = np.asarray(i_weights, dtype=float) / np.mean(i_weights)
+        i_weights = _normalize_weights(np.asarray(i_weights, dtype=float))
     control = ~treated
     masks = []
     if est_method in ("dr", "reg"):
@@ -212,7 +213,7 @@ def rc_outcome_has_too_few_obs(treated, post, i_weights, n_covariates,
     """
     w = np.asarray(i_weights, dtype=float).ravel()
     with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
-        scale = np.mean(w) if w.size else np.nan
+        scale = _weight_mean(w) if w.size else np.nan
         if not np.isfinite(scale) or scale <= 0:
             return True
         normalized = w / scale
