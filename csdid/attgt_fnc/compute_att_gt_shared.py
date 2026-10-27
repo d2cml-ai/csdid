@@ -37,45 +37,52 @@ def select_estimators(est_method):
     return panel, rc
 
 
-def rcond_check_fail(covariates_control):
-    """Per-(g, t) regression-feasibility guard, mirroring R `did`'s
-    ``rcond_check_fail`` (DRDID >= 1.3.0 era): return ``True`` when the
-    control-unit design's Gram matrix ``Xc'Xc`` is singular or numerically
-    ill-conditioned, i.e. ``rcond(crossprod(control_covs)) < .Machine$double.eps``.
+def rcond_check_fail(covariates_control, treated=None, i_weights=None):
+    """Check the actual normalized-weight control Gram, as in R ``did``.
 
-    ``covariates_control`` is the design matrix (intercept column included, as the
-    port already builds it) restricted to the comparison's control units (treatment
-    indicator ``== 0``). R uses the LAPACK 1-norm reciprocal condition number, so we
-    match with ``1 / np.linalg.cond(M, 1)`` and the ``np.finfo(float).eps`` cutoff
-    (= R's ``.Machine$double.eps``). A singular Gram (``inv`` fails / non-finite
-    cond) gives reciprocal condition number 0 -> fail, as in R; with no control
-    units the Gram is empty and the check fails, mirroring R's intercept-only
-    ``!any(y == 0)`` closed form. Applied only for outcome-regression methods
-    (``dr``/``reg``); ``ipw`` and custom estimators are exempt, matching R.
+    The one-argument form accepts an already restricted control design. Passing
+    ``treated`` allows normalization on the complete cell before restricting its
+    controls, which matters when a positive weight rounds to zero locally.
     """
-    xc = np.asarray(covariates_control, dtype=float)
-    if xc.ndim == 1:
-        xc = xc[:, None]
-    if xc.shape[0] == 0:
-        return True  # no control units
-    gram = xc.T @ xc
+    x = np.asarray(covariates_control, dtype=float)
+    if x.ndim == 1:
+        x = x[:, None]
+    control = (np.ones(len(x), dtype=bool) if treated is None
+               else np.asarray(treated).ravel() == 0)
+    if i_weights is None:
+        xc = x[control]
+        if len(xc) == 0:
+            return True
+        if x.shape[1] == 1 and np.all(x[:, 0] == 1):
+            return False
+        gram = xc.T @ xc
+    else:
+        w = np.asarray(i_weights, dtype=float).ravel()
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            w = w / np.mean(w)
+        control &= np.isfinite(w) & (w > 0)
+        if not control.any():
+            return True
+        if x.shape[1] == 1 and np.all(x[:, 0] == 1):
+            return False
+        xc = x[control]
+        gram = (xc * w[control, None]).T @ xc / len(x)
     try:
         rcond = 1.0 / np.linalg.cond(gram, 1)
     except np.linalg.LinAlgError:
-        return True  # singular Gram -> reciprocal condition number 0
-    if not np.isfinite(rcond):
         return True
-    return rcond < np.finfo(float).eps
+    return bool(not np.isfinite(rcond) or rcond < np.finfo(float).eps)
 
 
-def overlap_check_fail(int_cov, treated, intercept_only=None):
+def overlap_check_fail(int_cov, treated, intercept_only=None, i_weights=None):
     """Per-(g, t) propensity-overlap guard, mirroring R `did`'s
     ``overlap_check_fail`` (DRDID >= 1.3.0 era): NA a ``dr``/``ipw`` cell whose
     propensity-score model is (near-)separated, rather than letting exploding IPW
     weights return a garbage estimate.
 
     R fits the treatment logit ``treated ~ int_cov`` on the 2x2 cell sample
-    (``fastglm::fastglmPure``, IRLS) and fails when ``max(fitted) >= 0.999``. We
+    (``fastglm::fastglmPure``, IRLS) on positive normalized-weight support and
+    fails when ``max(fitted) >= 0.999``. The preliminary fit stays unweighted. We
     use ``statsmodels`` GLM (Binomial / IRLS) -- the same fit the audit harness
     uses to MEASURE the overlap mechanism -- so the port's NA decision tracks R's.
 
@@ -91,6 +98,15 @@ def overlap_check_fail(int_cov, treated, intercept_only=None):
     x = np.asarray(int_cov, dtype=float)
     if x.ndim == 1:
         x = x[:, None]
+    if i_weights is not None:
+        w = np.asarray(i_weights, dtype=float).ravel()
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+            normalized = w / np.mean(w)
+        supported = np.isfinite(normalized) & (normalized > 0)
+        if not supported.all():
+            x, y = x[supported], y[supported]
+    if y.size == 0:
+        return True
     if intercept_only is None:
         intercept_only = (x.shape[1] == 1)
     if intercept_only:
@@ -129,6 +145,10 @@ def _gram_singular(int_cov, i_weights, mask):
         return True
     x = np.asarray(int_cov, dtype=float)[m]
     w = np.asarray(i_weights, dtype=float)[m]
+    positive = np.isfinite(w) & (w > 0)
+    if not positive.any():
+        return True
+    x, w = x[positive], w[positive]
     gram = (x * w[:, None]).T @ x
     try:
         rcond = 1.0 / np.linalg.cond(gram, 1)
@@ -156,6 +176,8 @@ def drdid_design_singular(int_cov, i_weights, treated, est_method, post=None):
     (callable) estimators are exempt and handled by the caller.
     """
     treated = np.asarray(treated).astype(bool)
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+        i_weights = np.asarray(i_weights, dtype=float) / np.mean(i_weights)
     control = ~treated
     masks = []
     if est_method in ("dr", "reg"):
@@ -178,6 +200,27 @@ def drdid_design_singular(int_cov, i_weights, treated, est_method, post=None):
         if _gram_singular(int_cov, i_weights, np.ones(len(treated), dtype=bool)):
             return True
     return False
+
+
+def rc_outcome_has_too_few_obs(treated, post, i_weights, n_covariates,
+                               include_treated=True):
+    """Necessary physical-size check before each fitted RC outcome design.
+
+    Count finite positive weights after the estimator's local normalization;
+    even a positive subnormal counts, but a weight rounded to zero does not.
+    Passing this check does not certify full rank.
+    """
+    w = np.asarray(i_weights, dtype=float).ravel()
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore", under="ignore"):
+        scale = np.mean(w) if w.size else np.nan
+        if not np.isfinite(scale) or scale <= 0:
+            return True
+        normalized = w / scale
+    positive = np.isfinite(normalized) & (normalized > 0)
+    labels = np.asarray(post, dtype=int) + 2 * np.asarray(treated, dtype=int)
+    counts = np.bincount(labels[positive], minlength=4)
+    required = counts if include_treated else counts[:2]
+    return bool(np.any(required < n_covariates))
 
 
 _ORIGINAL_PANEL_GUARDS = (overlap_check_fail, rcond_check_fail, drdid_design_singular)
@@ -229,8 +272,10 @@ def plan_cell(g, t_i, tlist, anticipation, base_period, tfac):
             return pret, BREAK
         pret = idx
 
-    # Post-treatment period: reference is the last pre-treatment period.
-    if g <= tn:
+    # Treatment and anticipation periods share the last unaffected reference.
+    # Within the anticipation window, adjacent-period differences would remove
+    # an anticipation effect that persists over more than one period.
+    if g - anticipation <= tn:
         idx = last_pretreatment_index(g, tl, anticipation)
         if idx is None:
             warnings.warn(

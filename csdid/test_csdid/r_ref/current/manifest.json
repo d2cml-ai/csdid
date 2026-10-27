@@ -1,39 +1,39 @@
 {
   "schema_version": 1,
-  "generated_utc": "2026-10-24 03:58:13 UTC",
+  "generated_utc": "2026-10-27 01:28:38 UTC",
   "sources": {
     "did": {
-      "commit": "74b88eb07f1faa644df1271055a0f77848f6550c",
+      "commit": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
       "tracked_source_clean": true,
       "files_sha256": {
-        "DESCRIPTION": "ba1d9bb88db6e6d4c832a595ef9dbc7b449850dfdba7e512a8b62236129b61b4",
+        "DESCRIPTION": "b1341908477e1508d46d8e3d0f3d90271e12c13469935492842b14cd0e2f6cd5",
         "NAMESPACE": "dd0ca6151c06a4d3d9967349a2b71522584a444f42b1825befd715ad79f4a58d",
         "R/AGGTEobj.R": "d712036f46be633bf766fb26f1865503f4e6bfd2ae893381f819659615fbc799",
         "R/DIDparams.R": "756a3bd0d97a96f85dece2a005964fd87f3d7936d4f9347878fd1dd5202a47a1",
         "R/DIDparams2.R": "d76b2cf5a684b2cbd8aa8b1bd66b8bb58265e88ee0c8f844a314abebebea2a18",
-        "R/MP.R": "3f2a3df0bbf36cb13175b9a0aa9819cae2eaa9fe8f5d625bc84764f6ce4bfc2e",
+        "R/MP.R": "77c263bf742b56c8ce972eeec4087775e3078bf4fee1cae38231864266573dee",
         "R/MP.TEST.R": "8bfa3098e6e7df13a5d87575614298f43087635d7dae20bd1597b2212c3e52e1",
-        "R/aggte.R": "5600f40d704e41331b0f8c64f6543e20a52c87d5e4bf852e7fb3b61d042bd503",
-        "R/att_gt.R": "c36ea7217bfbd88ed5e316ca2a785aec39525dd1b7d9d62807b9a26cc73416f9",
-        "R/compute.aggte.R": "0ef436e2609ef612e8fecb1947b23f8e2faf387188bcff4bb49fcabebf17ac57",
-        "R/compute.att_gt.R": "f4b1d7510f0e0affc7c8224bdd848610ce21eb9671ab7bb33344ef324a69f8e0",
-        "R/compute.att_gt2.R": "60aa6da9e4feb680c3c1d3905dec3d2d7eb4fd43ca3753513a5e48060c02213b",
-        "R/conditional_did_pretest.R": "bd3a190a98edd9e5a6a68e14cdc303e2f47696fdfd38e5e9ad794ff9861ce276",
+        "R/aggte.R": "d095933c446a64947b74a4d9fa0719589b7897cc7f5362a5dd16963729b96b73",
+        "R/att_gt.R": "2c7717458728da54a3508d4ce34882e458ea411be1613d885bbdc62023b9469b",
+        "R/compute.aggte.R": "f080f7c75bd7f95a560d22037058771803bfa7dc1f37a9ac33365e4bb3b43a2d",
+        "R/compute.att_gt.R": "720165997d1f43de03b1cf15f8792fff3011530af75d215b883daa597c5837bd",
+        "R/compute.att_gt2.R": "cec9adec845940c225684c663c2998e57b7f439da2623770c35937defc4e4543",
+        "R/conditional_did_pretest.R": "6b4a69887b3173498664dc6b979f2de3f51bac331ef062212c47d51dac2c4ba7",
         "R/data.R": "9980a59e1ab898186cbbb92a392f6ddefd6cb8855c17508cead4951ec5e81eef",
         "R/ggdid.R": "7c0c17345edefc8608c1ccfde301cdd69ebc10c70495001ccc52766213a91718",
         "R/gplot.R": "5249fc0014d9127930cc8a2cc00656b9ec9a48a3f37dae5773bafe21b5c1e9eb",
         "R/honest_did/honest_did.R": "4dda2f7c28dc9414a87e4e57c0cfe9b482a9fa9dc066a5e9687f6a22bb52870a",
         "R/imports.R": "c8e0f1b77a44642ac217b94126e76605fd397d7cfdebcd8d531231405566dc3a",
-        "R/mboot.R": "2f1bff57c6e5ed9e8d46e16d5fef016f5a80e904c7e68d0637af22caa240a4b3",
+        "R/mboot.R": "71f2075cdc483e4decabaaa8a373c7311aeb6d0a120d2cf4f1f213ceed3ffdef",
         "R/pre_process_did.R": "eee865f201b9fc3f2ba60a9e6e2e61135069b8224f5b93af753211f2ee566a46",
-        "R/pre_process_did2.R": "ee7d8053c29827a6002999d44d23039d6aa996b92fbf0b02a76fce9cd3105749",
+        "R/pre_process_did2.R": "8a97eb9917da8e7e5737f7b9b2108bcab969f1f64b7dfeb055d837ef6ab0f0a6",
         "R/process_attgt.R": "60e673eb11f541da756eb5409520fec4f51b214b3585b284ca3e4ec7f47bb2eb",
         "R/simulate_data.R": "a520167f9a854b5df50f14ea85759a204f933d73aad5f560f04743cbbaf7f62d",
         "R/tidy.R": "371bf641f004caa37326bc29eb6eb6ffd8477d2e6f36268c45236fbecf7119e6",
-        "R/utility_functions.R": "8989ba702c84c15b7a8644cd53b6e6806b42ade12d00cb375b7fdcdd63d07ca4",
+        "R/utility_functions.R": "85a51bd6313bd87379543a6bdffb0d8b20d4b9f763d1732071ce48e0e4c994d5",
         "R/zzz.R": "1f4295221c822967e7de476fd67abbe9c1b756de74c4afd506f5b5b5571c5d85"
       },
-      "source_tree_sha256": "f729e7d7ca84907f2ccf7c2b735d77010d7ea38448f22b644f5bab7facf9490b"
+      "source_tree_sha256": "c78c58814dd71b3a7a010bae7f4fdec17cc8b256ff6e4781a3007e158303139e"
     },
     "DRDID": {
       "commit": "eaac3b49cd225d0d7706c633858555a5f204e21e",
@@ -105,7 +105,7 @@
     }
   },
   "packages": {
-    "did": "2.5.1.902",
+    "did": "2.5.1.904",
     "DRDID": "1.4.0",
     "fastglm": "0.1.1",
     "Matrix": "1.7.5",
@@ -179,7 +179,7 @@
     "cases.json": "2c8acb36421787eadef586f49709dd4a201bb4e761ace9203992114cc72dfa17",
     "references.json.gz": "6b48d1ba8b4629124f0d73e6b1fac9b01070b969ed2c817ad62cd88cc8f302d2",
     "r_mode_checks.json": "5e30e71e675cbd2a074e9786dd25a0c90fed999e0b83120638f0ec4462547084",
-    "sessionInfo.txt": "29dfbeb74f0e38187ea97e0c19654757da319616d4db3557f603cd20fe71b3df",
-    "generate.R": "e91e7ac764a83e9988710c4c98eb595b37a97e943e22b352dd1f96c1280ee97c"
+    "sessionInfo.txt": "df05ca84b8e937324e8318bd08d64c331ff494666cbe28df19eef8e1a3536b96",
+    "generate.R": "7941af05eba75862a94aaba590a8ba151362521b6423694919a9f4a4d1ead380"
   }
 }

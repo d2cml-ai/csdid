@@ -16,7 +16,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] did_2.5.1.902  DRDID_1.4.0    testthat_3.3.2
+[1] did_2.5.1.904  DRDID_1.4.0    testthat_3.3.2
 
 loaded via a namespace (and not attached):
  [1] gtable_0.3.6         ggplot2_4.0.3        recipes_1.3.3       

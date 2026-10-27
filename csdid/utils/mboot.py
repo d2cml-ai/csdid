@@ -121,12 +121,14 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
 
     # Handle vector and matrix case differently to get nxk matrix
     if isinstance(bres, np.ndarray) and bres.ndim == 1:
-        bres = np.expand_dims(bres, axis=0)
+        bres = bres.reshape(int(biters), -1)
     elif isinstance(bres, np.ndarray) and bres.ndim > 2:
         bres = bres.transpose()
 
     # Non-degenerate dimensions
-    ndg_dim = np.logical_and(~np.isnan(np.sum(bres, axis=0)), np.sum(bres ** 2, axis=0) > np.sqrt(np.finfo(float).eps) * 10)
+    # A positive bootstrap dimension remains usable in any outcome units.
+    # Avoid squaring here, which can underflow for small valid dimensions.
+    ndg_dim = np.all(np.isfinite(bres), axis=0) & np.any(bres != 0, axis=0)
     bres = bres[:, ndg_dim]
 
     # All dimensions degenerate: no finite bootstrap statistics (matches R's ncol==0 guard).
@@ -135,7 +137,10 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
         return {'bres': bres, 'V': np.nan, 'se': se, 'crit_val': np.nan}
 
     # Bootstrap variance matrix (this matrix can be defective because of degenerate cases)
-    V = np.cov(bres, rowvar=False)
+    if len(bres) > 1:
+        V = np.cov(bres, rowvar=False)
+    else:
+        V = np.full((bres.shape[1], bres.shape[1]), np.nan).squeeze()
 
     # Bootstrap standard error
     quantile_75 = np.quantile(bres, 0.75, axis=0, method="inverted_cdf")
@@ -143,6 +148,7 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
     qnorm_75 = norm.ppf(0.75)
     qnorm_25 = norm.ppf(0.25)
     bSigma = (quantile_75 - quantile_25) / (qnorm_75 - qnorm_25)
+    bSigma[~np.isfinite(bSigma) | (bSigma <= 0)] = np.nan
 
     # Critical value for uniform confidence band
     # O7-F1: biters=1 -> 25th and 75th percentiles coincide -> bSigma=0 -> bres/bSigma
@@ -151,7 +157,9 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
     # the function degrades gracefully (crit_val=NaN), matching R's mboot and the
     # existing all-degenerate branch's contract, instead of crashing.
     with np.errstate(divide='ignore', invalid='ignore'):
-        bT = np.max(np.abs(bres / bSigma), axis=1)
+        scaled = np.abs(bres / bSigma)
+    scaled[np.isnan(scaled)] = -np.inf
+    bT = np.max(scaled, axis=1)
     bT = bT[np.isfinite(bT)]
     if bT.size == 0:
         se = np.full(ndg_dim.shape, np.nan)

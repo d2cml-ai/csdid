@@ -90,6 +90,13 @@ def get_agg_inf_func(att, inffunc, whichones, weights_agg, wif=None):
     return thisinffunc
 
 
+def _positive_finite_se(se):
+    """Only positive finite scales support inference, in any outcome units."""
+    values = np.asarray(se)
+    result = np.where(np.isfinite(values) & (values > 0), values, np.nan)
+    return result[()] if result.ndim == 0 else result
+
+
 def get_se(thisinffunc, DIDparams=None):
     alpha = 0.05
     bstrap = False
@@ -101,7 +108,7 @@ def get_se(thisinffunc, DIDparams=None):
 
     if bstrap:
         bout = mboot(thisinffunc, DIDparams)
-        return bout['se']
+        return _positive_finite_se(bout['se'])
     else:
         # Analytical standard errors
         thisinffunc = np.asarray(thisinffunc).flatten()
@@ -140,10 +147,10 @@ def get_se(thisinffunc, DIDparams=None):
                 # where n is the total number of units (not clusters),
                 # matching R did v2.5.1
                 n_units = len(thisinffunc)
-                return np.sqrt(np.sum(cluster_sums**2)) / n_units
+                return _positive_finite_se(np.sqrt(np.sum(cluster_sums**2)) / n_units)
             
         # Standard (iid) analytical SE
-        return np.sqrt(np.mean(thisinffunc**2) / n)
+        return _positive_finite_se(np.sqrt(np.mean(thisinffunc**2) / n))
 
 
 _ORIGINAL_GET_SE = get_se
@@ -192,7 +199,7 @@ def _make_cached_get_se(get_se_func):
         cluster_sums = np.zeros(len(rows))
         for i, index in enumerate(rows):
             cluster_sums[i] = np.sum(influence[index])
-        return np.sqrt(np.sum(cluster_sums**2)) / len(influence)
+        return _positive_finite_se(np.sqrt(np.sum(cluster_sums**2)) / len(influence))
 
     return cached_get_se
 

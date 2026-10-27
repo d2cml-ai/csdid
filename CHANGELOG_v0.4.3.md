@@ -6,6 +6,19 @@ the default. Pass `faster_mode=False` to select the standard path explicitly.
 
 ## Changes that can affect results
 
+- Use the last unaffected period as the reference throughout the declared
+  anticipation window, and exclude that window from the Wald pre-test.
+- Check overlap on positive normalized weight support and regression
+  feasibility on the actual weighted control design. Reject undersized RC
+  outcome regressions before fitting, including varying-weight panel routes.
+- Preserve finite positive standard errors at small outcome scales; treat
+  exact-zero and nonfinite scales as unavailable. Handle a single bootstrap
+  draw without losing columns, with pointwise fallback when bands cannot be
+  estimated.
+- Balance dynamic effects on common originally observed event-time support
+  before removing missing cells or applying display limits.
+- Resolve time-column names directly when filtering and balancing panels,
+  including names containing spaces or punctuation.
 - Correct the signs of the pre-period outcome-regression terms in the
   repeated-cross-section DR influence function. ATT point estimates are
   unchanged, while analytical and bootstrap inference can change.
@@ -36,13 +49,23 @@ the default. Pass `faster_mode=False` to select the standard path explicitly.
   all four DR/IPW kernels, matching current R DRDID. Solver defaults and ATT
   arithmetic are unchanged; influence functions and SEs can change.
 
-The reference R sources are `did` master `74b88eb` (2.5.1.902) and `DRDID`
-master `eaac3b4` (1.4.0). These changes include the relevant behavior in
+The reference R sources are `did` master `48863b6` (2.5.1.904) and `DRDID`
+master `eaac3b4` (1.4.0), verified on 2026-10-26. These changes include the relevant behavior in
 [DID #273](https://github.com/bcallaway11/did/pull/273),
 [DID #275](https://github.com/bcallaway11/did/pull/275), and
-[DRDID #20](https://github.com/pedrohcgs/DRDID/pull/20).
-Unrelated R estimators and anticipation changes absent from the controlling
-`did` master branch are not introduced.
+[DRDID #20](https://github.com/pedrohcgs/DRDID/pull/20), plus the anticipation,
+support, inference, and aggregation fixes consolidated in
+[DID #279](https://github.com/bcallaway11/did/pull/279) and
+[DID #278](https://github.com/bcallaway11/did/pull/278).
+The R-only conditional pre-test has no Python counterpart. R's BMisc version
+requirement does not introduce a Python dependency.
+
+The [2026-10-26 synchronization audit](csdid/test_csdid/UPSTREAM_SYNC_20261026.md)
+records fresh comparisons, remaining numerical limits, and reproduction commands.
+At outcome scale `1e10`, near-zero aggregate influence components fail the
+unchanged absolute tolerance in 36 stress comparisons; R's own modes also
+differ there. These failures are retained, while all public estimate and
+inference fields pass. No fixture inputs or tolerances were relaxed.
 
 ## Performance
 
@@ -62,8 +85,9 @@ Unrelated R estimators and anticipation changes absent from the controlling
   preserving chunk shapes and random streams.
 - Load pyplot when plotting is requested while retaining the plotting helpers.
 
-The estimator formulas, overlap checks, Wald-test filtering, bootstrap draw
-schedule, and explicit standard-mode option are preserved. Performance
+The performance-only stage preserves estimator formulas, overlap checks,
+Wald-test filtering, bootstrap draw schedules, and explicit standard mode.
+The correctness changes above can affect reported results. Performance
 measurements and reproduction instructions are in
 [FASTER_MODE.md](csdid/test_csdid/FASTER_MODE.md).
 

@@ -17,7 +17,7 @@ did_path <- normalizePath(flag("did"), mustWork = TRUE)
 drdid_path <- normalizePath(flag("drdid"), mustWork = TRUE)
 sha256 <- function(path) digest::digest(file = path, algo = "sha256", serialize = FALSE)
 git <- function(path, ...) system2("git", c("-C", shQuote(path), ...), stdout = TRUE)
-pins <- list(did = "74b88eb07f1faa644df1271055a0f77848f6550c",
+pins <- list(did = "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
              DRDID = "eaac3b49cd225d0d7706c633858555a5f204e21e")
 source_info <- function(path, package) {
   head <- git(path, "rev-parse", "HEAD")
@@ -196,8 +196,16 @@ execute <- function(z, fast) {
     ids <- suppressWarnings(as.numeric(rownames(fit$inffunc)))
     stopifnot(length(ids) == nrow(fit$inffunc), all(is.finite(ids)), !anyDuplicated(ids))
     if (!z$constructor$panel) {
-      stopifnot(all(ids >= 1L & ids <= nrow(d)))
-      ids <- d$id[ids]
+      # R creates .rowid after filtering early-treated/missing observations.
+      # It is not generally an index into the original shared CSV. Recover the
+      # original unique observation ID from the retained authoritative frame.
+      retained <- fit$DIDparams$data
+      internal_ids <- retained[[fit$DIDparams$idname]]
+      original_ids <- retained[[z$constructor$idname]]
+      stopifnot(!anyDuplicated(internal_ids), !anyDuplicated(original_ids))
+      position <- match(ids, internal_ids)
+      stopifnot(!anyNA(position))
+      ids <- as.numeric(original_ids[position])
     }
     ord <- order(ids)
     aggs <- setNames(lapply(c("simple", "group", "dynamic", "calendar"), function(kind) {

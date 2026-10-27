@@ -314,13 +314,13 @@ def test_current_r_reference_provenance(references):
     manifest = json.loads((REFERENCE_DIR / "manifest.json").read_text())
     assert manifest["schema_version"] == 1
     expected_commits = {
-        "did": "74b88eb07f1faa644df1271055a0f77848f6550c",
+        "did": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
         "DRDID": "eaac3b49cd225d0d7706c633858555a5f204e21e",
     }
     for package, commit in expected_commits.items():
         assert manifest["sources"][package]["commit"] == commit
         assert manifest["sources"][package]["tracked_source_clean"] is True
-    assert manifest["packages"]["did"] == "2.5.1.902"
+    assert manifest["packages"]["did"] == "2.5.1.904"
     assert manifest["packages"]["DRDID"] == "1.4.0"
     assert manifest["case_count"] == len(CASES) == 25
     expected_artifacts = {

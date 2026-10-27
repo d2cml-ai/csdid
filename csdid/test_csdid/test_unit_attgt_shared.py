@@ -161,9 +161,9 @@ def test_overlap_threshold_is_0999():
     assert overlap_check_fail(np.ones((n, 1)), y_at) is True
 
 
-def test_overlap_empty_no_violation():
-    # pbar defaults to 0.0 for empty -> no violation
-    assert overlap_check_fail(np.zeros((0, 1)), np.array([])) is False
+def test_overlap_empty_support_violates():
+    # R did PR #279 treats an empty (possibly zero-weight) support as invalid.
+    assert overlap_check_fail(np.zeros((0, 1)), np.array([])) is True
 
 
 # --------------------------------------------------------------------------- #

@@ -4,7 +4,7 @@ from drdid import reg_did
 from csdid.attgt_fnc import drdid_trim
 from csdid.attgt_fnc.compute_att_gt_shared import (
     select_estimators, last_pretreatment_index, plan_cell, rcond_check_fail,
-    drdid_design_singular, overlap_check_fail, BREAK, BASE_ZERO)
+    drdid_design_singular, overlap_check_fail, rc_outcome_has_too_few_obs, BREAK, BASE_ZERO)
 
 from csdid.utils.bmisc import panel2cs2
 import warnings
@@ -172,7 +172,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 # Propensity-overlap guard (matches R, checked BEFORE the singular
                 # guard so its precedence/message match): NA a dr/ipw cell whose PS
                 # logit is (near-)separated (max fitted PS >= 0.999).
-                if apply_overlap and overlap_check_fail(covariates, G):
+                if apply_overlap and overlap_check_fail(covariates, G, i_weights=w if weights_name is not None else None):
                     warnings.warn(
                         f"overlap condition violated for group {g} in time period {tn}"
                     )
@@ -183,7 +183,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 # estimating design is singular/ill-conditioned, rather than letting
                 # the solver return an untrustworthy estimate. Covers the control
                 # design (`did` pre-check) and DRDID's weighted estimating designs.
-                if (apply_rcond and rcond_check_fail(covariates[G == 0])) or (
+                if (apply_rcond and rcond_check_fail(covariates, G, i_weights=w if weights_name is not None else None)) or (
                         apply_guard and drdid_design_singular(
                             covariates, w, G, est_method, post=None)):
                     warnings.warn(
@@ -321,10 +321,19 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 
                 est_att_f = est_rc
 
+                if apply_rcond and rc_outcome_has_too_few_obs(
+                        G, post, w, covariates.shape[1], include_treated=est_method == "dr"):
+                    warnings.warn(
+                        f"Outcome regression design is singular (fewer positive-weight observations "
+                        f"than covariates) for group {g} in time period {tn}; "
+                        f"the ATT for this cell will be set to NA.")
+                    add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+                    continue
+
                 # Propensity-overlap guard (matches R), checked before the singular
                 # guard. On the RC / varying path the PS logit is fit on the stacked
                 # long sample (covariates, G as built here).
-                if apply_overlap and overlap_check_fail(covariates, G):
+                if apply_overlap and overlap_check_fail(covariates, G, i_weights=w if weights_name is not None else None):
                     warnings.warn(
                         f"overlap condition violated for group {g} in time period {tn}"
                     )
@@ -334,7 +343,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 # Regression-feasibility guard (matches R): on the RC / unbalanced
                 # path DRDID fits control outcome regressions separately pre/post;
                 # the DR estimator additionally fits treated outcome regressions.
-                if (apply_rcond and rcond_check_fail(covariates[G == 0])) or (
+                if (apply_rcond and rcond_check_fail(covariates, G, i_weights=w if weights_name is not None else None)) or (
                         apply_guard and drdid_design_singular(
                             covariates, w, G, est_method, post=post)):
                     warnings.warn(
