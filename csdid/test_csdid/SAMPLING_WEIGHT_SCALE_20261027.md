@@ -35,6 +35,13 @@ bounded reduction only when needed. The selected two-period weights are repaired
 before invoking the existing dependency. Raw user columns, unrelated cohorts and
 custom-estimator inputs are preserved.
 
+For float16/float32 inputs, a positive mean may also round to zero in the input
+precision while remaining representable as R's double. The repair promotes the
+array before normalization in that case. Public aggregation uses temporary
+double-precision weight reductions, matching R and removing spurious float32
+contributions on zero-weight rows. The user's original columns retain their
+values and dtype; ordinary private legacy calls keep their prior behavior.
+
 Aggregation also formed a squared cohort-mass denominator. Large scales remove
 the denominator derivative through overflow; small scales yield nonfinite or
 inaccurate derivatives through underflow and subnormal rounding. The corrected
@@ -52,9 +59,9 @@ empirical derivatives.
 
 ## Checks and limits
 
-The full Python suite passes 2,469 tests, including 159 new sampling-weight tests
-and the two slow tests. The same new tests fail 120 times on the baseline, with
-39 passing. The tests cover all public methods, panels/RC, both modes and all
+The full Python suite passes 2,497 tests, including 187 new sampling-weight tests
+and the two slow tests. The same new tests fail 140 times on the baseline, with
+47 passing. The tests cover all public methods, panels/RC, both modes and all
 four aggregations, complete IF and SE, scales from `1e-200` to `1e307`, float32,
 duplicate cohort keys, zero mass, and local support in the presence of an
 unrelated large-weight cohort. They also check input immutability.
@@ -66,7 +73,9 @@ four upstream CI jobs pass, including downstream CSDID integration.
 The live common-input audit compares 120 Python fits with 120 corrected R fits
 across single- and multiple-cohort panel/RC designs, all three methods, both
 modes and five weight scales. All 552 complete-payload cross-language, mode and
-unit checks pass with unchanged tolerances. It checks row identity explicitly.
+unit checks pass with unchanged tolerances. A separate 96-check proof covers
+sparse float32 unit and smallest-positive weights against their exact R double
+representations, bringing the total to 648. Row identities are checked explicitly.
 An independent before/after audit finds 240 healthy workflows and 960 aggregates
 bit-identical, including all numeric fields, warnings and RNG state. Replay
 scripts and compact records are in [audit20261027](audit20261027/).

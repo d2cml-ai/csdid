@@ -51,13 +51,14 @@
   },
   "script_sha256": "45c1891eda3ecb94641b41c17127139a6234376a809feb6fa1b8cc224e1794d4",
   "runtime_sha256": {
-    "csdid/aggte_fnc/compute_aggte.py": "9c363bad73a2517a1f165e3168a02f0ba273d88cf57c250c40a847d3bb50cebf",
-    "csdid/aggte_fnc/utils.py": "ca55243c2ddb3fb0e048fa0414a57fe0a6384b16c38420101f2c1307fff3ab16",
+    "csdid/aggte_fnc/compute_aggte.py": "be4c92842a6c356c72b9e5c67f40234d54e92a3fadce80bbf0b9b30b37c7b3af",
+    "csdid/aggte_fnc/utils.py": "5385765417e65c291cc7d1ba38b67809374b1814127bbf0c6e9342ba09845354",
     "csdid/attgt_fnc/compute_att_gt.py": "07509a263025828adc46500959c52955b9fb50f5593d8dbce286ee598ae07851",
     "csdid/attgt_fnc/compute_att_gt2.py": "69fae043bd94147a71b817dd45ad874b9943531c8a8c3d5f99cc50a17584bda6",
     "csdid/attgt_fnc/compute_att_gt_shared.py": "3d048024cb804d8461917bfe61e822c91d4aa7cc2fda3d2d6a7d495e829aaf1b",
     "csdid/attgt_fnc/drdid_trim.py": "8dbc44a427fd5fccfee12b69a333dc8e34c3bd59785a5653e7580c6140e255e9",
     "csdid/attgt_fnc/preprocess_did.py": "ea36bd4ba29ee6134d2d2a3a77bc3fe92f2bb121e4874d08316f59062deeea99",
-    "csdid/utils/weights.py": "d8a95d97a531addaf3e2453865fadf43dc0043e42dcf62956466a7548adcedf0"
-  }
+    "csdid/utils/weights.py": "e35d418cc81369ba4728b245d9856cc2c993a4bd0854d8ef86266fe600dbdf6c"
+  },
+  "weight_dtype": "float64 for the audited ordinary workflow grid; float32 precision corrections are tested separately against R."
 }

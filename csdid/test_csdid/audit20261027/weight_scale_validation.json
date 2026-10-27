@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
   "status": "passed",
-  "elapsed_seconds": 46.48,
+  "elapsed_seconds": 45.079,
   "source_identity": {
     "csdid": {
-      "git_head": "b2e3b0baae0f4226e90e016b73cb0baf9456c3e2",
+      "git_head": "d672054f72b945c94f43309b6cd0799ccc3c07e1",
       "source_files_sha256": {
         "csdid/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "csdid/_version.py": "29833d7ba9ebf8f0b7ec36b68ef70ea9c671e20320e59d7750d8f71b48f09ec3",
         "csdid/aggte_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "csdid/aggte_fnc/aggte.py": "992788709ff02d453cc0f1c921de6091af8a3f8fc1afc7cd1eee06654c009893",
-        "csdid/aggte_fnc/compute_aggte.py": "9c363bad73a2517a1f165e3168a02f0ba273d88cf57c250c40a847d3bb50cebf",
-        "csdid/aggte_fnc/utils.py": "ca55243c2ddb3fb0e048fa0414a57fe0a6384b16c38420101f2c1307fff3ab16",
+        "csdid/aggte_fnc/compute_aggte.py": "be4c92842a6c356c72b9e5c67f40234d54e92a3fadce80bbf0b9b30b37c7b3af",
+        "csdid/aggte_fnc/utils.py": "5385765417e65c291cc7d1ba38b67809374b1814127bbf0c6e9342ba09845354",
         "csdid/att_gt.py": "5d6ef09799dc880581ee90ab529c17a0e18909242e750ba81917b13d366694c8",
         "csdid/attgt_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "csdid/attgt_fnc/compute_att_gt.py": "07509a263025828adc46500959c52955b9fb50f5593d8dbce286ee598ae07851",
@@ -24,9 +24,9 @@
         "csdid/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "csdid/utils/bmisc.py": "9650c57640f9a2fbfa91f01e0d3e7c38a411f7b8fcfd4129ad359c6a34e16c2d",
         "csdid/utils/mboot.py": "46919752135a38f7cd40d8b97be59cb9e61957860e3601dfff9b4566ecf630ef",
-        "csdid/utils/weights.py": "d8a95d97a531addaf3e2453865fadf43dc0043e42dcf62956466a7548adcedf0"
+        "csdid/utils/weights.py": "e35d418cc81369ba4728b245d9856cc2c993a4bd0854d8ef86266fe600dbdf6c"
       },
-      "source_tree_sha256": "bc922e6191e4e8f1e35b8396c2f240b77d8cef1091fc29d6c9c095da3a05fb37"
+      "source_tree_sha256": "b6273a2563eca4a428e706b76c3cf41933d4d300d280972d47f9de68a9ac3185"
     },
     "did": {
       "git_head": "75168454d6aa7faa2f9167b05ae7ad4f38f9e27b",
@@ -197,7 +197,7 @@
   },
   "payload_sha256": {
     "r_references.json.gz": "f23f9af5fe0f737c059225747988f67a6911f19ee2cdad3bb00e5be7f4b907d6",
-    "python_payloads.json.gz": "12d6933493584ffc33e334cf7df0ae55e84a7e75a0f14b6d24bf138d1cbc0783",
+    "python_payloads.json.gz": "3a30daea8b0983fb12e0dc7dc3e169720473b132fc60e5dac10610ba8bd8b546",
     "cases.json": "bfe2a2b0aee514104d06e78ac275f0b2e3675b3e1ad9d177619b09b83b214a1b",
     "sessionInfo.txt": "df05ca84b8e937324e8318bd08d64c331ff494666cbe28df19eef8e1a3536b96"
   },

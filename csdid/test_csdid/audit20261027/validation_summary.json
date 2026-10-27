@@ -3,23 +3,24 @@
   "objective": "Coordinate supported traditionalDR/normalizedIPW/regression results across RDRDID,Rdid,PythonDRDID,PythonCSDID.",
   "csdid_baseline": "b2e3b0baae0f4226e90e016b73cb0baf9456c3e2",
   "full_suite_current_pypi_drdid_1_1_6": {
-    "tests": 2469,
+    "tests": 2497,
     "failures": 0,
     "errors": 0,
     "skipped": 0
   },
   "selected_suite_proposed_drdid_wheel": {
-    "tests": 284,
+    "tests": 312,
     "failures": 0,
     "errors": 0,
     "skipped": 0
   },
-  "new_contracts": 159,
+  "new_contracts": 187,
   "before_new_contracts": {
-    "failures": 120,
-    "passed": 39
+    "failures": 140,
+    "passed": 47,
+    "harness": "Copied plain test file outside either repository, baseline modules preloaded, import origins asserted before/after pytest."
   },
-  "live_comparisons": 552,
+  "live_comparisons": 648,
   "healthy_bit_identical_workflows": 240,
   "healthy_bit_identical_aggregations": 960,
   "pr_links": {
@@ -31,5 +32,32 @@
     "Proposed standalone upstream requires review/release before CSDID can raise dependency minimum and consolidate cached kernels.",
     "Rdidcompanion PRcorrects slowpath weight-scaleinference; existingRbaselinefixturepinsremainunchanged until reviewed aftermerge.",
     "R-onlypushesdonottriggerPythonCIorautomaticallyportchanges; coveredAPIisthesixsharedkernels, notallRDRDIDfeatures."
-  ]
+  ],
+  "baseline_module_origins": {
+    "pytest_exit": 1,
+    "module_origins": {
+      "csdid": "/tmp/csdid-r-upstream-sync/csdid/__init__.py",
+      "csdid.att_gt": "/tmp/csdid-r-upstream-sync/csdid/att_gt.py",
+      "csdid.aggte_fnc.utils": "/tmp/csdid-r-upstream-sync/csdid/aggte_fnc/utils.py"
+    }
+  },
+  "live_comparison_components": {
+    "existing_full_grid": 552,
+    "sparse_float32": 96
+  },
+  "float32_behavior": "Promote represented positive means before underflowing normalization; public aggregation uses double-precision temporary weight reductions, matching R. Raw input columns and custom callback inputs are preserved.",
+  "ci_r_companion": "All five R/OS matrix jobs plus build-check pass at75168454; full local NOT_CRAN=true suite5896assertions passes without skips.",
+  "ci_drdid_companion": "All four jobs pass at87c78c9.",
+  "installed_csdid_wheel_tests": {
+    "tests": 312,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "installed_csdid_wheel_sha256": "5450d0e9a0003c478225edc3c4e275ee6cf7808bc7ea9f9d5c0bd5958bea43ed",
+  "installed_import_origin_check": {
+    "before_and_after_pytest": true,
+    "csdid_modules_checked": 18,
+    "plain_copied_test_directory": true
+  }
 }

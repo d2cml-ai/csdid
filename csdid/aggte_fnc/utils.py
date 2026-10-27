@@ -70,19 +70,31 @@ def _wif_scaled(selected, selected_pg, weights, unit_groups, groups):
     # the historical casting, errors and warnings of the legacy helper.
     if (not _valid_cohort_labels(unit_groups) or
             not np.all(np.isfinite(groups[selected])) or
-            np.any(weights < 0) or np.any(selected_pg < 0) or
-            not np.max(selected_pg) > 0):
+            np.any(weights < 0) or np.any(selected_pg < 0)):
         return None
     precision = max([1e-12] + [8 * np.finfo(values.dtype).eps
                                for values in (selected_pg, weights)
                                if values.dtype.kind == "f"])
     # Promotion belongs only to the repair. Ordinary float32/pandas calls keep
     # their historical casting and reductions in the legacy implementation.
+    original_pg = selected_pg
     selected_pg = np.asarray(selected_pg, dtype=float)
     weights = np.asarray(weights, dtype=float)
     matches = unit_groups[:, None] == groups[selected]
     empirical_pg = np.array([_weight_mean(weights * matches[:, i])
                              for i in range(len(selected))])
+    if (original_pg.dtype.kind == "f" and original_pg.dtype.itemsize < 8
+            and np.any((empirical_pg > 0)
+                       & (empirical_pg < np.finfo(original_pg.dtype).tiny))):
+        # A caller's native float32 cohort mean may already have rounded to
+        # zero. Repair only masses consistent with rounding the actual means
+        # back to that dtype, leaving malformed direct-call diagnostics intact.
+        with np.errstate(under="ignore"):
+            rounded_pg = empirical_pg.astype(original_pg.dtype).astype(float)
+        if np.allclose(selected_pg, rounded_pg, rtol=precision, atol=0):
+            selected_pg = empirical_pg
+    if not np.max(selected_pg) > 0:
+        return None
     if not np.allclose(selected_pg, empirical_pg, rtol=precision, atol=0):
         return None
     with np.errstate(all="ignore"):
@@ -117,7 +129,11 @@ def _wif_legacy(keepers, pg, weights_ind, G, group):
             squared = total ** 2
             multiplier = selected_pg / squared
         tiny = np.finfo(np.asarray(squared).dtype).tiny
-        if (not np.isfinite(squared) or squared < tiny or
+        low_precision_mass = (
+            weights.dtype.kind == "f" and weights.dtype.itemsize < 8
+            and np.any((selected_pg > 0)
+                       & (selected_pg < np.finfo(weights.dtype).tiny)))
+        if (not np.isfinite(squared) or squared < tiny or low_precision_mass or
                 not np.all(np.isfinite(multiplier))):
             stable = _wif_scaled(selected, selected_pg, weights, unit_groups, groups)
             if stable is not None:

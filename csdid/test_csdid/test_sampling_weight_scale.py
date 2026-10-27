@@ -111,6 +111,58 @@ def test_public_weight_units_preserve_cell_and_all_aggregation_inference(
                                   np.sort(original["wt"]))
 
 
+@pytest.mark.parametrize("panel", [False, True])
+@pytest.mark.parametrize("method", ["dr", "ipw", "reg"])
+@pytest.mark.parametrize("mode", [False, True])
+@pytest.mark.parametrize("weight_units", ["unit", "subnormal"])
+def test_sparse_float32_weight_units_preserve_all_public_inference(
+        panel, method, mode, weight_units):
+    baseline = _two_period_data(panel)
+    mask = np.arange(len(baseline)) % 5 == 0
+    baseline["wt"] = mask.astype(np.float64)
+    scaled = baseline.copy(deep=True)
+    scale = (np.nextafter(np.float32(0), np.float32(1))
+             if weight_units == "subnormal" else np.float32(1))
+    scaled["wt"] = mask.astype(np.float32) * scale
+    original = scaled.copy(deep=True)
+    assert scaled["wt"].dtype == np.float32
+    if weight_units == "subnormal":
+        assert np.mean(scaled["wt"].to_numpy()) == 0
+    assert np.mean(scaled["wt"].to_numpy(dtype=np.float64)) > 0
+
+    expected = _fit(baseline, panel, method, mode)
+    actual = _fit(scaled, panel, method, mode)
+    for model in (expected, actual):
+        assert np.isfinite(model.MP["att"]).all()
+        assert np.isfinite(model.results["se"]).all()
+        assert np.isfinite(model.MP["inffunc"]["inffunc"]).all()
+    np.testing.assert_allclose(actual.MP["att"], expected.MP["att"],
+                               atol=2e-10, rtol=2e-10)
+    np.testing.assert_allclose(actual.results["se"], expected.results["se"],
+                               atol=2e-10, rtol=2e-10)
+    np.testing.assert_allclose(actual.MP["inffunc"]["inffunc"],
+                               expected.MP["inffunc"]["inffunc"],
+                               atol=2e-9, rtol=2e-9)
+    for kind in AGGREGATIONS:
+        reference, result = _aggregate(expected, kind), _aggregate(actual, kind)
+        for field in ("overall_att", "overall_se", "att_egt", "se_egt"):
+            if reference[field] is None:
+                assert result[field] is None
+                continue
+            assert np.isfinite(result[field]).all()
+            np.testing.assert_allclose(result[field], reference[field],
+                                       atol=2e-10, rtol=2e-10)
+        assert result["inf_function"].keys() == reference["inf_function"].keys()
+        for key, influence in result["inf_function"].items():
+            assert np.isfinite(influence).all()
+            np.testing.assert_allclose(
+                influence, reference["inf_function"][key], atol=2e-9, rtol=2e-9)
+    pd.testing.assert_frame_equal(scaled, original)
+    assert actual.dp["data"]["wt"].dtype == np.float32
+    np.testing.assert_array_equal(np.sort(actual.dp["data"]["wt"]),
+                                  np.sort(original["wt"]))
+
+
 def _cohort_sample(layout):
     unit_groups = np.array([0, 2, 2, 4, 4, 6, 6, 0])
     weights = np.array([0., 1., 2., 0., 3., 4., 1., 2.])
@@ -195,6 +247,23 @@ def test_float32_cohort_weight_units_preserve_the_ratio_influence(
         actual = function(keepers, pg, weights, labels, groups)
     assert np.isfinite(actual).all()
     np.testing.assert_allclose(actual, expected, atol=2e-6, rtol=2e-6)
+
+
+@pytest.mark.parametrize("function", [wif, _wif_legacy], ids=["optimized", "fallback"])
+@pytest.mark.parametrize("mass_dtype", [np.float32, np.float64], ids=["native-mass", "double-mass"])
+def test_float32_subnormal_cohort_means_preserve_the_ratio_influence(
+        function, mass_dtype):
+    unit_groups, weights, groups, keepers = _cohort_sample("distinct")
+    membership = (unit_groups[:, None] == groups[keepers]).astype(float)
+    expected = _ratio_influence(weights, membership)
+    smallest = np.nextafter(np.float32(0), np.float32(1))
+    tiny_weights = weights.astype(np.float32) * smallest
+    pg = np.asarray([np.mean(tiny_weights.astype(mass_dtype)
+                             * (unit_groups == group)) for group in groups],
+                    dtype=mass_dtype)
+    actual = function(keepers, pg, tiny_weights, unit_groups, groups)
+    assert np.isfinite(actual).all()
+    np.testing.assert_allclose(actual, expected, atol=2e-12, rtol=2e-12)
 
 
 @pytest.mark.parametrize("panel", [False, True])

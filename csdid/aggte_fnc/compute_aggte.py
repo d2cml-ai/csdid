@@ -224,11 +224,16 @@ def compute_aggte(MP,
         dta = data[data[tname] == tlist[0]]
     else:
         dta_cols = [idname, gname, "w1"]
-        dta = data.loc[:, dta_cols].groupby(idname, as_index=False).mean()
+        cohort_data = data.loc[:, dta_cols]
+        if cohort_data['w1'].dtype.kind == "f" and cohort_data['w1'].dtype.itemsize < 8:
+            # R reduces these numeric weights in double precision. Promote a
+            # temporary column before grouping, preserving the user's data.
+            cohort_data = cohort_data.assign(w1=cohort_data['w1'].to_numpy(dtype=np.float64))
+        dta = cohort_data.groupby(idname, as_index=False).mean()
         if not np.all(np.isfinite(dta['w1'].to_numpy())):
             # Pandas' grouped sum can overflow although each unit's mean is
             # finite. Repair only those weight reductions, leaving data raw.
-            stable_means = data.groupby(idname)['w1'].agg(_weight_mean)
+            stable_means = cohort_data.groupby(idname)['w1'].agg(_weight_mean)
             dta['w1'] = dta[idname].map(stable_means)
         dta = dta.drop(columns=[idname], errors="ignore")
 
@@ -271,7 +276,7 @@ def compute_aggte(MP,
         
     # Set the weights
     # return data.columns
-    weights_ind = dta['w1'].to_numpy()
+    weights_ind = dta['w1'].to_numpy(dtype=np.float64)
     
     # We can work in overall probabilities because conditioning will cancel out
     # since it shows up in numerator and denominator

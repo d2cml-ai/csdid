@@ -35,12 +35,46 @@ worktree's parent revision; the recorded runtime-file hashes identify the
 reviewed changes before their commit. Sources and frozen fixtures were unchanged
 throughout the run.
 
-The new `test_sampling_weight_scale.py` supplies separate regression evidence:
-159 tests pass with the correction; the identical tests produce 120 failures
-and 39 passes on the original runtime. Its ratio-of-cohort-masses derivative
+The final 187-test `test_sampling_weight_scale.py` grid supplies separate
+regression evidence: all pass with the correction; the identical tests produce
+140 failures and 47 passes on the original runtime. Its ratio-of-cohort-masses derivative
 oracle and single-cell aggregation nesting check do not use R output as an
 expected answer. It also protects raw input columns and locally positive
 weights when an unrelated cohort has vastly larger weights.
+
+## Sparse float32 weights
+
+A second independent audit passes **96 complete checks**, using 24 fits in
+each language. Python receives actual in-memory float32 weights: the mask
+`arange(nrows) % 5 == 0`, either unchanged or multiplied by the smallest positive
+float32 value, `1.401298464324817e-45`. Its float32 mean rounds to zero, while
+the mean of those exact values in double precision is
+`2.8025969286496343e-46`. R receives those same represented values as doubles.
+Both cases use all three methods, both designs and both execution modes.
+
+The first proof exposed an additional ordinary float32 aggregation error:
+four cross-language comparisons and two Python weight-unit comparisons failed
+the existing tolerance. A single-cohort aggregate IF differed from its cell IF
+by `3.588e-7`. Temporary aggregation weight reductions now use double precision;
+raw input columns retain their original values and dtype. The complete rerun
+passes all 48 cross-language comparisons, both sets of 12 mode checks and both
+sets of 12 weight-unit checks. Maximum IF error is `6.07e-11`. The
+[before/after record](sparse_float32_before_after.json) preserves the failure
+counts, affected cases and original artifact hashes; the
+[final proof](sparse_float32_validation.json) identifies the corrected runtime.
+No failing case was removed and no tolerance was changed.
+
+The main 552-check audit was then rerun successfully against the same final
+runtime, bringing the two independent grids to **648 complete output checks**.
+To replay the float32 proof, use the same environment and R checkouts:
+
+```sh
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+VECLIB_MAXIMUM_THREADS=1 python \
+  csdid/test_csdid/audit20261027/compare_sparse_float32.py \
+  --did /path/to/reviewed/did --drdid /path/to/official/DRDID \
+  --output /tmp/new-empty-float32-audit
+```
 
 ## Replay
 
@@ -73,3 +107,10 @@ The R exporter adapts the numeric schema and retained-ID mapping in
 `r_ref/current/generate.R`, but never sources or executes that generator. The
 Python runner reuses `_run_case` and `_assert_case_output` from the permanent
 parity test, so this audit does not introduce a weaker numerical gate.
+
+The final built CSDID wheel was installed into a fresh target outside the source
+checkout. Copied tests and references ran from a separate plain test directory;
+all 18 loaded CSDID module paths were asserted to remain under the installation
+before and after pytest. All 312 scale/current-R checks passed. The baseline
+replay likewise preloaded the old runtime, asserted its import origins, and used
+a copied plain test file so pytest collection could not select the new package.
