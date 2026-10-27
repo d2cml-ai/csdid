@@ -1,63 +1,85 @@
 {
+  "schema_version": 2,
   "date": "2026-10-27",
-  "objective": "Coordinate supported traditionalDR/normalizedIPW/regression results across RDRDID,Rdid,PythonDRDID,PythonCSDID.",
-  "csdid_baseline": "b2e3b0baae0f4226e90e016b73cb0baf9456c3e2",
-  "full_suite_current_pypi_drdid_1_1_6": {
-    "tests": 2497,
+  "objective": "Validate the six shared traditional DR, normalized IPW and regression kernels across R and the Python distributions delivered together.",
+  "tested_release_pair": {
+    "csdid": {
+      "version": "0.4.4",
+      "commit": "e8354bc3454e5ed5bc78eb5f2df3c8b8422b24aa"
+    },
+    "drdid": {
+      "version": "1.1.7",
+      "commit": "eb896640c7fb74e2baac06ec0e208ee19f290d7c"
+    },
+    "csdid_requirement": "drdid==1.1.7",
+    "committed_peer_lock_matches": true,
+    "receipt": "joint_installed_validation.json"
+  },
+  "joint_installed_tests": {
+    "passed_test_functions": 2935,
+    "passed_subtests": 19,
+    "junit_cases": 2954,
     "failures": 0,
     "errors": 0,
-    "skipped": 0
+    "skipped": 0,
+    "slow_tests_included": true,
+    "publisher_units_included": true,
+    "direct_bridge_cases": 72,
+    "bridge_checks": "Strict raw output and original outcome units.",
+    "source_wheel_installed_hashes_match": true,
+    "plain_snapshots_unchanged": true,
+    "origins_checked": "Both complete test suites and direct bridge."
   },
-  "selected_suite_proposed_drdid_wheel": {
-    "tests": 312,
-    "failures": 0,
-    "errors": 0,
-    "skipped": 0
+  "installed_r_comparisons": {
+    "complete_checks": 648,
+    "weight_grid_checks": 552,
+    "sparse_float32_checks": 96,
+    "status": "passed",
+    "packages": {
+      "csdid": "0.4.4",
+      "drdid": "1.1.7"
+    },
+    "r_did_commit": "75168454d6aa7faa2f9167b05ae7ad4f38f9e27b",
+    "r_drdid_commit": "eaac3b49cd225d0d7706c633858555a5f204e21e",
+    "guards": [
+      "weight_scale_installed_guard.json",
+      "sparse_float32_installed_guard.json"
+    ],
+    "references_and_tolerances_unchanged": true
   },
-  "new_contracts": 187,
-  "before_new_contracts": {
-    "failures": 140,
-    "passed": 47,
-    "harness": "Copied plain test file outside either repository, baseline modules preloaded, import origins asserted before/after pytest."
+  "final_healthy_identity": {
+    "workflows": 240,
+    "aggregations": 960,
+    "field_hashes": 1920,
+    "bit_identical": true,
+    "record": "joint_installed_healthy_identity.json"
   },
-  "live_comparisons": 648,
-  "healthy_bit_identical_workflows": 240,
-  "healthy_bit_identical_aggregations": 960,
+  "preserved_raw_outcome_boundary": {
+    "record": "raw_outcome_installed_replay.json",
+    "comparisons": 288,
+    "passed": 252,
+    "failed": 36,
+    "failed_output": "Full aggregate influence-function components at outcome scale 1e10.",
+    "all_non_IF_public_fields_pass": true,
+    "original_unit_diagnostic_checks": 72,
+    "original_unit_diagnostics_passed": 72,
+    "r_fast_slow_failed_fields": 42,
+    "strict_exit_code": 1,
+    "waived_or_relaxed": false,
+    "interpretation": "The installed pair retains the documented floating-point cancellation boundary; universal raw full-IF equivalence is not claimed."
+  },
+  "history": {
+    "initial_summary": "historical_validation_summary_afa674b.json",
+    "earlier_weight_receipt": "historical_weight_scale_validation_afa674b.json",
+    "earlier_sparse_receipt": "historical_sparse_float32_validation_afa674b.json",
+    "original_healthy_receipt": "healthy_identity_summary.json",
+    "original_float32_before_after": "sparse_float32_before_after.json"
+  },
+  "scope": "Only the six shared estimators with equivalent settings. R-only methods and different high-level defaults are outside this claim.",
+  "delivery": "No publication was performed during validation. The new distributions and exact dependency lock become available after reviewed release.",
   "pr_links": {
     "python_drdid": "https://github.com/d2cml-ai/DRDIDpy/pull/21",
+    "python_csdid": "https://github.com/d2cml-ai/csdid/pull/88",
     "r_did": "https://github.com/bcallaway11/did/pull/280"
-  },
-  "scientific_decision": "Equivalent selected-cohort ratio derivatives correct weight-unit artifacts; estimator,sample,trimming and inference methods remain unchanged.",
-  "remaining": [
-    "Proposed standalone upstream requires review/release before CSDID can raise dependency minimum and consolidate cached kernels.",
-    "Rdidcompanion PRcorrects slowpath weight-scaleinference; existingRbaselinefixturepinsremainunchanged until reviewed aftermerge.",
-    "R-onlypushesdonottriggerPythonCIorautomaticallyportchanges; coveredAPIisthesixsharedkernels, notallRDRDIDfeatures."
-  ],
-  "baseline_module_origins": {
-    "pytest_exit": 1,
-    "module_origins": {
-      "csdid": "/tmp/csdid-r-upstream-sync/csdid/__init__.py",
-      "csdid.att_gt": "/tmp/csdid-r-upstream-sync/csdid/att_gt.py",
-      "csdid.aggte_fnc.utils": "/tmp/csdid-r-upstream-sync/csdid/aggte_fnc/utils.py"
-    }
-  },
-  "live_comparison_components": {
-    "existing_full_grid": 552,
-    "sparse_float32": 96
-  },
-  "float32_behavior": "Promote represented positive means before underflowing normalization; public aggregation uses double-precision temporary weight reductions, matching R. Raw input columns and custom callback inputs are preserved.",
-  "ci_r_companion": "All five R/OS matrix jobs plus build-check pass at75168454; full local NOT_CRAN=true suite5896assertions passes without skips.",
-  "ci_drdid_companion": "All four jobs pass at87c78c9.",
-  "installed_csdid_wheel_tests": {
-    "tests": 312,
-    "failures": 0,
-    "errors": 0,
-    "skipped": 0
-  },
-  "installed_csdid_wheel_sha256": "5450d0e9a0003c478225edc3c4e275ee6cf7808bc7ea9f9d5c0bd5958bea43ed",
-  "installed_import_origin_check": {
-    "before_and_after_pytest": true,
-    "csdid_modules_checked": 18,
-    "plain_copied_test_directory": true
   }
 }

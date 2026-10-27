@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "status": "raw_numeric_failures_preserved",
+  "execution_completed": true,
+  "strict_gate_returncode": 1,
+  "joint_receipt_sha256": "623b063cf8f54467f3728053c9851b3e49e8a8296c544d5dd86d00fe94d70e87",
+  "python_packages": {
+    "csdid": "0.4.4",
+    "drdid": "1.1.7",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "scipy": "1.18.1",
+    "statsmodels": "0.15.0"
+  },
+  "sources": {
+    "csdid": {
+      "commit": "e8354bc3454e5ed5bc78eb5f2df3c8b8422b24aa",
+      "runtime_files_sha256": {
+        "csdid/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/_version.py": "eff0534396bcfa828eb9a81771606b6bec0b830a33ff6075ccd12d496f210edb",
+        "csdid/aggte_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/aggte_fnc/aggte.py": "992788709ff02d453cc0f1c921de6091af8a3f8fc1afc7cd1eee06654c009893",
+        "csdid/aggte_fnc/compute_aggte.py": "be4c92842a6c356c72b9e5c67f40234d54e92a3fadce80bbf0b9b30b37c7b3af",
+        "csdid/aggte_fnc/utils.py": "5385765417e65c291cc7d1ba38b67809374b1814127bbf0c6e9342ba09845354",
+        "csdid/att_gt.py": "5d6ef09799dc880581ee90ab529c17a0e18909242e750ba81917b13d366694c8",
+        "csdid/attgt_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/attgt_fnc/compute_att_gt.py": "a730165664510133257a98ab5d8db0498ad153f6d7a0deae9d1a615d8f5b3a0e",
+        "csdid/attgt_fnc/compute_att_gt2.py": "619184099812c3e0f8d1596108affc8249ae0979fb106468270a487d42a72929",
+        "csdid/attgt_fnc/compute_att_gt_shared.py": "3d048024cb804d8461917bfe61e822c91d4aa7cc2fda3d2d6a7d495e829aaf1b",
+        "csdid/attgt_fnc/drdid_trim.py": "5033b0301f74124950ddd199c3018442f706cefb87ab4e0b5c20e179f7db19ea",
+        "csdid/attgt_fnc/preprocess_did.py": "ea36bd4ba29ee6134d2d2a3a77bc3fe92f2bb121e4874d08316f59062deeea99",
+        "csdid/plots/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/plots/gplot.py": "84c850a2acb9142b01d318e2869af00781c85bd3a32c02829a4569021ffda5c0",
+        "csdid/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/utils/bmisc.py": "9650c57640f9a2fbfa91f01e0d3e7c38a411f7b8fcfd4129ad359c6a34e16c2d",
+        "csdid/utils/mboot.py": "46919752135a38f7cd40d8b97be59cb9e61957860e3601dfff9b4566ecf630ef",
+        "csdid/utils/weights.py": "e35d418cc81369ba4728b245d9856cc2c993a4bd0854d8ef86266fe600dbdf6c"
+      }
+    },
+    "drdid": {
+      "commit": "eb896640c7fb74e2baac06ec0e208ee19f290d7c",
+      "runtime_files_sha256": {
+        "drdid/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "drdid/_estimators.py": "c2e4b34725025f28fe7d962026907ea625136b4a1f341da2473c15e1fc045e4f",
+        "drdid/_validation.py": "8af5f6bbb2ca7938f03394237ae4bb9c61362f43e090435dd61d150a3b773a80",
+        "drdid/_version_.py": "39fb21c3aa19604042a10f7b68e4fb77fa98ed32853bf5fcdf23501e36ad405c",
+        "drdid/drdid.py": "87146a902802c5839bd2ec11c3b693ccab7a9778bf2847d7582b8556154599c2",
+        "drdid/ipwd_did.py": "383c456c22f542854ebdf9b169012a8efe71cae05c705f6f40d41aebc6c888c6",
+        "drdid/reg_did.py": "243e5a77137c39b19f2eedfa90030c345c79f3de56bbdea5539010799919d018",
+        "drdid/utils.py": "67a33cd4bfa45bbdea8c8dbefa1efc4e55302d7f65e62a174c551ac8fcf5dc03"
+      }
+    }
+  },
+  "reference_description": "Replay of the original preserved 144-case R grid, not a newly regenerated R reference. Frozen input, mask, source and payload hashes verified.",
+  "reference_r_sources": {
+    "did": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
+    "DRDID": "eaac3b49cd225d0d7706c633858555a5f204e21e"
+  },
+  "reference_manifest_sha256": "c7cde2cf9f921be25883f7912afce7da069b0df07e419c2adf9ca507fcbad143",
+  "reference_payload_sha256": "3fb01eb4c3a3fc8bbd30f0f11886a59d824e278acf6b815a46995d38258210fa",
+  "comparator_sha256": "4b6b4a58664898604150361f4e8e2d3d8f41bdbfb23c81be037ab961f462a058",
+  "harness_sha256": "14e42166d2a4a274793911bb0649c5edb6f1662b411d358cbf6b1bcb5f1e1c5e",
+  "replay_sha256": "c4c374ac9abb8b9bbcdc6b83b5246fb1a34bc2c572c64869996e7c3ab76c3fcd",
+  "cases": 144,
+  "comparisons": 288,
+  "passed_comparisons": 252,
+  "failed_comparisons": 36,
+  "large_outcome_scale_comparisons": 36,
+  "large_outcome_scale_failures": 36,
+  "original_unit_diagnostics": {
+    "comparisons": 72,
+    "passed": 72
+  },
+  "failed_fields": [
+    "calendar.calendar_inf_func",
+    "calendar.calendar_inf_func_t",
+    "dynamic.dynamic_inf_func",
+    "dynamic.dynamic_inf_func_e",
+    "group.selective_inf_func",
+    "simple.simple_att"
+  ],
+  "failed_cases": [
+    {
+      "case": "panel_dr_varying_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "panel_dr_varying_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "panel_dr_universal_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "panel_dr_universal_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "panel_reg_varying_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "panel_reg_varying_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "panel_reg_universal_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "panel_reg_universal_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "panel_ipw_varying_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "panel_ipw_varying_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "panel_ipw_universal_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "panel_ipw_universal_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "rc_dr_varying_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "rc_dr_varying_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "rc_dr_universal_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "rc_dr_universal_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "rc_reg_varying_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "rc_reg_varying_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "rc_reg_universal_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "rc_reg_universal_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "rc_ipw_varying_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "rc_ipw_varying_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "rc_ipw_universal_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "rc_ipw_universal_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "unbalanced_dr_varying_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "unbalanced_dr_varying_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "unbalanced_dr_universal_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "unbalanced_dr_universal_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "unbalanced_reg_varying_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "unbalanced_reg_varying_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "unbalanced_reg_universal_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "unbalanced_reg_universal_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "unbalanced_ipw_varying_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "unbalanced_ipw_varying_scale1e+10",
+      "faster_mode": true
+    },
+    {
+      "case": "unbalanced_ipw_universal_scale1e+10",
+      "faster_mode": false
+    },
+    {
+      "case": "unbalanced_ipw_universal_scale1e+10",
+      "faster_mode": true
+    }
+  ],
+  "r_fast_slow_raw_field_failures": 42,
+  "tolerance_policy": {
+    "public": {
+      "atol": 1e-07,
+      "rtol": 1e-06
+    },
+    "wald": {
+      "atol": 1e-05,
+      "rtol": 1e-05
+    },
+    "influence_function": {
+      "atol": 1e-07,
+      "rtol": 1e-06
+    },
+    "missing_masks_and_support": "exact",
+    "declared_before_comparison": true
+  },
+  "origins_before": {
+    "csdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/__init__.py",
+    "drdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/__init__.py"
+  },
+  "origins_after": {
+    "csdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/__init__.py",
+    "drdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/__init__.py",
+    "csdid.aggte_fnc": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/aggte_fnc/__init__.py",
+    "csdid.utils": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/__init__.py",
+    "csdid.utils.bmisc": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/bmisc.py",
+    "csdid.utils.mboot": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/mboot.py",
+    "csdid.utils.weights": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/weights.py",
+    "csdid.aggte_fnc.utils": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/aggte_fnc/utils.py",
+    "csdid.aggte_fnc.compute_aggte": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/aggte_fnc/compute_aggte.py",
+    "csdid.aggte_fnc.aggte": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/aggte_fnc/aggte.py",
+    "csdid.attgt_fnc": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/__init__.py",
+    "csdid.attgt_fnc.preprocess_did": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/preprocess_did.py",
+    "drdid._validation": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/_validation.py",
+    "drdid._estimators": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/_estimators.py",
+    "drdid.reg_did": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/reg_did.py",
+    "csdid.attgt_fnc.drdid_trim": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/drdid_trim.py",
+    "csdid.attgt_fnc.compute_att_gt_shared": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/compute_att_gt_shared.py",
+    "csdid.attgt_fnc.compute_att_gt": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/compute_att_gt.py",
+    "csdid.attgt_fnc.compute_att_gt2": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/compute_att_gt2.py",
+    "csdid.plots": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/plots/__init__.py",
+    "csdid.plots.gplot": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/plots/gplot.py",
+    "csdid.att_gt": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/att_gt.py"
+  },
+  "original_references_unchanged": true,
+  "result_sha256": "177d38f70af801c118f3409bccbcb6104f81cd98adbd5ee96df8e503e9f8ad93",
+  "meaning": "Primary raw-output failures remain failures. Original-unit diagnostics do not override the strict gate or establish universal full-IF equivalence."
+}

@@ -1,23 +1,23 @@
 {
   "schema_version": 1,
   "status": "passed",
-  "elapsed_seconds": 8.764,
+  "elapsed_seconds": 9.011,
   "source_identity": {
     "csdid": {
-      "git_head": "d672054f72b945c94f43309b6cd0799ccc3c07e1",
+      "git_head": "e8354bc3454e5ed5bc78eb5f2df3c8b8422b24aa",
       "source_files_sha256": {
         "csdid/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "csdid/_version.py": "29833d7ba9ebf8f0b7ec36b68ef70ea9c671e20320e59d7750d8f71b48f09ec3",
+        "csdid/_version.py": "eff0534396bcfa828eb9a81771606b6bec0b830a33ff6075ccd12d496f210edb",
         "csdid/aggte_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "csdid/aggte_fnc/aggte.py": "992788709ff02d453cc0f1c921de6091af8a3f8fc1afc7cd1eee06654c009893",
         "csdid/aggte_fnc/compute_aggte.py": "be4c92842a6c356c72b9e5c67f40234d54e92a3fadce80bbf0b9b30b37c7b3af",
         "csdid/aggte_fnc/utils.py": "5385765417e65c291cc7d1ba38b67809374b1814127bbf0c6e9342ba09845354",
         "csdid/att_gt.py": "5d6ef09799dc880581ee90ab529c17a0e18909242e750ba81917b13d366694c8",
         "csdid/attgt_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "csdid/attgt_fnc/compute_att_gt.py": "07509a263025828adc46500959c52955b9fb50f5593d8dbce286ee598ae07851",
-        "csdid/attgt_fnc/compute_att_gt2.py": "69fae043bd94147a71b817dd45ad874b9943531c8a8c3d5f99cc50a17584bda6",
+        "csdid/attgt_fnc/compute_att_gt.py": "a730165664510133257a98ab5d8db0498ad153f6d7a0deae9d1a615d8f5b3a0e",
+        "csdid/attgt_fnc/compute_att_gt2.py": "619184099812c3e0f8d1596108affc8249ae0979fb106468270a487d42a72929",
         "csdid/attgt_fnc/compute_att_gt_shared.py": "3d048024cb804d8461917bfe61e822c91d4aa7cc2fda3d2d6a7d495e829aaf1b",
-        "csdid/attgt_fnc/drdid_trim.py": "8dbc44a427fd5fccfee12b69a333dc8e34c3bd59785a5653e7580c6140e255e9",
+        "csdid/attgt_fnc/drdid_trim.py": "5033b0301f74124950ddd199c3018442f706cefb87ab4e0b5c20e179f7db19ea",
         "csdid/attgt_fnc/preprocess_did.py": "ea36bd4ba29ee6134d2d2a3a77bc3fe92f2bb121e4874d08316f59062deeea99",
         "csdid/plots/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "csdid/plots/gplot.py": "84c850a2acb9142b01d318e2869af00781c85bd3a32c02829a4569021ffda5c0",
@@ -26,7 +26,7 @@
         "csdid/utils/mboot.py": "46919752135a38f7cd40d8b97be59cb9e61957860e3601dfff9b4566ecf630ef",
         "csdid/utils/weights.py": "e35d418cc81369ba4728b245d9856cc2c993a4bd0854d8ef86266fe600dbdf6c"
       },
-      "source_tree_sha256": "b6273a2563eca4a428e706b76c3cf41933d4d300d280972d47f9de68a9ac3185"
+      "source_tree_sha256": "6f590c616b6148ac7db3a0032b1ce506397da9127299ba4e52f3dae03b12a3c4"
     },
     "did": {
       "git_head": "75168454d6aa7faa2f9167b05ae7ad4f38f9e27b",
@@ -172,10 +172,10 @@
   },
   "maximum_cross_language_absolute_errors": {
     "att": 1.503241975342462e-13,
-    "cell_if": 6.068034963391256e-11,
+    "cell_if": 6.066613877919735e-11,
     "cell_se": 1.191269305422793e-13,
     "aggregate_se": 1.191269305422793e-13,
-    "aggregate_if": 6.068034963391256e-11
+    "aggregate_if": 6.066613877919735e-11
   },
   "tolerance_policy": {
     "public_and_full_influence": {
@@ -189,14 +189,14 @@
     "support_shape_nonfinite_masks": "exact"
   },
   "scripts_sha256": {
-    "compare_sparse_float32.py": "1bc13b57dd28b5ff9aaf839d6d88df929423c22cc7e2c570d267d6c6deace849",
-    "compare_weight_scale.py": "4d2050344fccb1a3254dd009d99c3fc37fa3413f24835d911c2fc596ec8aaa73",
+    "compare_sparse_float32.py": "24aec7af431b3e8f73b27743cd88f3e8d2e59f73b027a7f21b3bcb39e962fafc",
+    "compare_weight_scale.py": "37ff255278b95730ff1a4f19d44651dc131b6a46658504d4368663208f095e8b",
     "weight_scale_references.R": "84f894a11320879a32f04397be0404b4d8b367862f6d460986ce70d6d6d61f3c"
   },
   "dgp_test_sha256": "e41533782c937bf08e2ad8def28a8f2a70d4e5c31f94c19ff79f6db5bd0a1537",
   "payload_sha256": {
     "r_references.json.gz": "d75996a28b4d1e9717281f16ea4e4582faad00fa960e7e85bbdc35b227d7b758",
-    "python_payloads.json.gz": "0c1c6de63ad17ffe71b0b036ebd9512b2baff2d9fa805c88194736611f073ec8",
+    "python_payloads.json.gz": "894a620bcb5a928ac01603a9b1280d413a50e431d593cf003b8c93dc4ef62ab0",
     "cases.json": "f52dfdeb2f0b9391e7a5af275aa26792d09cc70f7a1de464388b686735370b22",
     "sessionInfo.txt": "df05ca84b8e937324e8318bd08d64c331ff494666cbe28df19eef8e1a3536b96"
   },
@@ -205,6 +205,15 @@
     "two_panel_sparse_1e-45.csv": "4295f7c3aa6fdbafd00048f1fd9ca309dbcd080e65be960964534845e30e59f3",
     "two_rc_sparse_1e+00.csv": "4f8325ce64ebd2ebdbd537afe81b1e6def8b0ec9277b19dfa28d1bb6bd7f9d44",
     "two_rc_sparse_1e-45.csv": "a8364fa2e6b64698081c36a172db2a787ea43d439046a3c0036e83d6d5b15e79"
+  },
+  "packages": {
+    "csdid": "0.4.4",
+    "drdid": "1.1.7",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "scipy": "1.18.1",
+    "statsmodels": "0.15.0",
+    "pytest": "9.1.1"
   },
   "failures": [],
   "scope": "Sparse float32 in-memory Python weights; R receives their exact double representations. Analytical inference."

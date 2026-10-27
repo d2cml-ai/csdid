@@ -20,6 +20,11 @@ bugs. Therefore the earlier public CSDID-versus-R comparisons did not certify
 the complete standalone Python package. Calling both packages fully compatible
 would have exceeded that evidence.
 
+The external DRDID package is still required at installation and import time:
+CSDID loads its regression module when loading the estimator dispatch. A DR or
+IPW fit uses the local kernels above, but removing the installed dependency
+would still prevent CSDID from loading normally.
+
 The new dtype audit also found genuine gaps in CSDID: integer subtraction could
 overflow in the faster path, and direct float32 kernels did not always match
 the identical represented values reduced in double precision. Built-in paths now
@@ -43,6 +48,12 @@ file's source/wheel/installation hash. The bridge enforces both raw-output and
 predeclared original-unit tolerances. The full local run includes the two slow
 tests; CI explicitly deselects them. JUnit, source IDs, wheel hashes, dependency
 metadata and import-origin receipts are retained as artifacts.
+
+The completed local pair (`e8354bc` / `eb89664`) passes **2,935 tests and 19
+subtests**, with no failures, errors or skips, plus all 72 direct comparisons.
+It also preserves exact numeric bytes, warnings and RNG state across 240
+healthy workflows and 960 aggregates versus the prior CSDID baseline; see the
+[installed-pair identity receipt](audit20261027/joint_installed_healthy_identity.json).
 
 The separate required R job still generates current official R references.
 Any unreviewed tracked R-tree change now requires review, including source-only
@@ -77,11 +88,15 @@ There is also a retained numerical limitation. The adversarial outcome-scale
 audit still has **36 raw aggregate-IF comparisons failing at outcome scale
 `1e10`**, while ATT, SE, confidence limits, critical values and Wald outputs pass.
 R's own fast/slow paths miss 42 raw IF fields in that audit. The largest recorded
-Python/R violating difference is about `0.1288` after large-number cancellation,
-or `1.29e-11` in the original outcome units. The replay keeps exit 1; the 72
+Python/R violating difference is about `0.1288` in a matrix with entries on the
+order of `1e11`, or `1.29e-11` in the original outcome units. The small
+implementation discrepancy is already present in original units and is
+amplified by the outcome scale; this is not solely an error introduced by
+rescaling. The replay keeps exit 1; the 72
 original-unit diagnostics passing do not erase the raw failures. See
 [UPSTREAM_SYNC_20261026.md](UPSTREAM_SYNC_20261026.md). This is why neither a
-passing fixed grid nor these releases establish universal bitwise equality.
+passing fixed grid nor these releases establish universal numerical equivalence
+within those fixed tolerances.
 
 R-only pushes do not trigger the existing Python push workflow. Updating a
 package still requires a coordinated reviewed port and release; CI detects

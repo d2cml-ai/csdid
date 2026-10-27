@@ -105,5 +105,14 @@
   },
   "tolerance_policy_unchanged": true,
   "source_pins_unchanged": true,
-  "original_failed_payloads_retained_outside_repository": true
+  "original_failed_payloads_retained_outside_repository": true,
+  "latest_installed_pair": {
+    "record": "sparse_float32_validation.json",
+    "guard": "sparse_float32_installed_guard.json",
+    "packages": {
+      "csdid": "0.4.4",
+      "drdid": "1.1.7"
+    },
+    "status": "passed"
+  }
 }
