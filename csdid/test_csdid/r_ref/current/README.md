@@ -8,6 +8,11 @@ upstream heads verified on 2026-10-26. The did source includes merged PRs
 retained from the 2026-10-23 audit. The word “current” identifies this
 recorded verification date; the references do not update themselves.
 
+The separate [upstream-check workflow](../../upstream_sync/README.md) regenerates
+temporary references from the latest R GitHub sources and reports numerical and
+test-coverage drift. Its source-lock override leaves these reviewed fixtures
+and their default source pins fixed. Advancing the baseline is a reviewed change.
+
 `cases.json` defines 23 analytic configurations and two bootstrap
 configurations. Python evaluates each in both execution modes. The analytic
 cases cover weighted balanced panels, repeated cross sections, and unbalanced

@@ -1,5 +1,6 @@
-# Generate permanent numerical references from the pinned, clean R sources.
+# Generate numerical references from pinned, clean R sources by default.
 # Rscript generate.R --did /path/to/did --drdid /path/to/DRDID
+# Deliberate upstream comparison: add --source-lock /path/to/source-lock.json.
 # Existing inputs are reused unless --regenerate-inputs is supplied.
 args <- commandArgs(trailingOnly = TRUE)
 flag <- function(name, default = NULL) {
@@ -17,12 +18,42 @@ did_path <- normalizePath(flag("did"), mustWork = TRUE)
 drdid_path <- normalizePath(flag("drdid"), mustWork = TRUE)
 sha256 <- function(path) digest::digest(file = path, algo = "sha256", serialize = FALSE)
 git <- function(path, ...) system2("git", c("-C", shQuote(path), ...), stdout = TRUE)
-pins <- list(did = "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
-             DRDID = "eaac3b49cd225d0d7706c633858555a5f204e21e")
+expected_sources <- list(
+  did = list(commit = "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e", version = "2.5.1.904"),
+  DRDID = list(commit = "eaac3b49cd225d0d7706c633858555a5f204e21e", version = "1.4.0"))
+valid_object <- function(value, fields) {
+  is.list(value) && !is.null(names(value)) && !anyDuplicated(names(value)) &&
+    length(value) == length(fields) && setequal(names(value), fields)
+}
+source_lock <- flag("source-lock")
+if (!is.null(source_lock)) {
+  lock <- jsonlite::fromJSON(normalizePath(source_lock, mustWork = TRUE), simplifyVector = FALSE)
+  if (!valid_object(lock, c("schema_version", "sources")) ||
+      !is.integer(lock$schema_version) || length(lock$schema_version) != 1L ||
+      is.na(lock$schema_version) || lock$schema_version != 1 ||
+      !valid_object(lock$sources, c("did", "DRDID"))) {
+    stop("Invalid source lock: expected schema_version 1 and exactly did/DRDID sources.")
+  }
+  for (package in c("did", "DRDID")) {
+    entry <- lock$sources[[package]]
+    if (!valid_object(entry, c("commit", "version")) ||
+        !is.character(entry$commit) || length(entry$commit) != 1L || is.na(entry$commit) ||
+        !grepl("^[0-9a-fA-F]{40}$", entry$commit) ||
+        !is.character(entry$version) || length(entry$version) != 1L || is.na(entry$version) ||
+        !grepl("^[0-9]+([.-][0-9]+)+$", entry$version)) {
+      stop("Invalid source lock entry for ", package, ": expected a 40-hex commit and R package version.")
+    }
+    entry$commit <- tolower(entry$commit)
+    expected_sources[[package]] <- entry
+  }
+}
 source_info <- function(path, package) {
   head <- git(path, "rev-parse", "HEAD")
   status <- git(path, "status", "--porcelain", "--untracked-files=no")
-  stopifnot(identical(head, pins[[package]]), length(status) == 0L)
+  description <- read.dcf(file.path(path, "DESCRIPTION"), fields = c("Package", "Version"))
+  stopifnot(identical(head, expected_sources[[package]]$commit), length(status) == 0L,
+            nrow(description) == 1L, description[1L, "Package"] == package,
+            description[1L, "Version"] == expected_sources[[package]]$version)
   files <- git(path, "ls-files", "DESCRIPTION", "NAMESPACE", "R", "src")
   files <- files[file.exists(file.path(path, files)) & !dir.exists(file.path(path, files))]
   hashes <- setNames(lapply(file.path(path, files), sha256), files)
@@ -35,6 +66,10 @@ suppressPackageStartupMessages(pkgload::load_all(drdid_path, quiet = TRUE))
 suppressPackageStartupMessages(pkgload::load_all(did_path, quiet = TRUE))
 stopifnot(normalizePath(getNamespaceInfo("did", "path")) == did_path,
           normalizePath(getNamespaceInfo("DRDID", "path")) == drdid_path)
+for (package in c("did", "DRDID")) {
+  stopifnot(identical(as.character(getNamespaceVersion(package)),
+                     as.character(package_version(expected_sources[[package]]$version))))
+}
 data.table::setDTthreads(1L)
 
 # These choices are fixed before numerical comparison. No input is selected or

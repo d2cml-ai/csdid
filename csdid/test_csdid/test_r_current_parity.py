@@ -13,6 +13,8 @@ import io
 import json
 import os
 from pathlib import Path
+import re
+import shutil
 import warnings
 
 import numpy as np
@@ -23,8 +25,55 @@ from csdid.att_gt import ATTgt
 from r_reference_checks import assert_numeric, decode_numeric, support_order
 
 
-REFERENCE_DIR = Path(os.environ.get(
-    "CSDID_R_REFERENCE_DIR", str(Path(__file__).parent / "r_ref" / "current")))
+DEFAULT_REFERENCE_DIR = (Path(__file__).parent / "r_ref" / "current").resolve()
+PINNED_SOURCES = {
+    "did": {"commit": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e", "version": "2.5.1.904"},
+    "DRDID": {"commit": "eaac3b49cd225d0d7706c633858555a5f204e21e", "version": "1.4.0"},
+}
+
+
+def _unique_json_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("Duplicate source lock key: " + key)
+        result[key] = value
+    return result
+
+
+def _load_source_lock(path):
+    lock = json.loads(Path(path).read_text(), object_pairs_hook=_unique_json_object)
+    if (not isinstance(lock, dict) or set(lock) != {"schema_version", "sources"}
+            or type(lock["schema_version"]) is not int or lock["schema_version"] != 1
+            or not isinstance(lock["sources"], dict) or set(lock["sources"]) != {"did", "DRDID"}):
+        raise ValueError("Invalid source lock: expected schema_version 1 and exactly did/DRDID sources")
+    sources = {}
+    for package, entry in lock["sources"].items():
+        if (not isinstance(entry, dict) or set(entry) != {"commit", "version"}
+                or not isinstance(entry["commit"], str)
+                or re.fullmatch(r"[0-9a-fA-F]{40}", entry["commit"]) is None
+                or not isinstance(entry["version"], str)
+                or re.fullmatch(r"[0-9]+(?:[.-][0-9]+)+", entry["version"]) is None):
+            raise ValueError("Invalid source lock entry for " + package)
+        sources[package] = {"commit": entry["commit"].lower(), "version": entry["version"]}
+    return sources
+
+
+def _reference_context(environ):
+    directory = environ.get("CSDID_R_REFERENCE_DIR", str(DEFAULT_REFERENCE_DIR))
+    if not isinstance(directory, str) or not directory.strip():
+        raise ValueError("CSDID_R_REFERENCE_DIR must name a reference directory")
+    directory = Path(directory).resolve()
+    if "CSDID_R_REFERENCE_SOURCES" not in environ:
+        return directory, copy.deepcopy(PINNED_SOURCES)
+    lock = environ["CSDID_R_REFERENCE_SOURCES"]
+    if ("CSDID_R_REFERENCE_DIR" not in environ or directory == DEFAULT_REFERENCE_DIR
+            or not isinstance(lock, str) or not lock.strip()):
+        raise ValueError("Source override requires a source lock and an explicit nondefault CSDID_R_REFERENCE_DIR")
+    return directory, _load_source_lock(lock)
+
+
+REFERENCE_DIR, EXPECTED_SOURCES = _reference_context(os.environ)
 CASES = json.loads((REFERENCE_DIR / "cases.json").read_text())
 FIT_FIELDS = ("att", "se", "c", "l_se", "u_se", "W", "Wpval", "cband")
 AGG_FIELDS = ("overall_att", "overall_se", "egt", "att_egt", "se_egt", "crit_val_egt")
@@ -310,18 +359,20 @@ def test_support_gate_rejects_missing_extra_duplicate_or_changed_keys(actual):
         support_order(actual, [1, 2], "cells")
 
 
+def _assert_source_provenance(manifest, expected_sources):
+    assert type(manifest["schema_version"]) is int and manifest["schema_version"] == 1
+    assert set(manifest["sources"]) == set(expected_sources) == {"did", "DRDID"}
+    for package, expected in expected_sources.items():
+        assert manifest["sources"][package]["commit"] == expected["commit"]
+        assert manifest["sources"][package]["tracked_source_clean"] is True
+        # R package_version normalizes the DESCRIPTION's valid hyphen separator.
+        version = ".".join(str(int(part)) for part in re.split(r"[.-]", expected["version"]))
+        assert manifest["packages"][package] == version
+
+
 def test_current_r_reference_provenance(references):
     manifest = json.loads((REFERENCE_DIR / "manifest.json").read_text())
-    assert manifest["schema_version"] == 1
-    expected_commits = {
-        "did": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
-        "DRDID": "eaac3b49cd225d0d7706c633858555a5f204e21e",
-    }
-    for package, commit in expected_commits.items():
-        assert manifest["sources"][package]["commit"] == commit
-        assert manifest["sources"][package]["tracked_source_clean"] is True
-    assert manifest["packages"]["did"] == "2.5.1.904"
-    assert manifest["packages"]["DRDID"] == "1.4.0"
+    _assert_source_provenance(manifest, EXPECTED_SOURCES)
     assert manifest["case_count"] == len(CASES) == 25
     expected_artifacts = {
         "panel.csv", "rc.csv", "unbalanced.csv", "multipliers_unit.csv",
@@ -342,3 +393,120 @@ def test_current_r_reference_provenance(references):
         assert fields, name + ": missing R fast/standard check"
         assert all(field["same_support"] for field in fields), name
         assert all(field["max_abs"] <= 1e-7 for field in fields), name
+
+
+def _write_source_lock(path, sources=None):
+    path.write_text(json.dumps({"schema_version": 1, "sources": sources or PINNED_SOURCES}))
+    return str(path)
+
+
+@pytest.mark.parametrize("defect", [
+    "schema_bool", "schema_float", "schema_new", "schema_missing", "extra_top_key",
+    "missing_package", "extra_package", "entry_not_object", "extra_entry_key",
+    "missing_commit", "short_commit", "nonhex_commit", "commit_array",
+    "version_number", "version_empty", "version_text", "version_whitespace",
+])
+def test_source_lock_rejects_invalid_schema_identity_and_version(tmp_path, defect):
+    lock = {"schema_version": 1, "sources": copy.deepcopy(PINNED_SOURCES)}
+    entry = lock["sources"]["did"]
+    if defect == "schema_bool": lock["schema_version"] = True
+    elif defect == "schema_float": lock["schema_version"] = 1.0
+    elif defect == "schema_new": lock["schema_version"] = 2
+    elif defect == "schema_missing": del lock["schema_version"]
+    elif defect == "extra_top_key": lock["url"] = "https://example.invalid"
+    elif defect == "missing_package": del lock["sources"]["DRDID"]
+    elif defect == "extra_package": lock["sources"]["other"] = copy.deepcopy(entry)
+    elif defect == "entry_not_object": lock["sources"]["did"] = []
+    elif defect == "extra_entry_key": entry["repository"] = "other/did"
+    elif defect == "missing_commit": del entry["commit"]
+    elif defect == "short_commit": entry["commit"] = "74b88eb"
+    elif defect == "nonhex_commit": entry["commit"] = "z" * 40
+    elif defect == "commit_array": entry["commit"] = [entry["commit"]]
+    elif defect == "version_number": entry["version"] = 1.4
+    elif defect == "version_empty": entry["version"] = ""
+    elif defect == "version_text": entry["version"] = "latest"
+    elif defect == "version_whitespace": entry["version"] = " 1.4.0 "
+    path = tmp_path / "source-lock.json"
+    path.write_text(json.dumps(lock))
+    with pytest.raises(ValueError, match="Invalid source lock"):
+        _load_source_lock(path)
+
+
+@pytest.mark.parametrize("text", [
+    '{"schema_version":1,"schema_version":1,"sources":{}}',
+    '{"schema_version":1,"sources":{"did":{},"did":{},"DRDID":{}}}',
+    '{"schema_version":',
+])
+def test_source_lock_rejects_duplicate_keys_and_malformed_json(tmp_path, text):
+    path = tmp_path / "source-lock.json"
+    path.write_text(text)
+    with pytest.raises(ValueError):
+        _load_source_lock(path)
+
+
+@pytest.mark.parametrize("directory", [None, "default", "symlink"])
+def test_source_override_requires_an_explicit_separate_reference_directory(tmp_path, directory):
+    env = {"CSDID_R_REFERENCE_SOURCES": _write_source_lock(tmp_path / "source-lock.json")}
+    if directory == "default": env["CSDID_R_REFERENCE_DIR"] = str(DEFAULT_REFERENCE_DIR)
+    elif directory == "symlink":
+        alias = tmp_path / "alias"
+        alias.symlink_to(DEFAULT_REFERENCE_DIR, target_is_directory=True)
+        env["CSDID_R_REFERENCE_DIR"] = str(alias)
+    with pytest.raises(ValueError, match="explicit nondefault"):
+        _reference_context(env)
+
+
+def test_reference_directory_alone_preserves_pinned_source_authority(tmp_path):
+    original = copy.deepcopy(PINNED_SOURCES)
+    directory, sources = _reference_context({"CSDID_R_REFERENCE_DIR": str(tmp_path)})
+    assert directory == tmp_path.resolve()
+    assert sources == PINNED_SOURCES
+    sources["did"]["commit"] = "a" * 40
+    assert PINNED_SOURCES == original
+
+
+def test_explicit_source_lock_changes_only_expected_source_identity(tmp_path):
+    expected = copy.deepcopy(PINNED_SOURCES)
+    expected["did"] = {"commit": "abcdef0123" * 4, "version": "9.8.7"}
+    path = tmp_path / "source-lock.json"
+    directory, sources = _reference_context({"CSDID_R_REFERENCE_DIR": str(tmp_path),
+        "CSDID_R_REFERENCE_SOURCES": _write_source_lock(path, expected)})
+    assert directory == tmp_path.resolve() and sources == expected
+    assert _reference_context({}) == (DEFAULT_REFERENCE_DIR, PINNED_SOURCES)
+
+
+@pytest.mark.parametrize("defect", ["commit", "version", "unclean", "schema_bool", "extra_source"])
+def test_source_provenance_cannot_substitute_other_revisions_or_versions(defect):
+    manifest = {"schema_version": 1, "sources": {
+        package: {"commit": entry["commit"], "tracked_source_clean": True}
+        for package, entry in PINNED_SOURCES.items()},
+        "packages": {package: entry["version"] for package, entry in PINNED_SOURCES.items()}}
+    if defect == "commit": manifest["sources"]["did"]["commit"] = "a" * 40
+    elif defect == "version": manifest["packages"]["DRDID"] = "9.9.9"
+    elif defect == "unclean": manifest["sources"]["did"]["tracked_source_clean"] = False
+    elif defect == "schema_bool": manifest["schema_version"] = True
+    else: manifest["sources"]["other"] = {}
+    with pytest.raises(AssertionError):
+        _assert_source_provenance(manifest, PINNED_SOURCES)
+
+
+def test_source_override_cannot_bypass_frozen_artifact_integrity(tmp_path, monkeypatch, references):
+    directory = tmp_path / "upstream"
+    shutil.copytree(REFERENCE_DIR, directory)
+    manifest_path = directory / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    sources = copy.deepcopy(EXPECTED_SOURCES)
+    sources["did"] = {"commit": "a" * 40, "version": "9.9.9"}
+    manifest["sources"]["did"]["commit"] = sources["did"]["commit"]
+    manifest["packages"]["did"] = sources["did"]["version"]
+    manifest_path.write_text(json.dumps(manifest))
+    lock_path = tmp_path / "source-lock.json"
+    selected, expected = _reference_context({"CSDID_R_REFERENCE_DIR": str(directory),
+        "CSDID_R_REFERENCE_SOURCES": _write_source_lock(lock_path, sources)})
+    monkeypatch.setitem(globals(), "REFERENCE_DIR", selected)
+    monkeypatch.setitem(globals(), "EXPECTED_SOURCES", expected)
+    # The source identity is explicitly authorized, but changed frozen inputs
+    # must still fail the very same full provenance gate used by the real suite.
+    (directory / "panel.csv").write_bytes((directory / "panel.csv").read_bytes() + b"\n")
+    with pytest.raises(AssertionError, match="R reference artifact changed: panel.csv"):
+        test_current_r_reference_provenance(references)
