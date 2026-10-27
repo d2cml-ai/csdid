@@ -7,6 +7,33 @@ import pandas as pd
 
 from csdid.utils.bmisc import multiplier_bootstrap
 
+
+def _cluster_sums_by_label(inf_func, cluster_labels):
+    """Group IF rows once, retaining the original within-cluster sum order."""
+    cluster_ids = np.unique(cluster_labels)
+    cluster_if = np.zeros((len(cluster_ids), inf_func.shape[1]))
+    # With few clusters, the original masks cost less than building sorted
+    # groups. Object arrays also retain the old route: sorting object NaNs with
+    # and without inverse codes can produce different unique-label sequences.
+    if len(cluster_ids) <= 16 or np.asarray(cluster_labels).dtype.kind == "O":
+        for i, label in enumerate(cluster_ids):
+            cluster_if[i] = inf_func[cluster_labels == label].sum(axis=0)
+        return cluster_if
+
+    _, codes = np.unique(cluster_labels, return_inverse=True)
+    order = np.argsort(codes, kind="stable")
+    ends = np.cumsum(np.bincount(codes, minlength=len(cluster_ids)))
+    start = 0
+    for i, (label, end) in enumerate(zip(cluster_ids, ends)):
+        rows = order[start:end]
+        # Match the former equality mask, including its empty NaN/NaT groups.
+        # Checking only this group's rows avoids rescanning all observations.
+        rows = rows[cluster_labels[rows] == label]
+        cluster_if[i] = inf_func[rows].sum(axis=0)
+        start = end
+    return cluster_if
+
+
 def mboot(inf_func, DIDparams, pl=False, cores=1):
     # Setup needed variables
     data            = DIDparams['data'] 
@@ -87,25 +114,21 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
         cluster_labels = cluster_vec.reindex(unit_ids).values
         
         # Aggregate IF to cluster sums
-        cluster_ids = np.unique(cluster_labels)
-        n_clusters = len(cluster_ids)
-        
-        # Sum influence functions by cluster
-        cluster_if = np.zeros((n_clusters, inf_func.shape[1]))
-        for i, c in enumerate(cluster_ids):
-            mask = cluster_labels == c
-            cluster_if[i] = inf_func[mask].sum(axis=0)
+        cluster_if = _cluster_sums_by_label(inf_func, cluster_labels)
+        n_clusters = len(cluster_if)
         
         bres = np.sqrt(n_clusters) * run_multiplier_bootstrap(cluster_if, biters, pl, cores)
 
     # Handle vector and matrix case differently to get nxk matrix
     if isinstance(bres, np.ndarray) and bres.ndim == 1:
-        bres = np.expand_dims(bres, axis=0)
+        bres = bres.reshape(int(biters), -1)
     elif isinstance(bres, np.ndarray) and bres.ndim > 2:
         bres = bres.transpose()
 
     # Non-degenerate dimensions
-    ndg_dim = np.logical_and(~np.isnan(np.sum(bres, axis=0)), np.sum(bres ** 2, axis=0) > np.sqrt(np.finfo(float).eps) * 10)
+    # A positive bootstrap dimension remains usable in any outcome units.
+    # Avoid squaring here, which can underflow for small valid dimensions.
+    ndg_dim = np.all(np.isfinite(bres), axis=0) & np.any(bres != 0, axis=0)
     bres = bres[:, ndg_dim]
 
     # All dimensions degenerate: no finite bootstrap statistics (matches R's ncol==0 guard).
@@ -114,7 +137,10 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
         return {'bres': bres, 'V': np.nan, 'se': se, 'crit_val': np.nan}
 
     # Bootstrap variance matrix (this matrix can be defective because of degenerate cases)
-    V = np.cov(bres, rowvar=False)
+    if len(bres) > 1:
+        V = np.cov(bres, rowvar=False)
+    else:
+        V = np.full((bres.shape[1], bres.shape[1]), np.nan).squeeze()
 
     # Bootstrap standard error
     quantile_75 = np.quantile(bres, 0.75, axis=0, method="inverted_cdf")
@@ -122,6 +148,7 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
     qnorm_75 = norm.ppf(0.75)
     qnorm_25 = norm.ppf(0.25)
     bSigma = (quantile_75 - quantile_25) / (qnorm_75 - qnorm_25)
+    bSigma[~np.isfinite(bSigma) | (bSigma <= 0)] = np.nan
 
     # Critical value for uniform confidence band
     # O7-F1: biters=1 -> 25th and 75th percentiles coincide -> bSigma=0 -> bres/bSigma
@@ -130,7 +157,9 @@ def mboot(inf_func, DIDparams, pl=False, cores=1):
     # the function degrades gracefully (crit_val=NaN), matching R's mboot and the
     # existing all-degenerate branch's contract, instead of crashing.
     with np.errstate(divide='ignore', invalid='ignore'):
-        bT = np.max(np.abs(bres / bSigma), axis=1)
+        scaled = np.abs(bres / bSigma)
+    scaled[np.isnan(scaled)] = -np.inf
+    bT = np.max(scaled, axis=1)
     bT = bT[np.isfinite(bT)]
     if bT.size == 0:
         se = np.full(ndg_dim.shape, np.nan)

@@ -17,8 +17,24 @@ from drdid import reg_did
 from csdid.attgt_fnc import drdid_trim
 from csdid.attgt_fnc.compute_att_gt_shared import (
     select_estimators, last_pretreatment_index, plan_cell, rcond_check_fail,
-    drdid_design_singular, overlap_check_fail, BREAK, BASE_ZERO)
+    drdid_design_singular, overlap_check_fail, rc_outcome_has_too_few_obs, BREAK, BASE_ZERO,
+    _ORIGINAL_PANEL_GUARDS)
 import warnings
+
+
+_CACHEABLE_PANEL_ESTIMATORS = drdid_trim._ORIGINAL_PANEL_ESTIMATORS
+
+
+def _period_cache_keys(period_arrays):
+    """Share the first period's key only for exactly unchanged arrays.
+
+    Period identities already permit post-treatment reuse with time-varying
+    data. Comparing each period to the first also covers time-invariant inputs
+    in linear time, without hashes or tolerance-based equality.
+    """
+    first = period_arrays[0]
+    return {p: (0 if values.dtype == first.dtype and np.array_equal(values, first)
+                else p) for p, values in period_arrays.items()}
 
 
 def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=True):
@@ -65,6 +81,12 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
     apply_guard = not callable(est_method)
     # Propensity-overlap guard (matches R): dr/ipw only.
     apply_overlap = (not callable(est_method)) and est_method in ("dr", "ipw")
+    cache_nuisance = (panel and apply_overlap and len(xcov_cols) > 1
+                      and any(est_panel is original for original in _CACHEABLE_PANEL_ESTIMATORS)
+                      and all(current is original for current, original in zip(
+                          (overlap_check_fail, rcond_check_fail, drdid_design_singular),
+                          _ORIGINAL_PANEL_GUARDS))
+                      and drdid_trim._panel_pscore_cache_available())
 
     # ─── Precompute period-indexed structures ───────────────────────────────
     if panel:
@@ -78,9 +100,14 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
         for p, tp in enumerate(tlist):
             fr = data[data[tname] == tp]
             fid = fr[idname].to_numpy()
-            period_y[p] = pd.Series(fr[yname].to_numpy(), index=fid)
-            period_w[p] = pd.Series(fr['w'].to_numpy(), index=fid)
-            period_cov[p] = pd.DataFrame(fr[xcov_cols].to_numpy(), index=fid)
+            # Align once to the global unit order, including when a caller has
+            # reordered the preprocessed frame. Cells then select NumPy rows.
+            period_y[p] = pd.Series(fr[yname].to_numpy(), index=fid).reindex(unit_ids).to_numpy()
+            period_w[p] = pd.Series(fr['w'].to_numpy(), index=fid).reindex(unit_ids).to_numpy()
+            period_cov[p] = pd.DataFrame(fr[xcov_cols].to_numpy(), index=fid).reindex(unit_ids).to_numpy()
+        if cache_nuisance:
+            cov_keys = _period_cache_keys(period_cov)
+            weight_keys = _period_cache_keys(period_w)
     else:
         # repeated cross sections / unbalanced panel: one global design matrix
         full_cov = pd.DataFrame(data[xcov_cols].to_numpy(), index=data.index)
@@ -92,6 +119,12 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
         state['g'] = g
         _pretg = last_pretreatment_index(g, tlist, anticipation)
         pret_g = _pretg if _pretg is not None else 0
+        # Keep only the most recent design, so retained fit memory is bounded
+        # independently of the number of periods. Entries cannot leak across
+        # treatment cohorts or public fit calls. Intercept-only designs retain
+        # the uncached path because their overlap guard has no warning context.
+        nuisance_cache = ({'overlap_key': None, 'pscore_key': None, 'cov_keys': cov_keys,
+                           'weight_keys': weight_keys} if cache_nuisance else None)
 
         if not panel:
             data = data.assign(G_m=1 * (data[gname] == g))
@@ -117,14 +150,15 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
                     unit_ids, unit_g, never_treated, anticipation, tlist, tfac,
                     period_y, period_w, period_cov, global_pos, n,
                     fix_weights, est_panel, add_att_data, t_i,
-                    apply_rcond, apply_guard, est_method, apply_overlap)
+                    apply_rcond, apply_guard, est_method, apply_overlap, nuisance_cache,
+                    weighted=weights_name is not None)
             else:
                 _att_gt_rc_cell(
                     g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
                     data, tname, idname, yname, gname, never_treated, anticipation,
                     tlist, tfac, full_cov, rowid_unique, n, fix_weights,
                     est_rc, add_att_data, t_i, apply_rcond, apply_guard, est_method,
-                    apply_overlap, xcov_cols)
+                    apply_overlap, xcov_cols, weighted=weights_name is not None)
 
     output = {'group': group, 'year': year, "att": att_est, 'post': post_array}
     if compute_inffunc:
@@ -136,7 +170,8 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
                        unit_ids, unit_g, never_treated, anticipation, tlist, tfac,
                        period_y, period_w, period_cov, global_pos, n,
                        fix_weights, est_att_f, add_att_data, t_i, apply_rcond=False,
-                       apply_guard=False, est_method="dr", apply_overlap=False):
+                       apply_guard=False, est_method="dr", apply_overlap=False,
+                       nuisance_cache=None, weighted=False):
     Gm = (unit_g == g)
     if never_treated:
         Cm = (unit_g == 0)
@@ -151,19 +186,47 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
     G = Gm[mask].astype(float)
 
     earlier_idx = min(tn_idx, pret)
-    ypre = period_y[pret].reindex(uids).to_numpy()
-    ypost = period_y[tn_idx].reindex(uids).to_numpy()
-    covariates = period_cov[earlier_idx].reindex(uids).to_numpy()
+    ypre = period_y[pret][mask]
+    ypost = period_y[tn_idx][mask]
+    # Pandas' former row reindexing yielded column-contiguous covariates.
+    # Retain that layout so estimator reductions keep their rounding behavior.
+    covariates = np.asfortranarray(period_cov[earlier_idx][mask])
 
     if fix_weights == "base_period":
-        w = period_w[pret_g].reindex(uids).to_numpy()
+        weight_idx = pret_g
     elif fix_weights == "first_period":
-        w = period_w[0].reindex(uids).to_numpy()
+        weight_idx = 0
     else:
-        w = period_w[earlier_idx].reindex(uids).to_numpy()
+        weight_idx = earlier_idx
+    w = period_w[weight_idx][mask]
+
+    pscore_cache = None
+    if nuisance_cache is not None:
+        # Treatment labels are fixed within the cohort; the exact mask captures
+        # changing not-yet-treated controls, including gaps between cohorts.
+        overlap_key = (nuisance_cache['cov_keys'][earlier_idx], mask.tobytes(),
+                       nuisance_cache['weight_keys'][weight_idx])
+        pscore_key = (overlap_key, nuisance_cache['weight_keys'][weight_idx])
+        if pscore_key != nuisance_cache['pscore_key']:
+            nuisance_cache['pscore_key'] = pscore_key
+            nuisance_cache['pscore'] = {}
+        pscore_cache = nuisance_cache['pscore']
 
     # Propensity-overlap guard (matches R), checked before the singular guard.
-    if apply_overlap and overlap_check_fail(covariates, G):
+    overlap_failed = False
+    if apply_overlap:
+        if nuisance_cache is None or overlap_key != nuisance_cache['overlap_key']:
+            overlap_failed = overlap_check_fail(covariates, G, i_weights=w if weighted else None)
+            if nuisance_cache is not None:
+                nuisance_cache['overlap_key'] = overlap_key
+                nuisance_cache['overlap_failed'] = overlap_failed
+        else:
+            overlap_failed = nuisance_cache['overlap_failed']
+            # The original guard enters this context even for a clean fit.
+            # Keep its warning-registry behavior when skipping that fit.
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+    if overlap_failed:
         warnings.warn(
             f"overlap condition violated for group {g} in time period {tn}")
         add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
@@ -171,7 +234,7 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
 
     # Regression-feasibility guard (matches R): control pre-check + DRDID's
     # per-group designs (incl. the treated outcome regression).
-    if (apply_rcond and rcond_check_fail(covariates[G == 0])) or (
+    if (apply_rcond and rcond_check_fail(covariates, G, i_weights=w if weighted else None)) or (
             apply_guard and drdid_design_singular(
                 covariates, w, G, est_method, post=None)):
         warnings.warn(
@@ -182,7 +245,12 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
         return
 
     try:
-        att_gt, att_inf_func = est_att_f(ypost, ypre, G, i_weights=w, covariates=covariates)
+        if pscore_cache is None:
+            att_gt, att_inf_func = est_att_f(ypost, ypre, G, i_weights=w, covariates=covariates)
+        else:
+            att_gt, att_inf_func = est_att_f(
+                ypost, ypre, G, i_weights=w, covariates=covariates,
+                _pscore_cache=pscore_cache)
     except Exception as e:
         warnings.warn(
             f"Estimation failed for group {g} in time period {tn}: {e}. "
@@ -190,9 +258,14 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
         add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
         return
 
+    if np.isnan(att_gt):
+        warnings.warn(f"ATT for (g,t) = ({g},{tn}) is NaN; setting it to NA")
+        add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+        return
+
     n1 = len(uids)
     inf_zeros = np.zeros(n)
-    positions = global_pos.reindex(uids).to_numpy()
+    positions = np.flatnonzero(mask)
     inf_zeros[positions] = (n / n1) * att_inf_func
     add_att_data(att_gt, pst=post_treat, inf_f=inf_zeros)
 
@@ -202,7 +275,7 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
                     tlist, tfac, full_cov, rowid_unique, n, fix_weights,
                     est_att_f, add_att_data, t_i, apply_rcond=False,
                     apply_guard=False, est_method="dr", apply_overlap=False,
-                    xcov_cols=None):
+                    xcov_cols=None, weighted=False):
     if never_treated:
         C_main = (data[gname] == 0)
     else:
@@ -269,8 +342,17 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
     else:
         covariates = full_cov.loc[disdat.index].to_numpy()
 
+    if apply_rcond and rc_outcome_has_too_few_obs(
+            G, post, w, covariates.shape[1], include_treated=est_method == "dr"):
+        warnings.warn(
+            f"Outcome regression design is singular (fewer positive-weight observations "
+            f"than covariates) for group {g} in time period {tn}; "
+            f"the ATT for this cell will be set to NA.")
+        add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+        return
+
     # Propensity-overlap guard (matches R), checked before the singular guard.
-    if apply_overlap and overlap_check_fail(covariates, G):
+    if apply_overlap and overlap_check_fail(covariates, G, i_weights=w if weighted else None):
         warnings.warn(
             f"overlap condition violated for group {g} in time period {tn}")
         add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
@@ -278,7 +360,7 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
 
     # Regression-feasibility guard (matches R): control pre-check + DRDID's
     # per-period, per-group designs (incl. the treated outcome regression).
-    if (apply_rcond and rcond_check_fail(covariates[G == 0])) or (
+    if (apply_rcond and rcond_check_fail(covariates, G, i_weights=w if weighted else None)) or (
             apply_guard and drdid_design_singular(
                 covariates, w, G, est_method, post=post)):
         warnings.warn(
@@ -297,6 +379,11 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
         add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
         return
 
+    if np.isnan(att_gt):
+        warnings.warn(f"ATT for (g,t) = ({g},{tn}) is NaN; setting it to NA")
+        add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+        return
+
     # n/n1 rescaling (matches R `did`; mirrors compute_att_gt). Scale the per-cell
     # IF by #units only for a BALANCED panel force-routed through the RC estimator
     # by fix_weights='varying' (R reshapes wide; two rows per unit summed back per
@@ -311,9 +398,13 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
     # exactly 2x too large (R 2.5.0's bug). Mirrors compute_att_gt.
     fold_factor = 0.5 if varying_forced_rc_balanced else 1.0
     att_inf_func = fold_factor * (n / n1_scale) * att_inf_func
-    inf_func_df = pd.DataFrame({"inf_func": att_inf_func, "right_ids": right_ids}).fillna(0)
+    inf_func_df = pd.DataFrame({"inf_func": att_inf_func, "right_ids": right_ids})
     inf_zeros = np.zeros(n)
     aggte_if = inf_func_df.groupby('right_ids').inf_func.sum()
+    # Preserve missing observed contributions; absent units remain zero below.
+    missing_if = pd.isna(att_inf_func)
+    if np.any(missing_if):
+        aggte_if.loc[np.unique(right_ids[missing_if])] = np.nan
     try:
         dis_idx1 = np.isin(data['rowid'].unique(), aggte_if.index.to_numpy())
     except Exception:

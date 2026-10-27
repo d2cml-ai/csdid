@@ -154,6 +154,7 @@ def test_analytical_cluster_se_vs_bootstrap():
 def test_clustered_se_repeated_cross_sections():
     """Clustered analytical SE on repeated cross sections; faster_mode agrees with standard."""
     d = _make_clustered_shocks(808)
+    d["id"] = np.arange(len(d))
     common = dict(yname="y", tname="t", idname="id", gname="g", data=d,
                   control_group="nevertreated", clustervar="cl", panel=False)
     with warnings.catch_warnings():
@@ -171,6 +172,7 @@ def test_clustered_se_repeated_cross_sections():
 def test_clustered_bootstrap_vs_analytical_rcs():
     """Analytical vs bootstrap clustered SE agree for repeated cross-sections."""
     d = _make_clustered_shocks(606)
+    d["id"] = np.arange(len(d))
     common = dict(yname="y", tname="t", idname="id", gname="g", data=d,
                   control_group="nevertreated", clustervar="cl", panel=False)
     with warnings.catch_warnings():

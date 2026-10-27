@@ -1,62 +1,110 @@
-# csdid `faster_mode` — Implementation, Correctness & Benchmark
+# `faster_mode` and 0.4.3 performance validation
 
-`faster_mode=True` is the Python equivalent of R `did`'s `faster_mode=TRUE`. It
-produces results **numerically identical** to the standard path but eliminates
-the two dominant per-(g,t) costs (profiled in the standard loop):
+The subsequent [PyFixest/R performance audit](PERFORMANCE_AUDIT_20261023.md)
+measures additional improvements against commit `972dbd0`, including nuisance-fit
+reuse, bootstrap cluster grouping, larger stress workloads, and current-source
+R comparisons. The measurements below describe the earlier optimization round.
 
-- per-cell `patsy` covariate construction → the design matrix is built **once
-  per period** (panel) or **once globally** (repeated cross sections);
-- per-cell `panel2cs2` reshaping → outcomes/weights are **pre-pivoted** to a
-  per-period lookup (panel).
-
-Implementation: `csdid/attgt_fnc/compute_att_gt2.py`, routed from
-`ATTgt(..., faster_mode=True)`.
-
-## Correctness — identical to the standard path
-
-Validated across **72 configurations** (3 datasets × {panel, RC} ×
-{nevertreated, notyettreated} × {dr, reg, ipw} × {varying, universal}):
-
-| Quantity | Max |standard − fast| |
-|----------|----------------------|
-| ATT(g,t) | **1.4e-17** (bit-identical) |
-| Standard error | **1.4e-17** |
-| Influence functions | < 1e-9 (see `TestIFConsistency`) |
-
-This equivalence is locked in by the suite: `TestFasterMode` (8),
-`TestIFConsistency` (5), and `test_faster_mode_consistency.py` (24 parametrized)
-all assert `faster_mode == standard`.
-
-## Speed — 4-way comparison
-
-`dr` estimator, `bstrap=False`, best of 5 runs, on this machine
-(R `did` 2.5.0 / R 4.4.2; Python 3.13). Reproduce with
-`r_ref/benchmark.py` and `r_ref/benchmark.R`.
-
-| Dataset | rows | R (Standard) | R (Fast) | Python (Standard) | **Python (Fast)** |
-|---------|-----:|-------------:|---------:|------------------:|------------------:|
-| tp8_dyn (2k units × 8 periods) | 16,000 | 115 ms | 133 ms | 505 ms | **138 ms** |
-| tp10_const (1k units × 10 periods) | 10,000 | 118 ms | 114 ms | 726 ms | **220 ms** |
-| big_tp10 (8k units × 10 periods) | 80,000 | 396 ms | 453 ms | 1387 ms | **423 ms** |
-
-### Takeaways
-- **Python `faster_mode` ≈ 3.3× faster** than Python standard (3.65× / 3.31× /
-  3.28×) — matching R's documented "2.5–3×" headline.
-- **Python (Fast) ≈ R (Standard)** in absolute time (e.g. 138 ms vs 115 ms),
-  largely closing the Python↔R gap that comes from R's compiled `DRDID`.
-- **R `faster_mode` is roughly break-even** at these sizes (its tensor-setup
-  overhead ≈ its savings); R's gains appear on much larger panels (more
-  units × periods × cohorts). The Python port pays off earlier because the
-  cost it removes — per-cell `patsy`/`pandas` reshaping — is proportionally
-  larger in Python.
-
-## Usage
+`ATTgt` defaults to `faster_mode=True` in 0.4.3. Pass `faster_mode=False` to
+select the standard computation path. Both modes remain tested across panel,
+repeated cross sections, unbalanced panels, estimators, control groups, weights,
+base periods and clustered inference. Results across the two paths agree to
+numerical tolerance; they need not have identical floating-point representations.
 
 ```python
 from csdid.att_gt import ATTgt
-res = ATTgt(yname="Y", tname="period", idname="id", gname="G", data=df,
-            faster_mode=True).fit(est_method="dr")   # identical results, ~3x faster
+
+result = ATTgt(yname="Y", tname="period", idname="id", gname="G", data=df,
+               xformla="Y~X").fit(est_method="dr", bstrap=False)
+# Set faster_mode=False explicitly to use the standard path.
 ```
 
-`faster_mode` composes with everything else (panel/RC, control groups, all
-est_methods, `base_period`, `fix_weights`, clustering, `bstrap`).
+The performance changes vectorize balanced-panel selection, reuse sorted
+panel reshaping in standard mode, align period arrays once in fast mode, and
+reuse time mappings, cohort-weight calculations and cluster membership inside
+each aggregation call. Plotting imports are deferred until requested. The
+estimators, overlap decisions, Wald filtering, bootstrap draw sequence and
+bootstrap chunk sizes are preserved.
+
+## Measured before/after results
+
+These are actual implemented-source measurements on October 23, 2026, against
+an aligned 0.4.3 source snapshot before the performance changes
+(`fafac8dc8c3cabf38444296abbb332db58136abe`). Both mode flags were explicit in both sources, so
+the table measures implementation changes independently of the new default.
+
+Each number is the median of five serial, paired rounds in milliseconds for
+construction/preprocessing, fitting, and all four public aggregations
+(`simple`, `group`, `dynamic`, `calendar`).
+
+| Workflow | Standard before | Standard after | Speedup | Fast before | Fast after | Speedup |
+|---|---:|---:|---:|---:|---:|---:|
+| 80,000 panel rows, analytical inference | 623.4 | 402.3 | 1.55x | 405.7 | 227.9 | 1.78x |
+| Same panel, 400 clusters | 752.6 | 436.8 | 1.72x | 540.7 | 268.0 | 2.02x |
+| 16,000 panel rows, 399 bootstrap draws and simultaneous bands | 329.4 | 269.5 | 1.22x | 257.4 | 203.0 | 1.27x |
+
+The analytical panel has 8,000 units, 10 periods and 81 ATT(g,t) cells; the
+bootstrap panel has 2,000 units, eight periods and 49 cells. Both use seeded
+synthetic data, the DR estimator, one covariate, unequal positive sampling
+weights and never-treated controls. These gains describe these workloads;
+repeated-cross-section or unbalanced-panel fits can benefit less because the
+panel-specific changes do not apply to those branches.
+
+The environment was macOS arm64, Python 3.12.12, NumPy 2.5.4, pandas 3.1.0,
+SciPy 1.18.1 and statsmodels 0.15.0, with Accelerate BLAS and inherited thread
+settings. Sources ran in separate processes with alternating source and mode
+order. Dataset generation, imports, warmups, serialization and comparisons
+were outside the timers. Profiling was a separate untimed call. No other agent
+CPU jobs ran during the benchmark. Other machines and BLAS providers can yield
+different results.
+
+[benchmark_results_v043.json](benchmark_results_v043.json) records every raw
+run, phase medians/ranges, environment, source hashes and comparison summary.
+
+## Correctness checks
+
+All 60 measured workflow/mode executions matched the aligned baseline exactly
+for the same explicit mode: ATT, SE, bounds and critical values, Wald results,
+complete unit and aggregation influence functions, warnings and final NumPy RNG
+state. The comparator checks symmetric field sets, array shapes and finite,
+NaN, positive-infinite and negative-infinite masks before numerical values.
+
+A separate functional comparison was exact for 144 estimator configurations
+and 2,304 aggregation requests, plus 48 bootstrap configurations using identical
+multiplier matrices. The full package suite passed 1,428 tests. Tests include
+shuffled and non-dense IDs, large integer and nullable IDs, time-varying
+covariates/weights, factor covariates, missing cells, event windows, cluster
+metadata, helper overrides and default-mode behavior.
+
+These before/after Python checks are distinct from numerical agreement with
+R's nuisance solvers. [UPSTREAM_SYNC_v0.4.3.md](UPSTREAM_SYNC_v0.4.3.md)
+records the upstream revisions, independent oracles, adversarial checks and
+remaining R solver-tolerance differences. No R/Python bit-identical claim is
+made.
+
+## Reproduce
+
+Create a checkout of the aligned baseline commit shown above, then run the
+current benchmark script with the same interpreter and BLAS settings for both
+source trees:
+
+```sh
+git worktree add --detach /tmp/csdid-v043-before fafac8dc8c3cabf38444296abbb332db58136abe
+
+python csdid/test_csdid/benchmark_v043.py \
+  --baseline /tmp/csdid-v043-before \
+  --output /tmp/csdid-v043-benchmark \
+  --reps 5 --profiles
+
+python -m pytest csdid/test_csdid -q
+```
+
+The benchmark always runs both mode flags and has no pass/fail speed threshold.
+It fails on a complete-output parity difference. Its output directory preserves
+raw timings, comparisons, source hashes, environment, first-pair full reference
+arrays and optional cProfile files. Repeated identical reference arrays from
+later rounds are removed to limit disk use.
+
+Additional raw R and benchmark evidence is kept locally under the ignored
+`csdid/test_csdid/stress/release_v043_20261023/` directory. Those large artifacts
+are excluded from the package distribution and the PR.

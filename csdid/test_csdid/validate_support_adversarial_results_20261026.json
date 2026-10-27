@@ -1,0 +1,607 @@
+{
+  "audit_date": "2026-10-26",
+  "source_pins": {
+    "baseline": "2a36b48e2c435d87c6dfaecda36734a4336c78ec",
+    "candidate": "81fa18073a239f40173c9a9a60e5c5d4934073be"
+  },
+  "sources": {
+    "baseline": {
+      "commit": "2a36b48e2c435d87c6dfaecda36734a4336c78ec",
+      "tracked_runtime_clean": true,
+      "runtime_sha256": {
+        "csdid/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/_version.py": "29833d7ba9ebf8f0b7ec36b68ef70ea9c671e20320e59d7750d8f71b48f09ec3",
+        "csdid/aggte_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/aggte_fnc/aggte.py": "992788709ff02d453cc0f1c921de6091af8a3f8fc1afc7cd1eee06654c009893",
+        "csdid/aggte_fnc/compute_aggte.py": "545262dfad0ad7ef20f03de2ee16968ded4697eeeb1f643132a22389c58a378b",
+        "csdid/aggte_fnc/utils.py": "7477a7b98f5dd8a9ae57ce5903da967d5f6755fb2ad8338cb5f016fe5e31a226",
+        "csdid/att_gt.py": "c4f690322440d7ae80138a5213393eac682f50832db81eeba2ccd067561a8d2b",
+        "csdid/attgt_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/attgt_fnc/compute_att_gt.py": "b3a3b6cd8559f06eff56a461197cbb166557ed53636e780d38e3728fa7d03de7",
+        "csdid/attgt_fnc/compute_att_gt2.py": "7eca8ec1629d98b17ccdd7170e72d7afd298eebd41a42f6cb4247afc6c5d6b7c",
+        "csdid/attgt_fnc/compute_att_gt_shared.py": "0fba0cbba6c7d23f06555e05bae49ecb62bcddadf6e8bdaa02ad033b38c7b1af",
+        "csdid/attgt_fnc/drdid_trim.py": "d3cafe7ff6abe045d337156c315a931efd2a9c4e127b0ab63f84a821eb6c5bda",
+        "csdid/attgt_fnc/preprocess_did.py": "3f2c603b7b1c2ed8ad883f171c7a6915eb4cda14b37bbbb9994b0deb7baecb66",
+        "csdid/plots/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/plots/gplot.py": "84c850a2acb9142b01d318e2869af00781c85bd3a32c02829a4569021ffda5c0",
+        "csdid/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/utils/bmisc.py": "9650c57640f9a2fbfa91f01e0d3e7c38a411f7b8fcfd4129ad359c6a34e16c2d",
+        "csdid/utils/mboot.py": "f99b41fc58062f8c99a98497b11bccdea6190156abe25036bb6fe471a0013b4b"
+      }
+    },
+    "candidate": {
+      "commit": "81fa18073a239f40173c9a9a60e5c5d4934073be",
+      "tracked_runtime_clean": true,
+      "runtime_sha256": {
+        "csdid/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/_version.py": "29833d7ba9ebf8f0b7ec36b68ef70ea9c671e20320e59d7750d8f71b48f09ec3",
+        "csdid/aggte_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/aggte_fnc/aggte.py": "992788709ff02d453cc0f1c921de6091af8a3f8fc1afc7cd1eee06654c009893",
+        "csdid/aggte_fnc/compute_aggte.py": "921fd3d10c51ea9ee4ed1c9a2bd6bb65db3ae7f57f5f3fdd4d0cacab2b31c688",
+        "csdid/aggte_fnc/utils.py": "9c180ce80f66af790ae1a041aa2bb96ad61f5d68531d33ee60c4296f2a529000",
+        "csdid/att_gt.py": "5d6ef09799dc880581ee90ab529c17a0e18909242e750ba81917b13d366694c8",
+        "csdid/attgt_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/attgt_fnc/compute_att_gt.py": "7a3522eb15ee6a3473950646d5fe2a53d0519d48b993ca19617155779fc460f6",
+        "csdid/attgt_fnc/compute_att_gt2.py": "c14b4a8abeccfa8530616ea313e3025db0493c18c2e189a79e6dda357302fa22",
+        "csdid/attgt_fnc/compute_att_gt_shared.py": "f8201dfd6151662bce9c6592bec763a3cb45a14239fec3417e08ea639420d94b",
+        "csdid/attgt_fnc/drdid_trim.py": "d3cafe7ff6abe045d337156c315a931efd2a9c4e127b0ab63f84a821eb6c5bda",
+        "csdid/attgt_fnc/preprocess_did.py": "4823a5803c03b2a4cca200a7869f29c55b3bc5d08eb79ab7546d8894d8223d2c",
+        "csdid/plots/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/plots/gplot.py": "84c850a2acb9142b01d318e2869af00781c85bd3a32c02829a4569021ffda5c0",
+        "csdid/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/utils/bmisc.py": "9650c57640f9a2fbfa91f01e0d3e7c38a411f7b8fcfd4129ad359c6a34e16c2d",
+        "csdid/utils/mboot.py": "46919752135a38f7cd40d8b97be59cb9e61957860e3601dfff9b4566ecf630ef"
+      }
+    }
+  },
+  "harness_sha256": {
+    "validate_support_adversarial.py": "b5766e1d042598daf0130e7d2c792f1975229e5705459df2aa4a556a48280f78",
+    "validate_support_adversarial.R": "6448009ab21290d97448b50a4db0e61b8887ef1646d98f6ddba01ce88bfe954c"
+  },
+  "oracle_session_info": "R version 4.6.0 (2026-04-24)\nPlatform: aarch64-apple-darwin23\nRunning under: macOS Tahoe 26.5.1\n\nMatrix products: default\nBLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib \nLAPACK: /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1\n\nlocale:\n[1] C.UTF-8/C.UTF-8/C.UTF-8/C/C.UTF-8/C.UTF-8\n\ntime zone: America/New_York\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n[1] compiler_4.6.0 jsonlite_2.0.0\n",
+  "oracle_policy": {
+    "atol": 1e-07,
+    "rtol": 1e-06,
+    "support_and_nonfinite_masks": "exact"
+  },
+  "harness_corrections": [
+    "The initial seeded-cache fixture had time-varying X, so it did not reuse a cache entry and could not detect deletion of the weight key. The corrected fixture fixes X by unit while varying weight support; production code was unchanged."
+  ],
+  "oracle_warning_messages": [
+    "glm.fit: fitted probabilities numerically 0 or 1 occurred",
+    "non-integer #successes in a binomial glm!"
+  ],
+  "independent_oracle": "Base R only: explicit normalized four-cell means, weighted linear normal equations, logistic score/Hessian and estimator influence equations; no did/DRDID code called.",
+  "healthy_comparisons": 864,
+  "healthy_full_output_exact": 864,
+  "healthy_discrepancies": [],
+  "healthy_combined_sha256": "3745b7d23390ed434eb9e77aec0f0c6819834894ad597c9e3de2c36d256a335b",
+  "healthy_scope": "All methods, both controls/bases/modes; panel/unbalanced anchors default/first/base/varying and RC default; absent/unit/nonconstant/time-varying-zero weights; all four aggregations, complete IFs, warnings and RNG states.",
+  "targeted_totals": {
+    "checks": 64,
+    "independent_base_r_oracles": 32,
+    "independent_max_att": 2.7929603074738907e-12,
+    "independent_max_if": 1.532560744976763e-10,
+    "restored_group_time_results": 64,
+    "old_unsupported_backend_entries": 48,
+    "new_unsupported_backend_entries": 0,
+    "seeded_weight_cache_defects_detected": 4
+  },
+  "targeted_checks": [
+    {
+      "case": "zero_treated_dr_false",
+      "old_finite_att": 8,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.859579736508749e-14,
+      "oracle_if_max_abs": 1.3375967000683886e-11,
+      "disposition": "corrected false feasibility rejection; current matches independent base-R ATT and full IF",
+      "unaffected_cells_exact": 8
+    },
+    {
+      "case": "zero_treated_dr_true",
+      "old_finite_att": 8,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.859579736508749e-14,
+      "oracle_if_max_abs": 1.3375967000683886e-11,
+      "disposition": "corrected false feasibility rejection; current matches independent base-R ATT and full IF",
+      "unaffected_cells_exact": 8
+    },
+    {
+      "case": "zero_treated_ipw_false",
+      "old_finite_att": 8,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 2.7929603074738907e-12,
+      "oracle_if_max_abs": 1.532560744976763e-10,
+      "disposition": "corrected false feasibility rejection; current matches independent base-R ATT and full IF",
+      "unaffected_cells_exact": 8
+    },
+    {
+      "case": "zero_treated_ipw_true",
+      "old_finite_att": 8,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 2.7929603074738907e-12,
+      "oracle_if_max_abs": 1.532560744976763e-10,
+      "disposition": "corrected false feasibility rejection; current matches independent base-R ATT and full IF",
+      "unaffected_cells_exact": 8
+    },
+    {
+      "case": "zero_control_reg_false",
+      "old_finite_att": 0,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 3.3306690738754696e-16,
+      "oracle_if_max_abs": 5.329070518200751e-15,
+      "disposition": "corrected false feasibility rejection; current matches independent base-R ATT and full IF"
+    },
+    {
+      "case": "zero_control_reg_true",
+      "old_finite_att": 0,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 3.3306690738754696e-16,
+      "oracle_if_max_abs": 5.329070518200751e-15,
+      "disposition": "corrected false feasibility rejection; current matches independent base-R ATT and full IF"
+    },
+    {
+      "case": "tiny_control_reg_false",
+      "old_finite_att": 0,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.881784197001252e-16,
+      "oracle_if_max_abs": 7.993605777301127e-15,
+      "disposition": "corrected false feasibility rejection; current matches independent base-R ATT and full IF"
+    },
+    {
+      "case": "tiny_control_reg_true",
+      "old_finite_att": 0,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.881784197001252e-16,
+      "oracle_if_max_abs": 7.993605777301127e-15,
+      "disposition": "corrected false feasibility rejection; current matches independent base-R ATT and full IF"
+    },
+    {
+      "case": "mean_panel_False_dr_false",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 6.661338147750939e-16,
+      "oracle_if_max_abs": 6.661338147750939e-15,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_panel_False_dr_true",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 6.661338147750939e-16,
+      "oracle_if_max_abs": 6.661338147750939e-15,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_panel_False_reg_false",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 6.661338147750939e-16,
+      "oracle_if_max_abs": 7.105427357601002e-15,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_panel_False_reg_true",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 6.661338147750939e-16,
+      "oracle_if_max_abs": 7.105427357601002e-15,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_panel_False_ipw_false",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 6.661338147750939e-16,
+      "oracle_if_max_abs": 7.549516567451064e-15,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_panel_False_ipw_true",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 6.661338147750939e-16,
+      "oracle_if_max_abs": 7.549516567451064e-15,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_panel_True_dr_false",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.881784197001252e-16,
+      "oracle_if_max_abs": 7.105427357601002e-15,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_panel_True_dr_true",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.881784197001252e-16,
+      "oracle_if_max_abs": 7.105427357601002e-15,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_panel_True_reg_false",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.881784197001252e-16,
+      "oracle_if_max_abs": 6.217248937900877e-15,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_panel_True_reg_true",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.881784197001252e-16,
+      "oracle_if_max_abs": 6.217248937900877e-15,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_panel_True_ipw_false",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.881784197001252e-16,
+      "oracle_if_max_abs": 7.105427357601002e-15,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_panel_True_ipw_true",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.881784197001252e-16,
+      "oracle_if_max_abs": 7.105427357601002e-15,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_rc_False_dr_false",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 1.3322676295501878e-15,
+      "oracle_if_max_abs": 4.973799150320701e-14,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_rc_False_dr_true",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 1.3322676295501878e-15,
+      "oracle_if_max_abs": 4.973799150320701e-14,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_rc_False_reg_false",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 1.3322676295501878e-15,
+      "oracle_if_max_abs": 4.263256414560601e-14,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_rc_False_reg_true",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 1.3322676295501878e-15,
+      "oracle_if_max_abs": 4.263256414560601e-14,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_rc_False_ipw_false",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 1.7763568394002505e-15,
+      "oracle_if_max_abs": 5.3290705182007514e-14,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_rc_False_ipw_true",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 1.7763568394002505e-15,
+      "oracle_if_max_abs": 5.3290705182007514e-14,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_rc_True_dr_false",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.881784197001252e-16,
+      "oracle_if_max_abs": 4.973799150320701e-14,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_rc_True_dr_true",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.881784197001252e-16,
+      "oracle_if_max_abs": 4.973799150320701e-14,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_rc_True_reg_false",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.881784197001252e-16,
+      "oracle_if_max_abs": 4.973799150320701e-14,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_rc_True_reg_true",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 8.881784197001252e-16,
+      "oracle_if_max_abs": 4.973799150320701e-14,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_rc_True_ipw_false",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 7.771561172376096e-16,
+      "oracle_if_max_abs": 4.263256414560601e-14,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "mean_rc_True_ipw_true",
+      "old_finite_att": 12,
+      "new_finite_att": 12,
+      "oracle_att_max_abs": 7.771561172376096e-16,
+      "oracle_if_max_abs": 4.263256414560601e-14,
+      "disposition": "unchanged and agrees with closed-form weighted means and influence function"
+    },
+    {
+      "case": "normalization_loss_rc_infFalse_false",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "old_unsupported_backend_entries": 4,
+      "new_unsupported_backend_entries": 0,
+      "unchanged_healthy_cells": 4,
+      "disposition": "normalized-support loss rejected before backend; healthy estimates/IF exact"
+    },
+    {
+      "case": "normalization_loss_rc_infFalse_true",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "old_unsupported_backend_entries": 4,
+      "new_unsupported_backend_entries": 0,
+      "unchanged_healthy_cells": 4,
+      "disposition": "normalized-support loss rejected before backend; healthy estimates/IF exact"
+    },
+    {
+      "case": "normalization_loss_rc_infTrue_false",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "old_unsupported_backend_entries": 4,
+      "new_unsupported_backend_entries": 0,
+      "unchanged_healthy_cells": 4,
+      "disposition": "normalized-support loss rejected before backend; healthy estimates/IF exact"
+    },
+    {
+      "case": "normalization_loss_rc_infTrue_true",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "old_unsupported_backend_entries": 4,
+      "new_unsupported_backend_entries": 0,
+      "unchanged_healthy_cells": 4,
+      "disposition": "normalized-support loss rejected before backend; healthy estimates/IF exact"
+    },
+    {
+      "case": "normalization_loss_varying_infFalse_false",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "old_unsupported_backend_entries": 4,
+      "new_unsupported_backend_entries": 0,
+      "unchanged_healthy_cells": 4,
+      "disposition": "normalized-support loss rejected before backend; healthy estimates/IF exact"
+    },
+    {
+      "case": "normalization_loss_varying_infFalse_true",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "old_unsupported_backend_entries": 4,
+      "new_unsupported_backend_entries": 0,
+      "unchanged_healthy_cells": 4,
+      "disposition": "normalized-support loss rejected before backend; healthy estimates/IF exact"
+    },
+    {
+      "case": "normalization_loss_varying_infTrue_false",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "old_unsupported_backend_entries": 4,
+      "new_unsupported_backend_entries": 0,
+      "unchanged_healthy_cells": 4,
+      "disposition": "normalized-support loss rejected before backend; healthy estimates/IF exact"
+    },
+    {
+      "case": "normalization_loss_varying_infTrue_true",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "old_unsupported_backend_entries": 4,
+      "new_unsupported_backend_entries": 0,
+      "unchanged_healthy_cells": 4,
+      "disposition": "normalized-support loss rejected before backend; healthy estimates/IF exact"
+    },
+    {
+      "case": "normalization_loss_unbalanced_infFalse_false",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "old_unsupported_backend_entries": 4,
+      "new_unsupported_backend_entries": 0,
+      "unchanged_healthy_cells": 4,
+      "disposition": "normalized-support loss rejected before backend; healthy estimates/IF exact"
+    },
+    {
+      "case": "normalization_loss_unbalanced_infFalse_true",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "old_unsupported_backend_entries": 4,
+      "new_unsupported_backend_entries": 0,
+      "unchanged_healthy_cells": 4,
+      "disposition": "normalized-support loss rejected before backend; healthy estimates/IF exact"
+    },
+    {
+      "case": "normalization_loss_unbalanced_infTrue_false",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "old_unsupported_backend_entries": 4,
+      "new_unsupported_backend_entries": 0,
+      "unchanged_healthy_cells": 4,
+      "disposition": "normalized-support loss rejected before backend; healthy estimates/IF exact"
+    },
+    {
+      "case": "normalization_loss_unbalanced_infTrue_true",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "old_unsupported_backend_entries": 4,
+      "new_unsupported_backend_entries": 0,
+      "unchanged_healthy_cells": 4,
+      "disposition": "normalized-support loss rejected before backend; healthy estimates/IF exact"
+    },
+    {
+      "case": "tiny_3_dr_false",
+      "old_finite_att": 2,
+      "new_finite_att": 2,
+      "disposition": "existing numerical rejection preserved; explicit physical preflight added"
+    },
+    {
+      "case": "tiny_3_dr_true",
+      "old_finite_att": 2,
+      "new_finite_att": 2,
+      "disposition": "existing numerical rejection preserved; explicit physical preflight added"
+    },
+    {
+      "case": "tiny_3_reg_false",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "disposition": "square/full-rank or non-treated-outcome method preserved exactly"
+    },
+    {
+      "case": "tiny_3_reg_true",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "disposition": "square/full-rank or non-treated-outcome method preserved exactly"
+    },
+    {
+      "case": "tiny_3_ipw_false",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "disposition": "square/full-rank or non-treated-outcome method preserved exactly"
+    },
+    {
+      "case": "tiny_3_ipw_true",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "disposition": "square/full-rank or non-treated-outcome method preserved exactly"
+    },
+    {
+      "case": "tiny_4_dr_false",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "disposition": "square/full-rank or non-treated-outcome method preserved exactly"
+    },
+    {
+      "case": "tiny_4_dr_true",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "disposition": "square/full-rank or non-treated-outcome method preserved exactly"
+    },
+    {
+      "case": "tiny_4_reg_false",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "disposition": "square/full-rank or non-treated-outcome method preserved exactly"
+    },
+    {
+      "case": "tiny_4_reg_true",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "disposition": "square/full-rank or non-treated-outcome method preserved exactly"
+    },
+    {
+      "case": "tiny_4_ipw_false",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "disposition": "square/full-rank or non-treated-outcome method preserved exactly"
+    },
+    {
+      "case": "tiny_4_ipw_true",
+      "old_finite_att": 4,
+      "new_finite_att": 4,
+      "disposition": "square/full-rank or non-treated-outcome method preserved exactly"
+    },
+    {
+      "case": "cache_support_dr_false",
+      "old_finite_att": 8,
+      "new_finite_att": 9,
+      "disposition": "weight-aware overlap correct and fast/standard identical"
+    },
+    {
+      "case": "cache_support_dr_true",
+      "old_finite_att": 8,
+      "new_finite_att": 9,
+      "disposition": "weight-aware overlap correct and fast/standard identical",
+      "seeded_weight_cache_defect_detected_cells": 3
+    },
+    {
+      "case": "cache_support_dr_notyet_false",
+      "old_finite_att": 8,
+      "new_finite_att": 9,
+      "disposition": "weight-aware overlap correct and fast/standard identical"
+    },
+    {
+      "case": "cache_support_dr_notyet_true",
+      "old_finite_att": 8,
+      "new_finite_att": 9,
+      "disposition": "weight-aware overlap correct and fast/standard identical",
+      "seeded_weight_cache_defect_detected_cells": 1
+    },
+    {
+      "case": "cache_support_ipw_false",
+      "old_finite_att": 8,
+      "new_finite_att": 9,
+      "disposition": "weight-aware overlap correct and fast/standard identical"
+    },
+    {
+      "case": "cache_support_ipw_true",
+      "old_finite_att": 8,
+      "new_finite_att": 9,
+      "disposition": "weight-aware overlap correct and fast/standard identical",
+      "seeded_weight_cache_defect_detected_cells": 3
+    },
+    {
+      "case": "cache_support_ipw_notyet_false",
+      "old_finite_att": 8,
+      "new_finite_att": 9,
+      "disposition": "weight-aware overlap correct and fast/standard identical"
+    },
+    {
+      "case": "cache_support_ipw_notyet_true",
+      "old_finite_att": 8,
+      "new_finite_att": 9,
+      "disposition": "weight-aware overlap correct and fast/standard identical",
+      "seeded_weight_cache_defect_detected_cells": 1
+    }
+  ],
+  "input_sha256": {
+    "cache_support.csv": "1814d252ba3775adeb9589a54ac57aa09216d76ad50d67ec1fb2bed7e2b5cbbc",
+    "mean_panel_False.csv": "697b33c4cf5d3b9db9c507bde655eb0a3d0773fc4a693bf802a59817f82e9335",
+    "mean_panel_True.csv": "c37f64b9b7a397dadd67ab08fbf16d34bbcc9598b3530a480e47309c95f9d5e6",
+    "mean_rc_False.csv": "b672dc07cb1c54cc42dc54da4d7042941912ffda3c2a9f3396c69282644ce665",
+    "mean_rc_True.csv": "ec644a0c5619e0da959ab6ac3b22108fdac30668299da07db2c9ab99fc0fad3c",
+    "normalization_loss_rc.csv": "59175be4d25f2a2033777de56b45cfa1ba4627c27f6897c6d84e76c8ddc8cece",
+    "normalization_loss_unbalanced.csv": "78e5a82e6e2f8a37784962499edaccfe4108b0c6367354eb5f91168d20a8dfa8",
+    "normalization_loss_varying.csv": "e84a53b51a70292b88bd685415fb2cd12ff3744c47f4b7f23be1504b543af745",
+    "panel.csv": "697b33c4cf5d3b9db9c507bde655eb0a3d0773fc4a693bf802a59817f82e9335",
+    "rc.csv": "b672dc07cb1c54cc42dc54da4d7042941912ffda3c2a9f3396c69282644ce665",
+    "tiny_3.csv": "93c3d18015a9bd4d56ca29e1a174c0873bcb58697eb924e60de5934d6fb443a5",
+    "tiny_4.csv": "17887c1700605df1eb7c8ab09d14b20e1d8328cf25a395e5ab3fa640a82da543",
+    "tiny_control.csv": "e8cbdcaca4830ec299ca5d4baba3069983266c903cb746bf6678ab560663790b",
+    "unbalanced.csv": "f50662609c2a158fdb6086a62e91e9ee74b0736ade6e100695ead821c964140e",
+    "zero_control.csv": "aea72b2e0a13aa027085b0e59f756397acfca497504d6d379adefb663fcaea4f",
+    "zero_treated.csv": "cc7767cfc7c95ba6f8d447a665f5ab72281559895348b5291a10fa8676ee4516"
+  },
+  "limitations": [
+    "Finite targeted and grid evidence cannot prove absence of all regressions.",
+    "Physical counts are necessary, not full-rank certificates; extreme floating-point overflow and solver-threshold boundaries remain numerical limits.",
+    "Old tiny-design cases already rejected by their numerical Gram check are reported as preserved rejections, not newly fixed estimates."
+  ]
+}

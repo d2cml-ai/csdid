@@ -1,6 +1,7 @@
 include readme.md
 include LICENSE
 include CHANGELOG_v0.3.0.md
+include CHANGELOG_v0.4.3.md
 include PYTHON_BUGFIXES.md
 include requirements.txt
 

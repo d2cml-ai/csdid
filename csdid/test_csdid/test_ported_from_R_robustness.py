@@ -55,7 +55,7 @@ class TestMutationSafety:
         snap = df.copy(deep=True)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            ATTgt(yname="Y", tname="period", idname="id", gname="G", data=df,
+            ATTgt(yname="Y", tname="period", idname=None, gname="G", data=df,
                   xformla="Y~1", control_group="nevertreated",
                   panel=False).fit(est_method="reg")
         assert list(df.columns) == list(snap.columns)

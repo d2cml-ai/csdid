@@ -102,7 +102,7 @@ def test_repeated_cross_section(sim_data):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             res = ATTgt(
-                yname="Y", tname="period", idname="id", gname="G",
+                yname="Y", tname="period", idname=None, gname="G",
                 data=sim_data, xformla="Y~X", panel=False,
             ).fit(est_method=em, bstrap=False)
         att = np.asarray(res.MP["att"], dtype=float)
@@ -115,7 +115,7 @@ def test_ipw_repeated_cross_sections(sim_data):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             res = ATTgt(
-                yname="Y", tname="period", idname="id", gname="G",
+                yname="Y", tname="period", idname=None, gname="G",
                 data=sim_data, xformla="Y~X", panel=False,
             ).fit(est_method=em, bstrap=False)
         att = np.asarray(res.MP["att"], dtype=float)
@@ -129,7 +129,7 @@ def test_rc_dynamic_effects():
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         res = ATTgt(
-            yname="Y", tname="period", idname="id", gname="G",
+            yname="Y", tname="period", idname=None, gname="G",
             data=data, xformla="Y~X", panel=False,
         ).fit(est_method="dr", bstrap=False)
         res.aggte(typec="dynamic")
@@ -168,7 +168,7 @@ def test_notyettreated_rc(sim_data):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         res = ATTgt(
-            yname="Y", tname="period", idname="id", gname="G",
+            yname="Y", tname="period", idname=None, gname="G",
             data=sim_data, xformla="Y~X", panel=False,
             control_group="notyettreated",
         ).fit(est_method="dr", bstrap=False)
@@ -182,7 +182,7 @@ def test_notyettreated_no_nevertreated(sim_data):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         res = ATTgt(
-            yname="Y", tname="period", idname="id", gname="G",
+            yname="Y", tname="period", idname=None, gname="G",
             data=data, xformla="Y~X", panel=False,
             control_group="notyettreated",
         ).fit(est_method="dr", bstrap=False)
@@ -212,7 +212,7 @@ def test_aggregation_dynamic():
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         res = ATTgt(
-            yname="Y", tname="period", idname="id", gname="G",
+            yname="Y", tname="period", idname=None, gname="G",
             data=data, xformla="Y~X", panel=False,
         ).fit(est_method="reg", bstrap=False)
         res.aggte(typec="dynamic")
@@ -231,7 +231,7 @@ def test_aggregation_balance_e():
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         res = ATTgt(
-            yname="Y", tname="period", idname="id", gname="G",
+            yname="Y", tname="period", idname=None, gname="G",
             data=data, xformla="Y~X", panel=False,
         ).fit(est_method="dr", bstrap=False)
 
@@ -260,7 +260,7 @@ def test_unequally_spaced_groups():
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         res = ATTgt(
-            yname="Y", tname="period", idname="id", gname="G",
+            yname="Y", tname="period", idname=None, gname="G",
             data=data, xformla="Y~X", panel=False,
         ).fit(est_method="reg", bstrap=False)
         res.aggte(typec="dynamic")
@@ -283,7 +283,7 @@ def test_first_period_treatment(sim_data):
 
     with pytest.warns(UserWarning, match="already treated|[Dd]ropped"):
         ATTgt(
-            yname="Y", tname="period", idname="id", gname="G",
+            yname="Y", tname="period", idname=None, gname="G",
             data=data, xformla="Y~X", panel=False,
         ).fit(est_method="reg", bstrap=False)
 
@@ -559,7 +559,7 @@ class TestFasterMode:
     @staticmethod
     def _both(data, control_group="nevertreated", panel=True, xformla="Y~X",
               est_method="dr", base_period="varying", allow_unbalanced_panel=True):
-        common = dict(yname="Y", tname="period", idname="id", gname="G", data=data,
+        common = dict(yname="Y", tname="period", idname="id" if panel else None, gname="G", data=data,
                       control_group=control_group, panel=panel, xformla=xformla,
                       allow_unbalanced_panel=allow_unbalanced_panel)
         with warnings.catch_warnings():
@@ -618,7 +618,7 @@ class TestFixWeights:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             return ATTgt(
-                yname="Y", tname="period", idname="id", gname="G", data=data,
+                yname="Y", tname="period", idname="id" if kw.get("panel", True) else None, gname="G", data=data,
                 weights_name="wt", fix_weights=fix_weights, **kw,
             ).fit(est_method="reg", bstrap=False)
 
@@ -661,7 +661,7 @@ class TestFixWeights:
                   weights_name="wt", fix_weights="bogus")
         # base_period / first_period not allowed for true repeated cross sections
         with pytest.raises(ValueError, match="repeated cross sections"):
-            ATTgt(yname="Y", tname="period", idname="id", gname="G", data=data,
+            ATTgt(yname="Y", tname="period", idname=None, gname="G", data=data,
                   weights_name="wt", panel=False, fix_weights="base_period")
 
     def test_unbalanced(self):
@@ -677,7 +677,7 @@ class TestIFConsistency:
     @staticmethod
     def _if_equal(data, control_group="nevertreated", panel=True, xformla="Y~X",
                   allow_unbalanced_panel=True):
-        common = dict(yname="Y", tname="period", idname="id", gname="G", data=data,
+        common = dict(yname="Y", tname="period", idname="id" if panel else None, gname="G", data=data,
                       control_group=control_group, panel=panel, xformla=xformla,
                       allow_unbalanced_panel=allow_unbalanced_panel)
         with warnings.catch_warnings():
@@ -742,7 +742,7 @@ def test_repeated_cross_section_all_methods(sim_data, em):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         res = ATTgt(
-            yname="Y", tname="period", idname="id", gname="G",
+            yname="Y", tname="period", idname=None, gname="G",
             data=sim_data, xformla="Y~X", panel=False,
         ).fit(est_method=em, bstrap=False)
     att = np.asarray(res.MP["att"], dtype=float)

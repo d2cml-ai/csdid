@@ -50,7 +50,7 @@ class TestFactorCovariates:
     @pytest.mark.parametrize("panel", [True, False])
     def test_factor_faster_mode_matches_standard(self, panel):
         d = self._data()
-        common = dict(yname='y', tname='year', idname='id', gname='group', data=d,
+        common = dict(yname='y', tname='year', idname="id" if panel else None, gname='group', data=d,
                       control_group='nevertreated', xformla='y~C(cat)', panel=panel)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -408,10 +408,12 @@ class TestUniversalBaseNaN:
         se = np.asarray(res.results['se'], dtype=float)
         assert np.all(np.isfinite(se)), "varying base period should have finite SEs"
 
-    def test_only_base_cell_nan_when_estimated_cells_are_degenerate(self):
-        """Base cell is identified by position, not by an all-zero influence
-        function. With a deterministic outcome (y == period) every estimated
-        cell also has an all-zero IF; only the cohort's base cell may be NaN."""
+    def test_zero_variance_estimated_cells_and_base_have_unavailable_se(self):
+        """R did PR279 treats every nonpositive variance as unavailable.
+
+        With a deterministic outcome (y == period), estimated cells and the
+        normalized base cell all have exact-zero influence functions.
+        """
         rows = []
         for uid in range(1, 201):
             g = 3 if uid <= 100 else 0
@@ -424,11 +426,9 @@ class TestUniversalBaseNaN:
                         data=df, control_group='nevertreated').fit(
                             est_method='ipw', base_period='universal', bstrap=False)
         se = np.asarray(res.results['se'], dtype=float)
-        yr = np.asarray(res.results['year'])
-        # cohort g=3, periods 1..5 -> last pre-treatment period is 2 (the base).
-        nan_years = set(int(y) for y in yr[np.isnan(se)])
-        assert nan_years == {2}, f"only base year 2 should be NaN, got {sorted(nan_years)}"
-        assert np.all(np.isfinite(se[yr != 2])), "degenerate estimated cells must keep finite SE"
+        np.testing.assert_array_equal(res.MP['inffunc']['inffunc'], 0.)
+        assert np.isnan(se).all()
+        assert res.MP['W'] is None
 
 
 class TestIdnameNumericValidation:

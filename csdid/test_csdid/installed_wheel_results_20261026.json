@@ -1,0 +1,299 @@
+{
+  "audit_date": "2026-10-26",
+  "comparisons": [
+    {
+      "case": "panel_dr_never_varying",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "panel_dr_never_varying",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "panel_dr_notyet_universal",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "panel_dr_notyet_universal",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "panel_reg_never_varying",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "panel_reg_never_varying",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "panel_reg_notyet_universal",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "panel_reg_notyet_universal",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "panel_ipw_never_varying",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "panel_ipw_never_varying",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "panel_ipw_notyet_universal",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "panel_ipw_notyet_universal",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "rc_dr_never_varying",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "rc_dr_never_varying",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "rc_dr_notyet_universal",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "rc_dr_notyet_universal",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "rc_reg_never_varying",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "rc_reg_never_varying",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "rc_reg_notyet_universal",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "rc_reg_notyet_universal",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "rc_ipw_never_varying",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "rc_ipw_never_varying",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "rc_ipw_notyet_universal",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "rc_ipw_notyet_universal",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_dr_never_varying",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_dr_never_varying",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_dr_notyet_universal",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_dr_notyet_universal",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_reg_never_varying",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_reg_never_varying",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_reg_notyet_universal",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_reg_notyet_universal",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_ipw_never_varying",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_ipw_never_varying",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_ipw_notyet_universal",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_ipw_notyet_universal",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "panel_dr_never_varying_varying_weights",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "panel_dr_never_varying_varying_weights",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "panel_reg_notyet_universal_varying_weights",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "panel_reg_notyet_universal_varying_weights",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "panel_dr_never_varying_bootstrap_unit",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "panel_dr_never_varying_bootstrap_unit",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "panel_reg_notyet_universal_bootstrap_cluster",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "panel_reg_notyet_universal_bootstrap_cluster",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "panel_dr_never_varying_analytic_cluster",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "panel_dr_never_varying_analytic_cluster",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "rc_reg_never_varying_analytic_cluster",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "rc_reg_never_varying_analytic_cluster",
+      "faster_mode": true,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_ipw_never_varying_analytic_cluster",
+      "faster_mode": false,
+      "passed": true
+    },
+    {
+      "case": "unbalanced_ipw_never_varying_analytic_cluster",
+      "faster_mode": true,
+      "passed": true
+    }
+  ],
+  "passed": 50,
+  "loaded_runtime_paths": {
+    "csdid": "/private/tmp/csdid-wheel-installed-20261026/csdid/__init__.py",
+    "csdid.aggte_fnc": "/private/tmp/csdid-wheel-installed-20261026/csdid/aggte_fnc/__init__.py",
+    "csdid.utils": "/private/tmp/csdid-wheel-installed-20261026/csdid/utils/__init__.py",
+    "csdid.utils.bmisc": "/private/tmp/csdid-wheel-installed-20261026/csdid/utils/bmisc.py",
+    "csdid.utils.mboot": "/private/tmp/csdid-wheel-installed-20261026/csdid/utils/mboot.py",
+    "csdid.aggte_fnc.utils": "/private/tmp/csdid-wheel-installed-20261026/csdid/aggte_fnc/utils.py",
+    "csdid.aggte_fnc.compute_aggte": "/private/tmp/csdid-wheel-installed-20261026/csdid/aggte_fnc/compute_aggte.py",
+    "csdid.aggte_fnc.aggte": "/private/tmp/csdid-wheel-installed-20261026/csdid/aggte_fnc/aggte.py",
+    "csdid.attgt_fnc": "/private/tmp/csdid-wheel-installed-20261026/csdid/attgt_fnc/__init__.py",
+    "csdid.attgt_fnc.preprocess_did": "/private/tmp/csdid-wheel-installed-20261026/csdid/attgt_fnc/preprocess_did.py",
+    "csdid.attgt_fnc.drdid_trim": "/private/tmp/csdid-wheel-installed-20261026/csdid/attgt_fnc/drdid_trim.py",
+    "csdid.attgt_fnc.compute_att_gt_shared": "/private/tmp/csdid-wheel-installed-20261026/csdid/attgt_fnc/compute_att_gt_shared.py",
+    "csdid.attgt_fnc.compute_att_gt": "/private/tmp/csdid-wheel-installed-20261026/csdid/attgt_fnc/compute_att_gt.py",
+    "csdid.attgt_fnc.compute_att_gt2": "/private/tmp/csdid-wheel-installed-20261026/csdid/attgt_fnc/compute_att_gt2.py",
+    "csdid.plots": "/private/tmp/csdid-wheel-installed-20261026/csdid/plots/__init__.py",
+    "csdid.plots.gplot": "/private/tmp/csdid-wheel-installed-20261026/csdid/plots/gplot.py",
+    "csdid.att_gt": "/private/tmp/csdid-wheel-installed-20261026/csdid/att_gt.py"
+  },
+  "wheel_sha256": "2e3586c7b6f84d0f3f79f0c46f664e2cfb2bfb2b0056d3f070a22a52cf40e13c",
+  "wheel_size_bytes": 72465,
+  "wheel_runtime_sha256": {
+    "csdid/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "csdid/_version.py": "29833d7ba9ebf8f0b7ec36b68ef70ea9c671e20320e59d7750d8f71b48f09ec3",
+    "csdid/att_gt.py": "5d6ef09799dc880581ee90ab529c17a0e18909242e750ba81917b13d366694c8",
+    "csdid/aggte_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "csdid/aggte_fnc/aggte.py": "992788709ff02d453cc0f1c921de6091af8a3f8fc1afc7cd1eee06654c009893",
+    "csdid/aggte_fnc/compute_aggte.py": "921fd3d10c51ea9ee4ed1c9a2bd6bb65db3ae7f57f5f3fdd4d0cacab2b31c688",
+    "csdid/aggte_fnc/utils.py": "9c180ce80f66af790ae1a041aa2bb96ad61f5d68531d33ee60c4296f2a529000",
+    "csdid/attgt_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "csdid/attgt_fnc/compute_att_gt.py": "7a3522eb15ee6a3473950646d5fe2a53d0519d48b993ca19617155779fc460f6",
+    "csdid/attgt_fnc/compute_att_gt2.py": "c14b4a8abeccfa8530616ea313e3025db0493c18c2e189a79e6dda357302fa22",
+    "csdid/attgt_fnc/compute_att_gt_shared.py": "f8201dfd6151662bce9c6592bec763a3cb45a14239fec3417e08ea639420d94b",
+    "csdid/attgt_fnc/drdid_trim.py": "d3cafe7ff6abe045d337156c315a931efd2a9c4e127b0ab63f84a821eb6c5bda",
+    "csdid/attgt_fnc/preprocess_did.py": "4823a5803c03b2a4cca200a7869f29c55b3bc5d08eb79ab7546d8894d8223d2c",
+    "csdid/plots/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "csdid/plots/gplot.py": "84c850a2acb9142b01d318e2869af00781c85bd3a32c02829a4569021ffda5c0",
+    "csdid/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "csdid/utils/bmisc.py": "9650c57640f9a2fbfa91f01e0d3e7c38a411f7b8fcfd4129ad359c6a34e16c2d",
+    "csdid/utils/mboot.py": "46919752135a38f7cd40d8b97be59cb9e61957860e3601dfff9b4566ecf630ef"
+  },
+  "test_and_R_reference_artifacts_excluded": true,
+  "scope": "Same pinned R numerical gate, including full influence functions and shared-draw bootstrap, on installed wheel imports outside checkout."
+}

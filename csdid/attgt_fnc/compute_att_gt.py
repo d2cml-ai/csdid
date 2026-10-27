@@ -4,7 +4,7 @@ from drdid import reg_did
 from csdid.attgt_fnc import drdid_trim
 from csdid.attgt_fnc.compute_att_gt_shared import (
     select_estimators, last_pretreatment_index, plan_cell, rcond_check_fail,
-    drdid_design_singular, overlap_check_fail, BREAK, BASE_ZERO)
+    drdid_design_singular, overlap_check_fail, rc_outcome_has_too_few_obs, BREAK, BASE_ZERO)
 
 from csdid.utils.bmisc import panel2cs2
 import warnings
@@ -141,8 +141,8 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
         #-----------------------------------------------------------------------------
 
             if panel:
-                disdat = panel2cs2(disdat, yname, idname, tname)
-                disdat = disdat.dropna()
+                # Preprocessing sorts by unit and time; subsetting preserves it.
+                disdat = panel2cs2(disdat, yname, idname, tname, assume_sorted=True)
                 n_cell = len(disdat)
                 dis_idx = np.array(disdat.G_m == 1) | np.array(disdat.C == 1)
                 disdat = disdat.loc[dis_idx, :]
@@ -172,7 +172,7 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 # Propensity-overlap guard (matches R, checked BEFORE the singular
                 # guard so its precedence/message match): NA a dr/ipw cell whose PS
                 # logit is (near-)separated (max fitted PS >= 0.999).
-                if apply_overlap and overlap_check_fail(covariates, G):
+                if apply_overlap and overlap_check_fail(covariates, G, i_weights=w if weights_name is not None else None):
                     warnings.warn(
                         f"overlap condition violated for group {g} in time period {tn}"
                     )
@@ -182,10 +182,8 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 # Regression-feasibility guard (matches R): NA the cell when a 2x2
                 # estimating design is singular/ill-conditioned, rather than letting
                 # the solver return an untrustworthy estimate. Covers the control
-                # design (`did` pre-check) and DRDID's per-group designs (incl. the
-                # treated outcome regression -- a tiny treated cohort can be singular
-                # even when the control design is fine).
-                if (apply_rcond and rcond_check_fail(covariates[G == 0])) or (
+                # design (`did` pre-check) and DRDID's weighted estimating designs.
+                if (apply_rcond and rcond_check_fail(covariates, G, i_weights=w if weights_name is not None else None)) or (
                         apply_guard and drdid_design_singular(
                             covariates, w, G, est_method, post=None)):
                     warnings.warn(
@@ -203,6 +201,11 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                         f"Estimation failed for group {g} in time period {tn}: {e}. "
                         f"Setting ATT to NA for this cell."
                     )
+                    add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+                    continue
+
+                if np.isnan(att_gt):
+                    warnings.warn(f"ATT for (g,t) = ({g},{tn}) is NaN; setting it to NA")
                     add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
                     continue
 
@@ -318,10 +321,19 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 
                 est_att_f = est_rc
 
+                if apply_rcond and rc_outcome_has_too_few_obs(
+                        G, post, w, covariates.shape[1], include_treated=est_method == "dr"):
+                    warnings.warn(
+                        f"Outcome regression design is singular (fewer positive-weight observations "
+                        f"than covariates) for group {g} in time period {tn}; "
+                        f"the ATT for this cell will be set to NA.")
+                    add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+                    continue
+
                 # Propensity-overlap guard (matches R), checked before the singular
                 # guard. On the RC / varying path the PS logit is fit on the stacked
                 # long sample (covariates, G as built here).
-                if apply_overlap and overlap_check_fail(covariates, G):
+                if apply_overlap and overlap_check_fail(covariates, G, i_weights=w if weights_name is not None else None):
                     warnings.warn(
                         f"overlap condition violated for group {g} in time period {tn}"
                     )
@@ -329,10 +341,9 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                     continue
 
                 # Regression-feasibility guard (matches R): on the RC / unbalanced
-                # path DRDID fits control AND treated outcome regressions separately
-                # pre and post, so each period-by-group design is checked (this is
-                # what NAs a tiny treated cohort with too few post observations).
-                if (apply_rcond and rcond_check_fail(covariates[G == 0])) or (
+                # path DRDID fits control outcome regressions separately pre/post;
+                # the DR estimator additionally fits treated outcome regressions.
+                if (apply_rcond and rcond_check_fail(covariates, G, i_weights=w if weights_name is not None else None)) or (
                         apply_guard and drdid_design_singular(
                             covariates, w, G, est_method, post=post)):
                     warnings.warn(
@@ -350,6 +361,11 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                         f"Estimation failed for group {g} in time period {tn}: {e}. "
                         f"Setting ATT to NA for this cell."
                     )
+                    add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+                    continue
+
+                if np.isnan(att_gt):
+                    warnings.warn(f"ATT for (g,t) = ({g},{tn}) is NaN; setting it to NA")
                     add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
                     continue
 
@@ -380,10 +396,15 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                     "inf_func": att_inf_func,
                     "right_ids": right_ids
                 }
-                ).fillna(0)
+                )
 
                 inf_zeros = np.zeros(n)
                 aggte_infffuc = inf_func_df.groupby('right_ids').inf_func.sum()
+                # A missing contribution from an observed unit makes its IF
+                # missing; only units absent from this cell get structural zero.
+                missing_if = pd.isna(att_inf_func)
+                if np.any(missing_if):
+                    aggte_infffuc.loc[np.unique(right_ids[missing_if])] = np.nan
                 try:
                     dis_idx1 = np.isin(data['rowid'].unique(), aggte_infffuc.index.to_numpy())
                 except Exception:

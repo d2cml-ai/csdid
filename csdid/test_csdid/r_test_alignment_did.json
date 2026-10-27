@@ -1,0 +1,2424 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-10-26",
+  "r_repository": "https://github.com/bcallaway11/did",
+  "r_commit": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
+  "scope": "Assertion-intent file-level crosswalk. Existing tests were read; filenames, generated counts, and translation docstrings were not treated as evidence of full parity. Current-source numerical reference tests are a separate layer.",
+  "status_definitions": {
+    "covered": "The stated portable behavioral intents have direct Python assertion oracles; language-specific internals may be explicitly excluded.",
+    "partial": "Some assertion intents have matching Python tests, with concrete untested sections or differing API contracts listed.",
+    "not_applicable": "This R API/statistic has no Python counterpart; unrelated Python tests cannot count as coverage.",
+    "gap": "The file\u2019s principal behavior lacks a matching Python oracle or behavior."
+  },
+  "new_test_file": "csdid/test_csdid/test_r_test_alignment.py",
+  "fixes_from_assertion_audit": [
+    {
+      "r_file": "test-modelmatrix-hoist.R",
+      "r_lines": "242-284",
+      "behavior": "Remove globally unused categorical levels on the retained sample before final design construction.",
+      "before": "Both engines returned 0/10 finite ATT when a pandas categorical declared an unused level; explicitly removing unused categories returned 10/10.",
+      "after": "All ATT/SE/fullIF match an explicitly retained/releveled sample, including first/last unused levels and levels removed by missingness or balancing."
+    },
+    {
+      "r_file": "test-faster-mode-consistency.R",
+      "r_lines": "175-220",
+      "behavior": "Propagate observed missing custom-estimator IF through per-unit aggregation, retaining zero only for absent units.",
+      "before": "One NaN injected per cell yielded zero NaN IF entries and 10/10 finite SE in both engines.",
+      "after": "Exactly one NaN unit IF per cell and all cell SE missing; healthy contributions remain bit-identical."
+    }
+  ],
+  "entries": [
+    {
+      "r_file": "tests/testthat/test-aggte-clustervars-override.R",
+      "status": "covered",
+      "r_intents": [
+        "Inherited and identical cluster overrides use clustered inference without unavailable-data warnings (R33-44).",
+        "Unavailable cluster overrides warn and return iid inference; includes analytic, bootstrap, alternate cluster and all aggregation types (R46-78)."
+      ],
+      "python_tests": [
+        "test_r_test_alignment.py::test_aggregation_unavailable_cluster_warns_and_equals_iid",
+        "test_r_test_alignment.py::test_aggregation_inherited_cluster_and_unavailable_switch"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 33,
+          "title_expression": "test_that(\"inherited clustering and same-variable override are honored without warning\", {"
+        },
+        {
+          "line": 46,
+          "title_expression": "test_that(\"aggte warns and falls back to i.i.d. when att_gt was not clustered (analytic)\", {"
+        },
+        {
+          "line": 58,
+          "title_expression": "test_that(\"aggte bootstrap override warns and falls back instead of erroring\", {"
+        },
+        {
+          "line": 70,
+          "title_expression": "test_that(\"aggte refuses to switch to a different cluster variable than att_gt used\", {"
+        }
+      ],
+      "r_file_sha256": "6af533e96b6847b7a988d1c617ba89ea1dd0c22c6e8b451bf4c5520d984c99d6"
+    },
+    {
+      "r_file": "tests/testthat/test-aggte-comprehensive.R",
+      "status": "covered",
+      "r_intents": [
+        "Four aggregation result shapes, finite estimates/SE, event ordering/windows/balance, na_rm and option inheritance.",
+        "Simple influence length and group na_rm windows are checked by a complete analytical influence-function oracle, including all-missing selected cells."
+      ],
+      "python_tests": [
+        "test_aggte_comprehensive.py",
+        "test_unit_aggte.py::test_dynamic_event_times_and_overall",
+        "test_unit_aggte.py::test_cband_crit_val_exceeds_pointwise",
+        "test_upstream_aggregation_sync.py::test_original_time_windows_att_se_and_influence",
+        "test_upstream_aggregation_sync.py::test_na_rm_drops_group_with_only_missing_in_window_cell"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [
+        "R S3 AGGTEobj class is translated to Python dict/result structure, not identical object APIs."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 21,
+          "title_expression": "test_that(\"aggte simple returns valid overall ATT\", {"
+        },
+        {
+          "line": 28,
+          "title_expression": "test_that(\"aggte simple returns valid SE\", {"
+        },
+        {
+          "line": 34,
+          "title_expression": "test_that(\"aggte simple has no egt component\", {"
+        },
+        {
+          "line": 39,
+          "title_expression": "test_that(\"aggte simple influence function has correct length\", {"
+        },
+        {
+          "line": 48,
+          "title_expression": "test_that(\"aggte dynamic returns event-time specific ATTs\", {"
+        },
+        {
+          "line": 57,
+          "title_expression": "test_that(\"aggte dynamic event times are sorted\", {"
+        },
+        {
+          "line": 62,
+          "title_expression": "test_that(\"aggte dynamic overall.att averages post-treatment event times\", {"
+        },
+        {
+          "line": 68,
+          "title_expression": "test_that(\"aggte dynamic min_e filters event times\", {"
+        },
+        {
+          "line": 75,
+          "title_expression": "test_that(\"aggte dynamic max_e filters event times\", {"
+        },
+        {
+          "line": 82,
+          "title_expression": "test_that(\"aggte dynamic min_e and max_e together\", {"
+        },
+        {
+          "line": 88,
+          "title_expression": "test_that(\"aggte dynamic balance_e filters groups\", {"
+        },
+        {
+          "line": 95,
+          "title_expression": "test_that(\"aggte dynamic SEs are positive where ATT is not NA\", {"
+        },
+        {
+          "line": 105,
+          "title_expression": "test_that(\"aggte group returns per-group ATTs\", {"
+        },
+        {
+          "line": 112,
+          "title_expression": "test_that(\"aggte group overall.att is reasonable\", {"
+        },
+        {
+          "line": 118,
+          "title_expression": "test_that(\"aggte group SEs are positive for each group\", {"
+        },
+        {
+          "line": 128,
+          "title_expression": "test_that(\"aggte calendar returns per-period ATTs\", {"
+        },
+        {
+          "line": 134,
+          "title_expression": "test_that(\"aggte calendar overall.att is reasonable\", {"
+        },
+        {
+          "line": 140,
+          "title_expression": "test_that(\"aggte calendar SEs are positive for each period\", {"
+        },
+        {
+          "line": 146,
+          "title_expression": "test_that(\"aggte calendar only includes post-treatment periods\", {"
+        },
+        {
+          "line": 157,
+          "title_expression": "test_that(\"aggte with na.rm=TRUE drops NA ATTs and proceeds\", {"
+        },
+        {
+          "line": 171,
+          "title_expression": "test_that(\"all aggte types return AGGTEobj class\", {"
+        },
+        {
+          "line": 178,
+          "title_expression": "test_that(\"all aggte types have non-NULL DIDparams\", {"
+        },
+        {
+          "line": 185,
+          "title_expression": "test_that(\"aggte preserves overridden bstrap/alp settings\", {"
+        },
+        {
+          "line": 195,
+          "title_expression": "test_that(\"aggte with cband=TRUE and bstrap=TRUE returns simultaneous critical value\", {"
+        },
+        {
+          "line": 210,
+          "title_expression": "test_that(\"aggte group with na.rm and finite max_e excludes (not errors on) groups whose only non-NA cell is past max_e\", {"
+        },
+        {
+          "line": 233,
+          "title_expression": "test_that(\"aggte group default (max_e = Inf) is unchanged by the gnotna max_e filter\", {"
+        }
+      ],
+      "r_file_sha256": "99cf542b7b8dc91ca403cdd5b12028256631d48f4095997012dcf2b4211741ae"
+    },
+    {
+      "r_file": "tests/testthat/test-aggte-edge-coverage.R",
+      "status": "covered",
+      "r_intents": [
+        "Single treated cohort works for all four aggregations; dynamic windows preserve aligned event and estimate lengths."
+      ],
+      "python_tests": [
+        "test_edge_cases.py::test_single_treated_group_aggte_types",
+        "test_ported_from_R_robustness.py::test_dynamic_window_bounded_and_aligned"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 7,
+          "title_expression": "test_that(\"aggte handles a single treated group for every aggregation type\", {"
+        },
+        {
+          "line": 23,
+          "title_expression": "test_that(\"aggte dynamic with min_e / max_e windows returns a consistent event-time set\", {"
+        }
+      ],
+      "r_file_sha256": "774a712a6c3c035c4330658a3078b57b6e0031676c034331a6852cb197cb8065"
+    },
+    {
+      "r_file": "tests/testthat/test-aggte-min-e-window.R",
+      "status": "partial",
+      "r_intents": [
+        "Simple/group selected-window ratios, inference and original irregular-time units, including inclusive bounds.",
+        "Empty windows name affected cohorts, na_rm removes empty groups, and ignored balance_e warns without changing results."
+      ],
+      "python_tests": [
+        "test_upstream_aggregation_sync.py::test_original_time_windows_att_se_and_influence",
+        "test_upstream_aggregation_sync.py::test_group_empty_window_error_and_na_rm",
+        "test_upstream_aggregation_sync.py::test_simple_empty_window_error",
+        "test_upstream_aggregation_sync.py::test_balance_e_warning_preserves_result",
+        "test_unit_aggte.py::test_dynamic_balance_e_bounds_event_times"
+      ],
+      "remaining_gaps": [
+        "R181-187 explicitly asserts dynamic balance_e changes the ATT; Python current balance tests constrain windows/length rather than asserting that effect on an independently computed ATT."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 26,
+          "title_expression": "test_that(\"aggte(type='simple', min_e=) equals the hand-computed restricted weighted mean\", {"
+        },
+        {
+          "line": 44,
+          "title_expression": "test_that(\"the default min_e = -Inf leaves simple and group aggregations unchanged\", {"
+        },
+        {
+          "line": 64,
+          "title_expression": "test_that(\"aggte(type='group', min_e=) restricts each group's average to the window\", {"
+        },
+        {
+          "line": 86,
+          "title_expression": "test_that(\"a min_e window that excludes every post-treatment cell errors clearly\", {"
+        },
+        {
+          "line": 100,
+          "title_expression": "test_that(\"a window that empties only some groups errors clearly, naming them\", {"
+        },
+        {
+          "line": 109,
+          "title_expression": "test_that(\"min_e/max_e for simple and group are in original time units on irregularly spaced panels\", {"
+        },
+        {
+          "line": 146,
+          "title_expression": "test_that(\"the min_e/max_e window boundary is inclusive: an existing e = max_e cell is kept\", {"
+        },
+        {
+          "line": 172,
+          "title_expression": "test_that(\"balance_e warns that it is ignored for the simple and group aggregations\", {"
+        }
+      ],
+      "r_file_sha256": "724cb56e0b1d5b2bd03d54a7fc9a03ad2fec5a4cd8c9304cdd8c54700d504ccb"
+    },
+    {
+      "r_file": "tests/testthat/test-always-treated-invariance.R",
+      "status": "partial",
+      "r_intents": [
+        "Always-treated units cannot enter valid cells; latest no-never cohort stays as control and is not estimated.",
+        "Existing Python ports check never-treated control invariance, outcome-scaling invariance and cohort exclusion."
+      ],
+      "python_tests": [
+        "test_ported_from_R_always_treated_invariance.py",
+        "test_notyettreated.py::test_last_cohort_retained_in_data",
+        "test_review_fixes.py"
+      ],
+      "remaining_gaps": [
+        "The dedicated R P1/P2/P3 deletion invariance oracles (R60-87) for notyettreated without never-treated, including anticipation promoting the first cohort and un-coercing the late cohort, are not all asserted by the Python port. Its scaling oracle uses nevertreated instead of the vulnerable notyettreated branch."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 60,
+          "title_expression": "test_that(\"Invariant A holds under P1 (always-treated cohort, no never-treated)\", {"
+        },
+        {
+          "line": 71,
+          "title_expression": "test_that(\"Invariant A holds under P2 (anticipation>=1 promotes earliest cohort)\", {"
+        },
+        {
+          "line": 80,
+          "title_expression": "test_that(\"Invariant A holds under P3 (anticipation un-coerces a late cohort)\", {"
+        },
+        {
+          "line": 89,
+          "title_expression": "test_that(\"always-treated outcomes are never read (scaling oracle)\", {"
+        },
+        {
+          "line": 102,
+          "title_expression": "test_that(\"fast and slow paths agree in the no-never + always-treated regime\", {"
+        },
+        {
+          "line": 113,
+          "title_expression": "test_that(\"latest cohort is retained as a control, not deleted, when always-treated present\", {"
+        },
+        {
+          "line": 130,
+          "title_expression": "test_that(\"control_group='nevertreated' is invariant to always-treated presence\", {"
+        }
+      ],
+      "r_file_sha256": "8c9632da1dc7d453cea1c6acc2766fa35d93a644e2c77cab39ed3f3130f062ec"
+    },
+    {
+      "r_file": "tests/testthat/test-att_gt.R",
+      "status": "partial",
+      "r_intents": [
+        "Core DR/reg/IPW estimates across panel, RC, unbalanced, controls, base periods, weights, anticipation, irregular time and aggregation.",
+        "Fast/standard full output and IF equivalence, custom callbacks, clustering, weight reference periods and period indexing."
+      ],
+      "python_tests": [
+        "test_att_gt.py",
+        "test_parametric_combinations.py",
+        "test_unit_compute_attgt.py",
+        "test_performance_parity.py",
+        "test_upstream_did_sync.py",
+        "test_r_test_alignment.py::test_constant_weight_forced_rc_preserves_panel_standard_errors"
+      ],
+      "remaining_gaps": [
+        "R small-comparison-group branch (R520-592) has broader warning/aggregation expectations than Python small-group smoke tests.",
+        "R clustered numeric-versus-factor label bootstrap comparison (R1054-1117) is not directly mirrored as a full public fit equality test; helper-level label coverage exists in test_speed_cluster_groups.py.",
+        "Cross-language tests need committed current-R fixtures; fast/standard equivalence alone cannot establish correctness against R."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 11,
+          "title_expression": "test_that(\"att_gt works w/o dynamics, time effects, or group effects\", {"
+        },
+        {
+          "line": 30,
+          "title_expression": "test_that(\"att_gt works using ipw\", {"
+        },
+        {
+          "line": 49,
+          "title_expression": "test_that(\"two period case\", {"
+        },
+        {
+          "line": 73,
+          "title_expression": "test_that(\"no covariates case\", {"
+        },
+        {
+          "line": 92,
+          "title_expression": "test_that(\"repeated cross section\", {"
+        },
+        {
+          "line": 110,
+          "title_expression": "test_that(\"ipw repeated cross sections\", {"
+        },
+        {
+          "line": 131,
+          "title_expression": "test_that(\"repeated cross sections dynamic effects\", {"
+        },
+        {
+          "line": 149,
+          "title_expression": "test_that(\"unbalanced panel\", {"
+        },
+        {
+          "line": 187,
+          "title_expression": "test_that(\"not yet treated comparison group\", {"
+        },
+        {
+          "line": 228,
+          "title_expression": "test_that(\"aggregations\", {"
+        },
+        {
+          "line": 303,
+          "title_expression": "test_that(\"unequally spaced groups\", {"
+        },
+        {
+          "line": 328,
+          "title_expression": "test_that(\"some units treated in first period\", {"
+        },
+        {
+          "line": 339,
+          "title_expression": "test_that(\"min and max length of exposures\", {"
+        },
+        {
+          "line": 360,
+          "title_expression": "test_that(\"anticipation\", {"
+        },
+        {
+          "line": 413,
+          "title_expression": "test_that(\"significance level and uniform confidence bands\", {"
+        },
+        {
+          "line": 438,
+          "title_expression": "test_that(\"malformed data\", {"
+        },
+        {
+          "line": 463,
+          "title_expression": "test_that(\"varying or universal base period\", {"
+        },
+        {
+          "line": 493,
+          "title_expression": "test_that(\"small groups\", {"
+        },
+        {
+          "line": 520,
+          "title_expression": "test_that(\"small comparison group\", {"
+        },
+        {
+          "line": 595,
+          "title_expression": "test_that(\"custom estimation method\", {"
+        },
+        {
+          "line": 606,
+          "title_expression": "test_that(\"sampling weights\", {"
+        },
+        {
+          "line": 634,
+          "title_expression": "test_that(\"works when user column is literally named 'gname'\", {"
+        },
+        {
+          "line": 655,
+          "title_expression": "test_that(\"works when user column is literally named 'gname' with faster_mode\", {"
+        },
+        {
+          "line": 675,
+          "title_expression": "test_that(\"time-varying weights: faster_mode matches slow mode (default fix_weights=NULL)\", {"
+        },
+        {
+          "line": 696,
+          "title_expression": "test_that(\"fix_weights options: faster_mode matches slow mode (balanced panel)\", {"
+        },
+        {
+          "line": 715,
+          "title_expression": "test_that(\"time-invariant weights: all fix_weights options produce identical ATTs\", {"
+        },
+        {
+          "line": 736,
+          "title_expression": "test_that(\"message emitted for time-varying weights in balanced panel\", {"
+        },
+        {
+          "line": 749,
+          "title_expression": "test_that(\"no message for time-invariant weights\", {"
+        },
+        {
+          "line": 763,
+          "title_expression": "test_that(\"notyettreated with time-varying weights: faster_mode matches\", {"
+        },
+        {
+          "line": 779,
+          "title_expression": "test_that(\"RC with time-varying weights: faster_mode matches\", {"
+        },
+        {
+          "line": 798,
+          "title_expression": "test_that(\"fix_weights validation\", {"
+        },
+        {
+          "line": 861,
+          "title_expression": "test_that(\"unbalanced panel fix_weights with units missing from reference period\", {"
+        },
+        {
+          "line": 894,
+          "title_expression": "test_that(\"IF consistency: balanced panel, all fix_weights x est_method x base_period\", {"
+        },
+        {
+          "line": 926,
+          "title_expression": "test_that(\"IF consistency: balanced panel, notyettreated control group\", {"
+        },
+        {
+          "line": 954,
+          "title_expression": "test_that(\"IF consistency: repeated cross-sections, default weights x est_method\", {"
+        },
+        {
+          "line": 985,
+          "title_expression": "test_that(\"IF consistency: unbalanced panel, default weights x est_method\", {"
+        },
+        {
+          "line": 1016,
+          "title_expression": "test_that(\"IF consistency: no covariates (xformla=~1), all data types\", {"
+        },
+        {
+          "line": 1054,
+          "title_expression": "test_that(\"clustered standard errors\", {"
+        },
+        {
+          "line": 1119,
+          "title_expression": "test_that(\"faster mode enabled for panel data\", {"
+        },
+        {
+          "line": 1169,
+          "title_expression": "test_that(\"faster model enabled for repeated cross sectional data\", {"
+        },
+        {
+          "line": 1229,
+          "title_expression": "test_that(\"faster model enabled for unbalanced panel data and time-varying covariates\", {"
+        },
+        {
+          "line": 1381,
+          "title_expression": "test_that(\"faster_mode = TRUE matches baseline on filtered sim dataset when there are not subsequent cohort and time periods\", {"
+        },
+        {
+          "line": 1436,
+          "title_expression": "test_that(\"faster_mode time indexing matches baseline with repeated cross-sections\", {"
+        },
+        {
+          "line": 1536,
+          "title_expression": "test_that(\"faster_mode time indexing matches baseline with panel data and varying base period\", {"
+        },
+        {
+          "line": 1584,
+          "title_expression": "test_that(\"faster_mode time indexing with non-consecutive time periods\", {"
+        },
+        {
+          "line": 1663,
+          "title_expression": "test_that(\"faster_mode time indexing with universal base period\", {"
+        }
+      ],
+      "r_file_sha256": "463ecc95a77a300c825a8cf80bd3f2f2d470e20a446c8e7a2384891ea643842d"
+    },
+    {
+      "r_file": "tests/testthat/test-audit-fixes.R",
+      "status": "partial",
+      "r_intents": [
+        "Forced-RC constant-weight IF/SE normalization equals balanced panel and all aggregation inference.",
+        "Empty aggregation selections, negative cohorts, reproducible parallel bootstrap and positive chunk sizes.",
+        "Calendar min_e/max_e/balance_e warnings and exactly unchanged inference."
+      ],
+      "python_tests": [
+        "test_r_test_alignment.py::test_constant_weight_forced_rc_preserves_panel_standard_errors",
+        "test_r_test_alignment.py::test_calendar_ignored_event_options_warn_without_changing_inference",
+        "test_upstream_aggregation_sync.py",
+        "test_unit_mboot.py::test_parallel_path_reproducible_under_seed",
+        "test_review_fixes.py::test_biters_less_than_cores",
+        "test_validation.py::test_negative_gname_rejected"
+      ],
+      "remaining_gaps": [
+        "R71-83 intentionally makes an entire post-treatment calendar period missing and asserts that na_rm drops that period; Python existing na_rm tests primarily exercise dynamic/group rather than this calendar-specific selection."
+      ],
+      "not_applicable": [
+        "R RNGkind restoration has no direct Python analogue; Python tests instead assert seeded reproducibility and random-stream contracts."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 25,
+          "title_expression": "test_that(\"fix_weights='varying' SE is not 2x too large on a balanced panel\", {"
+        },
+        {
+          "line": 40,
+          "title_expression": "test_that(\"fix_weights='varying' fast and slow paths agree (balanced panel)\", {"
+        },
+        {
+          "line": 48,
+          "title_expression": "test_that(\"fix_weights='varying' aggregations inherit the corrected SE\", {"
+        },
+        {
+          "line": 60,
+          "title_expression": "test_that(\"aggte() normal aggregations still work (no regression)\", {"
+        },
+        {
+          "line": 71,
+          "title_expression": "test_that(\"aggte(type='calendar', na.rm=TRUE) drops all-NA calendar periods instead of crashing\", {"
+        },
+        {
+          "line": 86,
+          "title_expression": "test_that(\"aggte() empty post-treatment windows give clean errors, not cryptic crashes\", {"
+        },
+        {
+          "line": 104,
+          "title_expression": "test_that(\"negative gname is rejected with a clear error in both code paths\", {"
+        },
+        {
+          "line": 122,
+          "title_expression": "test_that(\"parallel multiplier bootstrap is reproducible under a fixed seed\", {"
+        },
+        {
+          "line": 132,
+          "title_expression": "test_that(\"parallel bootstrap chunking never produces negative chunks (biters < cores)\", {"
+        },
+        {
+          "line": 152,
+          "title_expression": "test_that(\"aggte(type='calendar') warns that min_e/max_e/balance_e are ignored, returns unrestricted\", {"
+        }
+      ],
+      "r_file_sha256": "8d38f1785dcf661f3a73e84486e0f0dd5577024792301670a53bc54676f0c868"
+    },
+    {
+      "r_file": "tests/testthat/test-cluster-analytic.R",
+      "status": "partial",
+      "r_intents": [
+        "Cluster-sum CRVE, difference from iid, propagation into all aggregation types, analytic/bootstrap proximity and RC routing."
+      ],
+      "python_tests": [
+        "test_cluster_analytic.py",
+        "test_analytical_cluster_se.py",
+        "test_r_test_alignment.py::test_shuffled_clustered_panel_matches_cluster_sum_oracle_and_all_aggregations"
+      ],
+      "remaining_gaps": [
+        "R checks exact RC CRVE for omitted and supplied IDs in both modes; existing Python RC tests check fast/standard SE agreement and bootstrap proximity, not all of those exact oracles.",
+        "R bootstrap comparison uses 12-15% IQR-SE and 6% SD-SE checks on multiple DGPs; Python bootstrap proximity permits 25% and does not mirror the SD-SE target."
+      ],
+      "not_applicable": [
+        "R cluster_vector storage is an internal representation; Python reconstructs labels from DIDparams data."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 18,
+          "title_expression": "test_that(\"analytical (no-bootstrap) clustered SE for att_gt equals the cluster-sum CRVE (faster_mode TRUE and FALSE)\", {"
+        },
+        {
+          "line": 42,
+          "title_expression": "test_that(\"analytical cluster SE agrees with the bootstrap cluster SE (multiple DGPs)\", {"
+        },
+        {
+          "line": 87,
+          "title_expression": "test_that(\"analytical clustered SE for repeated cross-sections (idname omitted/provided, faster_mode TRUE/FALSE)\", {"
+        },
+        {
+          "line": 114,
+          "title_expression": "test_that(\"clustered bootstrap and analytical SE agree for repeated cross-sections (idname omitted)\", {"
+        },
+        {
+          "line": 129,
+          "title_expression": "test_that(\"analytical clustered SE flows through aggte at all levels (simple/group/dynamic)\", {"
+        }
+      ],
+      "r_file_sha256": "6f7d7bd4ba73c1f92826c799bac176c3a4bfdc6be91a3505625ab602d6c04a56"
+    },
+    {
+      "r_file": "tests/testthat/test-compute-inffunc.R",
+      "status": "partial",
+      "r_intents": [
+        "Point-only ATT equals full inference for all methods and both engines, panel/RC/unbalanced/varying weights and anticipation/universal/notyettreated/clustering.",
+        "No IF, SE, Wald or bootstrap/bands; summary table remains valid; aggregation refused; logical controls validated."
+      ],
+      "python_tests": [
+        "test_compute_inffunc.py",
+        "test_upstream_did_sync.py::test_nan_estimate_warns_and_marks_entire_if_missing",
+        "test_r_test_alignment.py::test_point_only_nondefault_routes_preserve_all_att"
+      ],
+      "remaining_gaps": [
+        "Python noIF tests do not currently spy on callback/bootstrap invocation to prove no work is performed beyond omitted output; performance semantics are narrower than R do_inf skipping."
+      ],
+      "not_applicable": [
+        "R142-174 passes inffunc to a custom callback and permits NULL IF. Python documented callback signature returns (att, inf_func) and does not expose the inffunc keyword. This R callback protocol is not a supported Python API; compute_inffunc=False still requires a valid callback IF. R print/tidy/glance methods are not Python methods."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 7,
+          "title_expression": "test_that(\"compute_inffunc = FALSE gives point estimates identical to a full run\", {"
+        },
+        {
+          "line": 32,
+          "title_expression": "test_that(\"compute_inffunc = FALSE forces bstrap/cband off and yields a valid MP object\", {"
+        },
+        {
+          "line": 51,
+          "title_expression": "test_that(\"aggte() errors clearly on a compute_inffunc = FALSE object\", {"
+        },
+        {
+          "line": 62,
+          "title_expression": "test_that(\"compute_inffunc must be a single logical\", {"
+        },
+        {
+          "line": 78,
+          "title_expression": "test_that(\"compute_inffunc = FALSE matches a full run with fix_weights = 'varying'\", {"
+        },
+        {
+          "line": 99,
+          "title_expression": "test_that(\"compute_inffunc = FALSE matches a full run with anticipation, universal base period, not-yet-treated controls, and clustering\", {"
+        },
+        {
+          "line": 121,
+          "title_expression": "test_that(\"compute_inffunc = FALSE matches a full run on an unbalanced panel\", {"
+        },
+        {
+          "line": 142,
+          "title_expression": "test_that(\"custom est_method receives inffunc = FALSE and may return a NULL influence function\", {"
+        }
+      ],
+      "r_file_sha256": "1d93fb91e5358cb0e5be5b291ce30bb456fb461bbd890b5f0e96418972def75c"
+    },
+    {
+      "r_file": "tests/testthat/test-conditional-did-pretest.R",
+      "status": "not_applicable",
+      "r_intents": [
+        "Conditional Cramer-von-Mises parallel-trends pretest, bootstrap critical value/scale, and setup/y-override optimization parity."
+      ],
+      "python_tests": [],
+      "remaining_gaps": [],
+      "not_applicable": [
+        "Python csdid has no conditional_did_pretest/CvM API. test_pretest.py concerns the unconditional ATT Wald pretest and does not cover these R assertions."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 9,
+          "title_expression": "test_that(\"conditional did pre-test\", {"
+        },
+        {
+          "line": 27,
+          "title_expression": "test_that(\"pretest setup-bundle/y-override path is bit-identical to the legacy data-copy loop\", {"
+        },
+        {
+          "line": 58,
+          "title_expression": "test_that(\"conditional pre-test CvM is on the bootstrap scale (R>=4.0 orientation regression)\", {"
+        }
+      ],
+      "r_file_sha256": "c09ea5dce40d692776f14ac6b53de39100f9d25f38bd5db87ea182daafdc83b7"
+    },
+    {
+      "r_file": "tests/testthat/test-edge-cases.R",
+      "status": "covered",
+      "r_intents": [
+        "Single treatment group/post period, two-period universal base, no-never fallback, always-treated removal, irregular times/cohorts and balanced/unbalanced routing."
+      ],
+      "python_tests": [
+        "test_edge_cases.py",
+        "test_review_fixes.py",
+        "test_upstream_did_sync.py"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 5,
+          "title_expression": "test_that(\"single treated group produces valid att_gt\", {"
+        },
+        {
+          "line": 22,
+          "title_expression": "test_that(\"single treated group works with all 4 aggte types\", {"
+        },
+        {
+          "line": 43,
+          "title_expression": "test_that(\"two-period data with universal base period\", {"
+        },
+        {
+          "line": 62,
+          "title_expression": "test_that(\"data with no never-treated group works with notyettreated\", {"
+        },
+        {
+          "line": 78,
+          "title_expression": "test_that(\"data with no never-treated group warns with nevertreated\", {"
+        },
+        {
+          "line": 93,
+          "title_expression": "test_that(\"groups treated in first period are dropped\", {"
+        },
+        {
+          "line": 111,
+          "title_expression": "test_that(\"non-consecutive time periods work\", {"
+        },
+        {
+          "line": 133,
+          "title_expression": "test_that(\"non-consecutive group values work\", {"
+        },
+        {
+          "line": 147,
+          "title_expression": "test_that(\"allow_unbalanced_panel=TRUE with balanced data proceeds normally\", {"
+        },
+        {
+          "line": 160,
+          "title_expression": "test_that(\"allow_unbalanced_panel=TRUE with truly unbalanced data\", {"
+        },
+        {
+          "line": 175,
+          "title_expression": "test_that(\"single post-treatment period produces valid results\", {"
+        }
+      ],
+      "r_file_sha256": "1250ee7e6675d809fc65d98c83f81ec9f8af42b0e297af2b82ae05f3d905a2a3"
+    },
+    {
+      "r_file": "tests/testthat/test-error-handling.R",
+      "status": "partial",
+      "r_intents": [
+        "Invalid columns/types/cohorts/weights/controls/anticipation/estimator, missing-data treatment, treatment reversals, cluster validity, overlap/singular cells and aggregation validation.",
+        "New R source includes utility-level malformed-input guards and exact warning-text/cardinality checks beyond existing Python ports."
+      ],
+      "python_tests": [
+        "test_error_handling.py",
+        "test_validation.py",
+        "test_unit_preprocess.py",
+        "test_percell_failure.py",
+        "test_review_fixes.py",
+        "test_upstream_did_sync.py",
+        "test_unit_mboot.py",
+        "test_unit_aggte.py"
+      ],
+      "remaining_gaps": [
+        "R102-204 tests a much wider invalid logical/core/scalar/name/formula matrix; existing Python examples do not exhaust the matrix.",
+        "R396-529 direct mboot/process_attgt/aggte/plot input-validation matrix is only partially represented; Python direct helper mboot guards differ.",
+        "R846-921 asserts failed-cell warning text/count/order and accurate empty universal-base period names; existing Python tests do not reproduce every diagnostic oracle.",
+        "R947-963 expects balancing warnings to count dropped units, while Python preprocess_did.py currently says observations for that count (message difference)."
+      ],
+      "not_applicable": [
+        "R simulation/trimmer/conditional-test.mboot utility APIs and ggplot-specific arguments are absent or differently scoped in Python; R formula objects map to Patsy formula strings."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 14,
+          "title_expression": "test_that(\"att_gt errors on invalid est_method string\", {"
+        },
+        {
+          "line": 22,
+          "title_expression": "test_that(\"att_gt errors on non-character non-function est_method\", {"
+        },
+        {
+          "line": 30,
+          "title_expression": "test_that(\"att_gt errors on invalid fix_weights value\", {"
+        },
+        {
+          "line": 38,
+          "title_expression": "test_that(\"att_gt rejects non-exact control_group and base_period values in both modes\", {"
+        },
+        {
+          "line": 67,
+          "title_expression": "test_that(\"att_gt rejects negative or non-numeric anticipation in both modes\", {"
+        },
+        {
+          "line": 102,
+          "title_expression": "test_that(\"att_gt rejects invalid scalar logical controls before base R errors\", {"
+        },
+        {
+          "line": 125,
+          "title_expression": "test_that(\"att_gt rejects invalid cores before parallel code sees it\", {"
+        },
+        {
+          "line": 135,
+          "title_expression": "test_that(\"att_gt rejects argument-referenced internal variable names in both modes\", {"
+        },
+        {
+          "line": 168,
+          "title_expression": "test_that(\"att_gt rejects invalid xformla before formula internals in both modes\", {"
+        },
+        {
+          "line": 182,
+          "title_expression": "test_that(\"slow path rejects malformed column-name arguments before ambiguous indexing\", {"
+        },
+        {
+          "line": 205,
+          "title_expression": "test_that(\"att_gt drops rows with missing gname and non-finite numeric inputs in both modes\", {"
+        },
+        {
+          "line": 235,
+          "title_expression": "test_that(\"att_gt errors on panel=TRUE without idname in both modes\", {"
+        },
+        {
+          "line": 245,
+          "title_expression": "test_that(\"att_gt still runs with panel=FALSE and no idname in both modes\", {"
+        },
+        {
+          "line": 257,
+          "title_expression": "test_that(\"att_gt errors on invalid alp\", {"
+        },
+        {
+          "line": 267,
+          "title_expression": "test_that(\"att_gt errors on invalid biters when bootstrapping\", {"
+        },
+        {
+          "line": 283,
+          "title_expression": "test_that(\"simulation helpers reject invalid scalar controls before raw R errors\", {"
+        },
+        {
+          "line": 329,
+          "title_expression": "test_that(\"trimmer rejects malformed exported utility arguments\", {"
+        },
+        {
+          "line": 367,
+          "title_expression": "test_that(\"test.mboot rejects malformed bootstrap inputs before recycling\", {"
+        },
+        {
+          "line": 396,
+          "title_expression": "test_that(\"mboot rejects malformed direct helper inputs before raw errors\", {"
+        },
+        {
+          "line": 426,
+          "title_expression": "test_that(\"process_attgt rejects malformed group-time result lists\", {"
+        },
+        {
+          "line": 444,
+          "title_expression": "test_that(\"aggte rejects invalid scalar controls before base R errors\", {"
+        },
+        {
+          "line": 482,
+          "title_expression": "test_that(\"plotting helpers reject invalid scalar controls before ggplot errors\", {"
+        },
+        {
+          "line": 503,
+          "title_expression": "test_that(\"mboot rejects invalid scalar controls before bootstrap internals\", {"
+        },
+        {
+          "line": 533,
+          "title_expression": "test_that(\"att_gt errors on fix_weights with panel=FALSE\", {"
+        },
+        {
+          "line": 542,
+          "title_expression": "test_that(\"att_gt warns on extra args with built-in est_method\", {"
+        },
+        {
+          "line": 550,
+          "title_expression": "test_that(\"att_gt messages about anticipation\", {"
+        },
+        {
+          "line": 560,
+          "title_expression": "test_that(\"att_gt computes clustered SEs without the bootstrap (no 'requires bootstrap' warning)\", {"
+        },
+        {
+          "line": 577,
+          "title_expression": "test_that(\"att_gt errors on missing column name (slower mode)\", {"
+        },
+        {
+          "line": 585,
+          "title_expression": "test_that(\"att_gt errors on missing column name (faster_mode)\", {"
+        },
+        {
+          "line": 593,
+          "title_expression": "test_that(\"att_gt errors on non-numeric tname\", {"
+        },
+        {
+          "line": 603,
+          "title_expression": "test_that(\"att_gt errors on non-numeric gname\", {"
+        },
+        {
+          "line": 613,
+          "title_expression": "test_that(\"att_gt errors on non-numeric outcome variable in both modes\", {"
+        },
+        {
+          "line": 632,
+          "title_expression": "test_that(\"att_gt still accepts logical and integer outcomes in both modes\", {"
+        },
+        {
+          "line": 651,
+          "title_expression": "test_that(\"att_gt errors on treatment reversals (faster_mode)\", {"
+        },
+        {
+          "line": 665,
+          "title_expression": "test_that(\"att_gt warns on missing data dropped\", {"
+        },
+        {
+          "line": 675,
+          "title_expression": "test_that(\"att_gt warns on small groups\", {"
+        },
+        {
+          "line": 689,
+          "title_expression": "test_that(\"att_gt handles data with .w column (slower mode)\", {"
+        },
+        {
+          "line": 699,
+          "title_expression": "test_that(\"att_gt messages on time-varying weights (panel)\", {"
+        },
+        {
+          "line": 709,
+          "title_expression": "test_that(\"clustervars contract enforced in all faster_mode x bstrap combinations\", {"
+        },
+        {
+          "line": 739,
+          "title_expression": "test_that(\"one extra cluster variable still works in all faster_mode x bstrap combinations\", {"
+        },
+        {
+          "line": 779,
+          "title_expression": "test_that(\"aggte errors on invalid type\", {"
+        },
+        {
+          "line": 796,
+          "title_expression": "test_that(\"aggte errors when ATTs contain NA and na.rm=FALSE\", {"
+        },
+        {
+          "line": 815,
+          "title_expression": "test_that(\"att_gt handles singular covariance for Wald test gracefully\", {"
+        },
+        {
+          "line": 834,
+          "title_expression": "test_that(\"att_gt warns on overlap violations\", {"
+        },
+        {
+          "line": 846,
+          "title_expression": "test_that(\"slow path warns once per failed cell, matching fast-path wording, with accurate Wald diagnosis\", {"
+        },
+        {
+          "line": 877,
+          "title_expression": "test_that(\"att_gt warns when no pre-treatment periods for Wald test\", {"
+        },
+        {
+          "line": 893,
+          "title_expression": "test_that(\"empty-cell warning names the actually-empty base period under base_period='universal' in both modes\", {"
+        },
+        {
+          "line": 922,
+          "title_expression": "test_that(\"'no never-treated group' warning is identical across modes and discloses the period filtering\", {"
+        },
+        {
+          "line": 947,
+          "title_expression": "test_that(\"balanced-panel coercion warning counts dropped units identically in both modes\", {"
+        }
+      ],
+      "r_file_sha256": "37cd15d84e357a068ef083955ab785a3bf80ac6f5e6a19039b65b702f37a2515"
+    },
+    {
+      "r_file": "tests/testthat/test-faster-mode-consistency.R",
+      "status": "covered",
+      "r_intents": [
+        "Fast/standard ATT, cell labels, IF shape/sums/Gram and SE for panel/RC/unbalanced, controls, bases, anticipation, no covariates and aggregation.",
+        "Partial missing custom-estimator IF propagates to the corresponding unit and makes cell SE missing (R181-220)."
+      ],
+      "python_tests": [
+        "test_performance_parity.py::test_both_modes_preserve_full_influence_and_inference",
+        "test_performance_parity.py::test_bootstrap_bands_and_rng_match_in_both_modes",
+        "test_att_gt.py",
+        "test_r_test_alignment.py::test_partial_missing_custom_influence_propagates_to_unit_and_se"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 43,
+          "title_expression": "test_that(paste(\"consistency:\", label), {"
+        },
+        {
+          "line": 68,
+          "title_expression": "test_that(paste(\"consistency:\", label), {"
+        },
+        {
+          "line": 95,
+          "title_expression": "test_that(paste(\"consistency:\", label), {"
+        },
+        {
+          "line": 123,
+          "title_expression": "test_that(\"consistency with anticipation > 0\", {"
+        },
+        {
+          "line": 137,
+          "title_expression": "test_that(\"consistency without covariates\", {"
+        },
+        {
+          "line": 151,
+          "title_expression": "test_that(\"aggte consistency across faster_mode for all types\", {"
+        },
+        {
+          "line": 181,
+          "title_expression": "test_that(\"partial-NA influence functions propagate identically across modes (unbalanced panel)\", {"
+        }
+      ],
+      "r_file_sha256": "fd93ade210e09586dd070340ae34686e7471bb35e138a8e73edbcbad43101c48"
+    },
+    {
+      "r_file": "tests/testthat/test-ggdid.R",
+      "status": "partial",
+      "r_intents": [
+        "Plots for group-time and three nonsimple aggregation types, labels, grouping and theme/ref-line options."
+      ],
+      "python_tests": [
+        "test_ggdid.py"
+      ],
+      "remaining_gaps": [
+        "R67-70 rejects plotting simple aggregation; Python plot tests iterate simple among supported types, reflecting a different public contract.",
+        "R warns on unknown requested groups; Python tests expect an exception. This is a diagnostic API difference, not exact alignment."
+      ],
+      "not_applicable": [
+        "ggplot object classes/build and ggplot deprecation warnings are R-specific; Python uses matplotlib Figures."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 25,
+          "title_expression": "test_that(\"ggdid.MP returns a ggplot object\", {"
+        },
+        {
+          "line": 30,
+          "title_expression": "test_that(\"ggdid.MP accepts group parameter\", {"
+        },
+        {
+          "line": 36,
+          "title_expression": "test_that(\"ggdid.MP warns for non-existent group values\", {"
+        },
+        {
+          "line": 43,
+          "title_expression": "test_that(\"ggdid.MP accepts custom labels\", {"
+        },
+        {
+          "line": 52,
+          "title_expression": "test_that(\"ggdid works for type = dynamic\", {"
+        },
+        {
+          "line": 57,
+          "title_expression": "test_that(\"ggdid works for type = group\", {"
+        },
+        {
+          "line": 62,
+          "title_expression": "test_that(\"ggdid works for type = calendar\", {"
+        },
+        {
+          "line": 67,
+          "title_expression": "test_that(\"ggdid errors for type = simple\", {"
+        },
+        {
+          "line": 74,
+          "title_expression": "test_that(\"ggdid.AGGTEobj accepts custom labels and theme settings\", {"
+        },
+        {
+          "line": 80,
+          "title_expression": "test_that(\"ggdid.AGGTEobj works with theming=FALSE\", {"
+        },
+        {
+          "line": 85,
+          "title_expression": "test_that(\"ggdid.AGGTEobj works with ref_line=NULL\", {"
+        },
+        {
+          "line": 90,
+          "title_expression": "test_that(\"splot works for group-type and renders without deprecation warnings\", {"
+        }
+      ],
+      "r_file_sha256": "5752409812175f8f659750b50d2f57844bc78a0715beb6be98ade666f44838e3"
+    },
+    {
+      "r_file": "tests/testthat/test-glance.R",
+      "status": "partial",
+      "r_intents": [
+        "Model metadata, unit/group/period counts, aggregation metadata and mode consistency."
+      ],
+      "python_tests": [
+        "test_glance.py"
+      ],
+      "remaining_gaps": [
+        "The Python file checks DIDparams dict fields and does not implement/assert the R one-row glance table, custom-estimator label or backward compatibility when DIDparams lacks faster_mode."
+      ],
+      "not_applicable": [
+        "Python has no broom glance S3 method. Metadata coverage is an analogue, not R API parity."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 34,
+          "title_expression": "test_that(\"glance.MP returns a one-row data.frame\", {"
+        },
+        {
+          "line": 40,
+          "title_expression": "test_that(\"glance.MP has expected columns\", {"
+        },
+        {
+          "line": 46,
+          "title_expression": "test_that(\"glance.MP values are reasonable\", {"
+        },
+        {
+          "line": 55,
+          "title_expression": "test_that(\"glance.MP nobs matches nobs.MP\", {"
+        },
+        {
+          "line": 60,
+          "title_expression": "test_that(\"glance.MP works with faster_mode = TRUE\", {"
+        },
+        {
+          "line": 68,
+          "title_expression": "test_that(\"glance.MP agrees between faster_mode settings\", {"
+        },
+        {
+          "line": 82,
+          "title_expression": "test_that(\"glance.AGGTEobj returns a one-row data.frame for all 4 types\", {"
+        },
+        {
+          "line": 90,
+          "title_expression": "test_that(\"glance.AGGTEobj has expected columns\", {"
+        },
+        {
+          "line": 96,
+          "title_expression": "test_that(\"glance.AGGTEobj type column matches requested type\", {"
+        },
+        {
+          "line": 103,
+          "title_expression": "test_that(\"glance.AGGTEobj values are not NULL or NA\", {"
+        },
+        {
+          "line": 111,
+          "title_expression": "test_that(\"glance.AGGTEobj works with faster_mode = TRUE\", {"
+        },
+        {
+          "line": 119,
+          "title_expression": "test_that(\"glance.MP and glance.AGGTEobj agree on nobs\", {"
+        },
+        {
+          "line": 131,
+          "title_expression": "test_that(\"glance.MP works when DIDparams lacks faster_mode\", {"
+        },
+        {
+          "line": 137,
+          "title_expression": "test_that(\"glance.AGGTEobj works when DIDparams lacks faster_mode\", {"
+        },
+        {
+          "line": 143,
+          "title_expression": "test_that(\"nobs.AGGTEobj works when DIDparams lacks faster_mode\", {"
+        },
+        {
+          "line": 164,
+          "title_expression": "test_that(\"glance.MP works with a custom est_method function\", {"
+        },
+        {
+          "line": 171,
+          "title_expression": "test_that(\"glance.AGGTEobj works with a custom est_method function\", {"
+        }
+      ],
+      "r_file_sha256": "eb89be6352de487c4fe03983001673e96cda9c8930f9557a4b48f3ce48fe54c3"
+    },
+    {
+      "r_file": "tests/testthat/test-inference.R",
+      "status": "partial",
+      "r_intents": [
+        "ATT/influence and aggregation inference stability for panel, RC, unbalanced and clustering against historical R did2.1.2."
+      ],
+      "python_tests": [
+        "test_inference.py",
+        "test_r_parity.py",
+        "test_sim_parity.py",
+        "test_cluster_analytic.py",
+        "test_performance_parity.py"
+      ],
+      "remaining_gaps": [
+        "Python test_inference.py mostly asserts shape/finiteness and bootstrap proximity; it does not reproduce R historical-version full IF comparisons.",
+        "Historical Python numerical fixtures are R2.5.0; current-source numerical parity belongs to the separately added test_r_current_parity.py and is not established by translated behavioral tests."
+      ],
+      "not_applicable": [
+        "Installing/reloading R2.1.2 namespaces is an R historical compatibility test, not a Python public behavior."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 48,
+          "title_expression": "test_that(\"inference with balanced panel data and aggregations\", {"
+        },
+        {
+          "line": 183,
+          "title_expression": "test_that(\"inference with clustering\", {"
+        },
+        {
+          "line": 313,
+          "title_expression": "test_that(\"same inference with unbalanced panel and panel data\", {"
+        },
+        {
+          "line": 345,
+          "title_expression": "test_that(\"inference with repeated cross sections\", {"
+        },
+        {
+          "line": 476,
+          "title_expression": "test_that(\"inference with repeated cross sections and clustering\", {"
+        },
+        {
+          "line": 607,
+          "title_expression": "test_that(\"inference with unbalanced panel\", {"
+        },
+        {
+          "line": 742,
+          "title_expression": "test_that(\"inference with unbalanced panel and clustering\", {"
+        }
+      ],
+      "r_file_sha256": "3a39714114bb5157f619f3184d2e21011c49c1a1a828405ee35b24c027eb131f"
+    },
+    {
+      "r_file": "tests/testthat/test-jel_replication.R",
+      "status": "partial",
+      "r_intents": [
+        "JEL Table7 2x2, 2xT event study and GxT staggered estimates with/without covariates, selected aggregation results."
+      ],
+      "python_tests": [
+        "test_jel_replication.py"
+      ],
+      "remaining_gaps": [
+        "R336-377 explicitly compares fast and slow on JEL data; Python five JEL functions do not include this dedicated sixth comparison.",
+        "These tests depend on external JEL data and may skip when unavailable; a translated test existing is not evidence it executed."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 81,
+          "title_expression": "test_that(\"JEL Table 7: 2x2 CS-DiD point estimates match\", {"
+        },
+        {
+          "line": 133,
+          "title_expression": "test_that(\"JEL 2xT: event study ATT(g,t) point estimates match\", {"
+        },
+        {
+          "line": 183,
+          "title_expression": "test_that(\"JEL 2xT: event study with covariates matches across methods\", {"
+        },
+        {
+          "line": 223,
+          "title_expression": "test_that(\"JEL GxT: staggered event study without covariates matches\", {"
+        },
+        {
+          "line": 279,
+          "title_expression": "test_that(\"JEL GxT: staggered event study with DR covariates matches\", {"
+        },
+        {
+          "line": 336,
+          "title_expression": "test_that(\"JEL: faster_mode matches regular mode\", {"
+        }
+      ],
+      "r_file_sha256": "7538c16e888105bd5c4aa30ad9d735a4f2612780eae844ca22312cfc94b9e054"
+    },
+    {
+      "r_file": "tests/testthat/test-mboot-cluster.R",
+      "status": "partial",
+      "r_intents": [
+        "Unequal and equal cluster-size bootstrap normalization and cluster validation."
+      ],
+      "python_tests": [
+        "test_mboot_cluster.py",
+        "test_unit_mboot.py::test_mboot_clustered_se_uses_cluster_sums",
+        "test_speed_cluster_groups.py"
+      ],
+      "remaining_gaps": [
+        "The two Python test_mboot_cluster public-fit cases assert only finite positive SE; R explicitly compares the bootstrap result against the cluster-sum target and rejects the cluster-mean target for unequal clusters. Helper-level seeded parity does not by itself supply that independent public-fit oracle."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 26,
+          "title_expression": "test_that(\"clustered mboot SE matches the cluster-sum (Remark 10) for UNBALANCED clusters\", {"
+        },
+        {
+          "line": 42,
+          "title_expression": "test_that(\"clustered mboot SE is unchanged for BALANCED clusters (cluster-sum == cluster-mean)\", {"
+        },
+        {
+          "line": 54,
+          "title_expression": "test_that(\"clustering validation is preserved (at most one cluster variable beyond idname)\", {"
+        }
+      ],
+      "r_file_sha256": "13955d5d8c5998432833c209351f16c2c197b7e4f88bdc0ce51a842f6e923258"
+    },
+    {
+      "r_file": "tests/testthat/test-mboot-postprocess.R",
+      "status": "covered",
+      "r_intents": [
+        "All-degenerate IF gives empty live draws and missing SE/critical value; mixed live/degenerate dimensions use type1 quantile IQR and row maximum critical statistic."
+      ],
+      "python_tests": [
+        "test_unit_mboot.py::test_mboot_all_degenerate_returns_nan",
+        "test_unit_mboot.py::test_mboot_degenerate_column_gives_nan_se",
+        "test_r_test_alignment.py::test_bootstrap_postprocess_matches_independent_quantile_formula"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 17,
+          "title_expression": "test_that(\"mboot on an all-degenerate influence function returns NA crit.val and all-NA se\", {"
+        },
+        {
+          "line": 29,
+          "title_expression": "test_that(\"mboot pmax-fold critical value equals the old row-wise apply reference\", {"
+        }
+      ],
+      "r_file_sha256": "184431a6dbf1f2dc56f2ac91aaf47592938c6b10026f21e41084e6ed500fdc6d"
+    },
+    {
+      "r_file": "tests/testthat/test-modelmatrix-hoist.R",
+      "status": "partial",
+      "r_intents": [
+        "Factor versus manually expanded dummy ATT/SE/fullIF, full-rank transformed polynomial basis invariance and both engines/data designs.",
+        "Unused declared levels, including unused reference levels and levels lost during missingness/balancing, equal explicitly cleaned retained sample."
+      ],
+      "python_tests": [
+        "test_review_fixes.py::test_factor_faster_mode_matches_standard",
+        "test_performance_parity.py",
+        "test_r_test_alignment.py::test_factor_covariates_equal_explicit_dummies",
+        "test_r_test_alignment.py::test_full_rank_transformed_covariate_basis_preserves_estimator",
+        "test_r_test_alignment.py::test_unused_factor_levels_equal_explicit_retained_sample",
+        "test_r_test_alignment.py::test_sparse_factor_cell_failures_match_explicit_dummy"
+      ],
+      "remaining_gaps": [
+        "R41-164 has broader interaction/transform/data-dependent-basis tests and options crossed with anticipation/universal/notyettreated.",
+        "R193-240 tests transformed non-finite and matrix-valued formula terms; those full assertion oracles are not all yet translated. Sparse factor cell failures and warning equality (R286-345) now have a direct Python oracle."
+      ],
+      "not_applicable": [
+        "R poly()/model.matrix()/factor syntax differs from Patsy; the new polynomial test asserts estimator invariance to an invertible basis, not identical language-specific design construction."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 19,
+          "title_expression": "test_that(\"global design slice is bit-identical to per-subset model.matrix for numeric formulae\", {"
+        },
+        {
+          "line": 32,
+          "title_expression": "test_that(\"slow path matches faster_mode for numeric / transform formulae\", {"
+        },
+        {
+          "line": 55,
+          "title_expression": "test_that(\"RC-path (positional global slice) matches faster_mode\", {"
+        },
+        {
+          "line": 76,
+          "title_expression": "test_that(\"unbalanced panel (positional global slice) matches faster_mode for factor / transform formulae\", {"
+        },
+        {
+          "line": 99,
+          "title_expression": "test_that(\"RC-path matches faster_mode for factor / data-dependent-basis formulae\", {"
+        },
+        {
+          "line": 123,
+          "title_expression": "test_that(\"transform / factor formulae match faster_mode under universal base, notyettreated, anticipation\", {"
+        },
+        {
+          "line": 146,
+          "title_expression": "test_that(\"global basis is reparameterization-invariant: ~poly(X, 2) equals ~X + I(X^2)\", {"
+        },
+        {
+          "line": 168,
+          "title_expression": "test_that(\"a factor covariate equals manually-expanded dummies EXACTLY (dense levels)\", {"
+        },
+        {
+          "line": 193,
+          "title_expression": "test_that(\"transform formulae that evaluate to NaN drop those rows instead of crashing\", {"
+        },
+        {
+          "line": 222,
+          "title_expression": "test_that(\"matrix-valued transformed formula terms drop non-finite rows row-wise\", {"
+        },
+        {
+          "line": 242,
+          "title_expression": "test_that(\"a globally-empty factor level is dropped instead of NA-failing every cell\", {"
+        },
+        {
+          "line": 286,
+          "title_expression": "test_that(\"a sparse factor (level absent from some cells) matches manual dummies, incl. warnings\", {"
+        },
+        {
+          "line": 315,
+          "title_expression": "test_that(\"RC sparse factor (level absent from some cells) matches manual dummies, incl. warnings\", {"
+        }
+      ],
+      "r_file_sha256": "93e728acdcd402bf782794a80b80d47d53ddf13ddc89da6bf2e3458d68577a4d"
+    },
+    {
+      "r_file": "tests/testthat/test-mutation-safety.R",
+      "status": "covered",
+      "r_intents": [
+        "Caller data values, columns, categorical metadata and indices stay unchanged in both engines and panel/RC/unbalanced designs."
+      ],
+      "python_tests": [
+        "test_ported_from_R_robustness.py::test_caller_dataframe_unchanged_panel",
+        "test_ported_from_R_robustness.py::test_caller_dataframe_unchanged_rcs",
+        "test_r_test_alignment.py::test_fit_preserves_caller_values_index_categories_and_columns"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [
+        "R data.frame/data.table reference semantics map to pandas DataFrame; no Python data.table input API."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 1,
+          "title_expression": "test_that(\"att_gt does not mutate caller data in either implementation\", {"
+        }
+      ],
+      "r_file_sha256": "f31e6211fbba13b3e8c49d1e9fa10a8c350c36d0258fc253e7798b9c6c41f5fb"
+    },
+    {
+      "r_file": "tests/testthat/test-nevertreated-balanced-panel.R",
+      "status": "partial",
+      "r_intents": [
+        "After balancing, recompute never-treated availability/cohorts and anticipation cutoff; preserve surviving never-treated/latest controls and diagnose empty samples.",
+        "NaN estimator outputs warn and mark full influence columns missing; all-pretreatment aggregation is rejected."
+      ],
+      "python_tests": [
+        "test_upstream_did_sync.py",
+        "test_upstream_aggregation_sync.py::test_all_pretreatment_cells_refused"
+      ],
+      "remaining_gaps": [
+        "R103-109 explicitly asserts notyettreated without raw never-treated is silent; existing tests mainly assert outputs.",
+        "R153-164 asserts the exact no-control-cell warning names group/time in fast mode; broader failure tests do not assert that exact case."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 31,
+          "title_expression": "test_that(\"never-treated group removed by balancing is re-checked\", {"
+        },
+        {
+          "line": 53,
+          "title_expression": "test_that(\"re-check honors anticipation\", {"
+        },
+        {
+          "line": 62,
+          "title_expression": "test_that(\"re-check also covers the comparison cohort coerced from the raw data\", {"
+        },
+        {
+          "line": 73,
+          "title_expression": "test_that(\"a treated cohort removed by balancing is dropped with a warning, not an internal error\", {"
+        },
+        {
+          "line": 88,
+          "title_expression": "test_that(\"no re-check when never-treated units survive balancing or the panel is left unbalanced\", {"
+        },
+        {
+          "line": 103,
+          "title_expression": "test_that(\"'notyettreated' without a never-treated group in the raw data stays silent\", {"
+        },
+        {
+          "line": 112,
+          "title_expression": "test_that(\"nothing left to estimate gives an error that names the cause, identically in both modes\", {"
+        },
+        {
+          "line": 131,
+          "title_expression": "test_that(\"a sample emptied by the missing-data drop stops with the missing-data message\", {"
+        },
+        {
+          "line": 143,
+          "title_expression": "test_that(\"a NaN 2x2 estimate is announced (both modes)\", {"
+        },
+        {
+          "line": 153,
+          "title_expression": "test_that(\"faster_mode = TRUE names a cell with no control units instead of returning NA silently\", {"
+        },
+        {
+          "line": 166,
+          "title_expression": "test_that(\"aggte() explains an object with no post-treatment cells\", {"
+        }
+      ],
+      "r_file_sha256": "0ce1d9809a297b6dc3ecedf127afde70705da64110598e55405c664b343acd5b"
+    },
+    {
+      "r_file": "tests/testthat/test-output-methods-coverage.R",
+      "status": "partial",
+      "r_intents": [
+        "Result summaries and aggregation presentation under all types/methods/control definitions."
+      ],
+      "python_tests": [
+        "test_tidy.py",
+        "test_glance.py",
+        "test_ggdid.py",
+        "test_performance_estimation.py::test_panel_shift_rejects_other_than_two_periods",
+        "test_r_test_alignment.py::test_point_only_nondefault_routes_preserve_all_att"
+      ],
+      "remaining_gaps": [
+        "No direct Python analogue of all R print/summary branch text assertions; summary tests primarily check DataFrame shape and columns."
+      ],
+      "not_applicable": [
+        "summary.MP.TEST/conditional pretest, trimmer and get_wide_data data.table type guards are R APIs not provided by Python; panel2cs2 covers the applicable two-period reshape refusal."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 9,
+          "title_expression": "test_that(\"summary.AGGTEobj / print.AGGTEobj cover every aggregation type\", {"
+        },
+        {
+          "line": 25,
+          "title_expression": "test_that(\"summary.AGGTEobj covers pointwise (non-cband) and not-yet-treated / est_method branches\", {"
+        },
+        {
+          "line": 41,
+          "title_expression": "test_that(\"summary.MP.TEST prints the conditional pre-test results\", {"
+        },
+        {
+          "line": 52,
+          "title_expression": "test_that(\"trimmer() runs for both control-group definitions\", {"
+        },
+        {
+          "line": 67,
+          "title_expression": "test_that(\"get_wide_data() guards reject non-data.table and non-2-period input\", {"
+        }
+      ],
+      "r_file_sha256": "bc976fa5586002f0e83864fe84dc18d0b7607a4e35ec011419ffca673edae9bd"
+    },
+    {
+      "r_file": "tests/testthat/test-overlap-guard-cache.R",
+      "status": "partial",
+      "r_intents": [
+        "Cached versus uncached nuisance/guard results and warning ordering; exceptional/failed diagnostics do not enter cache."
+      ],
+      "python_tests": [
+        "test_performance_nuisance_cache.py::test_cached_estimates_influence_warnings_and_rng_are_exact",
+        "test_performance_nuisance_cache.py::test_invalid_cells_preserve_guard_order_and_per_cell_warnings",
+        "test_performance_nuisance_cache.py::test_failed_diagnostics_do_not_enter_propensity_cache",
+        "test_unit_attgt_shared.py"
+      ],
+      "remaining_gaps": [
+        "R intercept-only shortcut tests use fastglm fitted-probability decisions at mean(D)=0.999 and neighboring knife edges; Python does not use that shortcut and lacks an equivalent cross-language cutoff fixture.",
+        "The Python cache is a fast balanced-panel nuisance cache; it is not the same implementation/scope as the R fast+slow preliminary-check cache."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 5,
+          "title_expression": "test_that(\"intercept-only overlap short-circuit matches the real fit's decision, including the 0.999 knife edge\", {"
+        },
+        {
+          "line": 27,
+          "title_expression": "test_that(\"intercept-only rcond short-circuit matches the Gram-matrix test\", {"
+        },
+        {
+          "line": 43,
+          "title_expression": "test_that(\"guard cache returns bit-identical results to per-cell checks (fast and slow paths)\", {"
+        },
+        {
+          "line": 63,
+          "title_expression": "test_that(\"cached guard failures still warn once per cell with unchanged text\", {"
+        }
+      ],
+      "r_file_sha256": "0c703c15508197c525930dbe0718ff159c35163364020b7852a3a94ca80622d9"
+    },
+    {
+      "r_file": "tests/testthat/test-pretest-vectorization.R",
+      "status": "not_applicable",
+      "r_intents": [
+        "Conditional-CvM indicator, unclustered/clustered per-draw test.mboot oracle and multi-chunk accumulation."
+      ],
+      "python_tests": [],
+      "remaining_gaps": [],
+      "not_applicable": [
+        "No Python conditional_did_pretest or three-dimensional CvM test.mboot implementation. Ordinary multiplier bootstrap tests concern a different statistic."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 8,
+          "title_expression": "test_that(\"indicator() vectorization matches the row-wise definition exactly\", {"
+        },
+        {
+          "line": 22,
+          "title_expression": "test_that(\"test.mboot equals the explicit per-draw multiplier bootstrap (unclustered)\", {"
+        },
+        {
+          "line": 40,
+          "title_expression": "test_that(\"test.mboot equals the explicit clustered multiplier bootstrap\", {"
+        },
+        {
+          "line": 61,
+          "title_expression": "test_that(\"test.mboot multi-chunk tiling accumulates across chunks correctly\", {"
+        }
+      ],
+      "r_file_sha256": "7aa2650b67772424643c84a71e20ba9cd1056afa414f939aebb9031956960fe8"
+    },
+    {
+      "r_file": "tests/testthat/test-rc-idname-uniqueness.R",
+      "status": "covered",
+      "r_intents": [
+        "True RC supplied IDs must be globally unique after missing-data exclusion; unique/omitted IDs produce equal results; unbalanced panel repeated IDs remain permitted."
+      ],
+      "python_tests": [
+        "test_upstream_did_sync.py::test_true_rc_rejects_repeated_ids_before_panel_specific_checks",
+        "test_upstream_did_sync.py::test_true_rc_unique_ids_and_omitted_ids_are_identical",
+        "test_upstream_did_sync.py::test_missing_rc_ids_are_dropped_before_duplicate_id_check",
+        "test_upstream_did_sync.py::test_unbalanced_allowed_retains_never_treated_and_latest_cohort"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 21,
+          "title_expression": "test_that(\"panel = FALSE rejects an idname that repeats across periods, in both modes\", {"
+        },
+        {
+          "line": 30,
+          "title_expression": "test_that(\"panel = FALSE rejects an idname that repeats within a period, in both modes\", {"
+        },
+        {
+          "line": 43,
+          "title_expression": "test_that(\"panel = FALSE runs when the supplied idname is unique, in both modes\", {"
+        },
+        {
+          "line": 55,
+          "title_expression": "test_that(\"panel = FALSE runs when idname is omitted even though an id column is present\", {"
+        },
+        {
+          "line": 66,
+          "title_expression": "test_that(\"panel = TRUE with allow_unbalanced_panel = TRUE is unaffected by the new check\", {"
+        }
+      ],
+      "r_file_sha256": "914b4881a68b3c884b8c902b9bb8c7c597a4feaaa13affc742a0afcc9c7ca4a7"
+    },
+    {
+      "r_file": "tests/testthat/test-robustness-guards.R",
+      "status": "partial",
+      "r_intents": [
+        "Duplicate ID-period and invalid weights guards, healthy positive weights, missing RC cells, singular controls, NaN estimates and Inf-as-never treatment coding."
+      ],
+      "python_tests": [
+        "test_unit_preprocess.py",
+        "test_validation.py",
+        "test_percell_failure.py",
+        "test_ported_from_R_robustness.py::test_inf_gname_equals_zero_coding",
+        "test_upstream_did_sync.py"
+      ],
+      "remaining_gaps": [
+        "R102-175 specifically tests fractional numeric IDs under unbalanced folding, user columns named weights, and transformed non-finite RC covariates; current tests do not directly mirror all three oracles.",
+        "Inf never-treated Python port compares keyed ATT in one default-mode scenario; R226-264 checks retained rows/fullIF in both controls and modes and the NA/NaN exclusion carve-out."
+      ],
+      "not_applicable": [
+        "fastglmPure bit identity against fastglm (R177-202) is an R backend contract. Python uses statsmodels, so an independent cutoff/estimation oracle is required rather than claiming bit identity."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 9,
+          "title_expression": "test_that(\"duplicate (id, period) rows are rejected identically by both modes\", {"
+        },
+        {
+          "line": 34,
+          "title_expression": "test_that(\"negative / zero-mean weights are rejected identically by both modes\", {"
+        },
+        {
+          "line": 50,
+          "title_expression": "test_that(\"valid positive weights are still accepted in both modes\", {"
+        },
+        {
+          "line": 64,
+          "title_expression": "test_that(\"fast RC path returns NA instead of crashing when a cell has no treated post observations\", {"
+        },
+        {
+          "line": 85,
+          "title_expression": "test_that(\"never-treated small-group stop fires in both modes when multiple groups are small\", {"
+        },
+        {
+          "line": 102,
+          "title_expression": "test_that(\"slow unbalanced influence aggregation handles fractional numeric ids\", {"
+        },
+        {
+          "line": 120,
+          "title_expression": "test_that(\"fast path preserves user columns named weights\", {"
+        },
+        {
+          "line": 146,
+          "title_expression": "test_that(\"transformed non-finite covariates are dropped before RC overlap checks\", {"
+        },
+        {
+          "line": 177,
+          "title_expression": "test_that(\"overlap_logit_fit matches fastglm::fastglm exactly, including the 0.999 decision\", {"
+        },
+        {
+          "line": 204,
+          "title_expression": "test_that(\"slow panel path converts estimator NaN cells to NA like fast mode\", {"
+        },
+        {
+          "line": 226,
+          "title_expression": "test_that(\"never-treated units coded as gname = Inf are NOT dropped (Inf is a valid never-treated code)\", {"
+        },
+        {
+          "line": 253,
+          "title_expression": "test_that(\"NA / NaN gname rows are still dropped while Inf is preserved\", {"
+        }
+      ],
+      "r_file_sha256": "3cc127066b7b8b2771ceed1836194bbf46c21d6aa6e72e53cb3ac1b895ff7e68"
+    },
+    {
+      "r_file": "tests/testthat/test-slowpath-precompute.R",
+      "status": "partial",
+      "r_intents": [
+        "Optimized assembly equals legacy panel reshape, including sampling weight/base/reference choices; fast/standard full-output parity under data layouts."
+      ],
+      "python_tests": [
+        "test_performance_estimation.py",
+        "test_performance_parity.py"
+      ],
+      "remaining_gaps": [
+        "Python exact old-reshape checks mainly cover numeric design; R separately compares optimized versus legacy paths for factor/transform designs and RC/unbalanced subset assembly with dropped-weight warning order.",
+        "Python full fast/standard comparisons are valuable but do not reproduce every independent R legacy-precompute toggle oracle."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 10,
+          "title_expression": "test_that(\"panel precompute is bit-identical to the original get_wide_data path\", {"
+        },
+        {
+          "line": 36,
+          "title_expression": "test_that(\"panel precompute also bit-identical for factor / transform covariates\", {"
+        },
+        {
+          "line": 56,
+          "title_expression": "test_that(\"panel precompute also bit-identical with time-varying sampling weights\", {"
+        },
+        {
+          "line": 80,
+          "title_expression": "test_that(\"panel precompute bit-identical with fix_weights base_period/first_period\", {"
+        },
+        {
+          "line": 120,
+          "title_expression": "test_that(\"RC/unbalanced precompute is bit-identical to the legacy subset path\", {"
+        },
+        {
+          "line": 165,
+          "title_expression": "test_that(\"RC/unbalanced precompute bit-identical with fix_weights base/first, incl. dropped units\", {"
+        },
+        {
+          "line": 200,
+          "title_expression": "test_that(\"RC/unbalanced precompute keeps slow-fast parity\", {"
+        },
+        {
+          "line": 222,
+          "title_expression": "test_that(\"input row order does not affect slow-path results (precompute precondition)\", {"
+        }
+      ],
+      "r_file_sha256": "d483bcf01078f0f9f375f26af0b0456564bcf62755151c87f48621cb89740cda"
+    },
+    {
+      "r_file": "tests/testthat/test-tidy.R",
+      "status": "partial",
+      "r_intents": [
+        "Summary table structure, aggregation output metadata and consistent unit counts."
+      ],
+      "python_tests": [
+        "test_tidy.py",
+        "test_glance.py"
+      ],
+      "remaining_gaps": [
+        "Python summary does not expose the R tidy statistic/p.value/term schema; existing tests do not assert statistic=estimate/SE or normal p-values for every aggregation."
+      ],
+      "not_applicable": [
+        "broom tidy/nobs S3 dispatch is R-specific; Python uses summ_attgt/MP/atte/DIDparams."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 32,
+          "title_expression": "test_that(\"tidy.MP returns expected columns\", {"
+        },
+        {
+          "line": 41,
+          "title_expression": "test_that(\"tidy.MP statistic equals estimate / std.error\", {"
+        },
+        {
+          "line": 46,
+          "title_expression": "test_that(\"tidy.MP p.value matches normal approximation\", {"
+        },
+        {
+          "line": 52,
+          "title_expression": "test_that(\"tidy.MP p.value is between 0 and 1\", {"
+        },
+        {
+          "line": 61,
+          "title_expression": "test_that(\"tidy.AGGTEobj (dynamic) returns expected columns\", {"
+        },
+        {
+          "line": 69,
+          "title_expression": "test_that(\"tidy.AGGTEobj (group) returns expected columns\", {"
+        },
+        {
+          "line": 77,
+          "title_expression": "test_that(\"tidy.AGGTEobj (calendar) returns expected columns\", {"
+        },
+        {
+          "line": 85,
+          "title_expression": "test_that(\"tidy.AGGTEobj (simple) returns expected columns\", {"
+        },
+        {
+          "line": 93,
+          "title_expression": "test_that(\"tidy.AGGTEobj statistic and p.value are consistent\", {"
+        },
+        {
+          "line": 105,
+          "title_expression": "test_that(\"nobs.MP returns number of unique units\", {"
+        },
+        {
+          "line": 111,
+          "title_expression": "test_that(\"nobs.AGGTEobj returns number of unique units\", {"
+        },
+        {
+          "line": 118,
+          "title_expression": "test_that(\"nobs.MP and nobs.AGGTEobj agree\", {"
+        }
+      ],
+      "r_file_sha256": "534afcf046f23224e61af67b1362f232bdeae6ccc8b6904383224e64f80bc9b3"
+    },
+    {
+      "r_file": "tests/testthat/test-two-period-cband.R",
+      "status": "partial",
+      "r_intents": [
+        "Two-period cband resolution and normal critical value; multivariate band retained for >=3 periods; bootstrap SE routing respects resolved cband."
+      ],
+      "python_tests": [
+        "test_upstream_did_sync.py::test_bootstrap_se_and_band_critical_value_respect_resolved_cband",
+        "test_unit_mboot.py::test_mboot_se_positive_and_crit_exceeds_pointwise"
+      ],
+      "remaining_gaps": [
+        "Existing routing test injects bootstrap output; R additionally runs real public fits and asserts override message present only for two-period cband=True. Exact message-presence/absence contract not yet translated."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 11,
+          "title_expression": "test_that(\"two periods + cband = TRUE announces the override and returns a pointwise critical value\", {"
+        },
+        {
+          "line": 29,
+          "title_expression": "test_that(\"two periods without cband is silent about the override\", {"
+        },
+        {
+          "line": 46,
+          "title_expression": "test_that(\"three or more periods still get the bootstrap uniform band, with no message\", {"
+        }
+      ],
+      "r_file_sha256": "37d5e49bd0312f3236adc862a6497f7e25adedac97e5d3074997b302b89abd1a"
+    },
+    {
+      "r_file": "tests/testthat/test-unbalanced-faster-cluster-se.R",
+      "status": "covered",
+      "r_intents": [
+        "Shuffled unbalanced/balanced clustered panels use correctly aligned unit IF cluster sums; exact CRVE differs from iid; all aggregation ATT/SE agree across modes."
+      ],
+      "python_tests": [
+        "test_r_test_alignment.py::test_shuffled_clustered_panel_matches_cluster_sum_oracle_and_all_aggregations",
+        "test_performance_parity.py::test_both_modes_preserve_full_influence_and_inference"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [
+        "R cluster_vector storage check replaced by explicit independent label alignment and cluster-sum oracle; no identical internal representation asserted."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 46,
+          "title_expression": "test_that(\"att_gt analytical clustered SE: faster_mode works (not i.i.d. fallback) on an unbalanced panel\", {"
+        },
+        {
+          "line": 70,
+          "title_expression": "test_that(\"aggte: faster_mode TRUE == FALSE on an unbalanced clustered panel (all aggregation types)\", {"
+        },
+        {
+          "line": 86,
+          "title_expression": "test_that(\"no regression: balanced panel still has faster_mode TRUE == FALSE (att_gt + aggte, clustered)\", {"
+        }
+      ],
+      "r_file_sha256": "fd6deb485634bc3db1a9f0dca120d2c0d05c8813fb133b40617b86cb1b12582e"
+    },
+    {
+      "r_file": "tests/testthat/test-unbalanced-panel-message.R",
+      "status": "gap",
+      "r_intents": [
+        "Both modes announce when allow_unbalanced_panel=True is reset on balanced data or routes true unbalanced data."
+      ],
+      "python_tests": [
+        "test_review_fixes.py::test_unbalanced_switches_to_rc",
+        "test_review_fixes.py::test_balanced_panel_stays_panel"
+      ],
+      "remaining_gaps": [
+        "Existing tests cover routing flags/results only. Python does not emit the two R informative messages, so this file has no matching message-behavior coverage."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 7,
+          "title_expression": "test_that(\"both modes announce that a balanced panel resets allow_unbalanced_panel\", {"
+        },
+        {
+          "line": 22,
+          "title_expression": "test_that(\"both modes announce that an unbalanced panel is used as such\", {"
+        }
+      ],
+      "r_file_sha256": "e301fec6c951bd547d6dce940834d7f61bcf5a4daa5be3125600c4040783193d"
+    },
+    {
+      "r_file": "tests/testthat/test-user_bug_fixes.R",
+      "status": "covered",
+      "r_intents": [
+        "Column t1, missing covariates/variables, fewer periods than groups, zero pre-outcomes and late-cohort anticipation retention."
+      ],
+      "python_tests": [
+        "test_user_bug_fixes.py",
+        "test_review_fixes.py",
+        "test_percell_failure.py"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 10,
+          "title_expression": "test_that(\"having column named t1 causes code to crash\", {"
+        },
+        {
+          "line": 35,
+          "title_expression": "test_that(\"missing covariates\", {"
+        },
+        {
+          "line": 53,
+          "title_expression": "test_that(\"fewer time periods than groups\", {"
+        },
+        {
+          "line": 85,
+          "title_expression": "test_that(\"0 pre-treatment estimates when outcomes are 0\", {"
+        },
+        {
+          "line": 114,
+          "title_expression": "test_that(\"variables not in dataset\", {"
+        },
+        {
+          "line": 125,
+          "title_expression": "test_that(\"groups treated after max(t) but within anticipation window are not coerced to never-treated\", {"
+        }
+      ],
+      "r_file_sha256": "bec928849861585369e616c37eedeb3d4da47971fae2c045718d167469b2adc4"
+    },
+    {
+      "r_file": "tests/testthat/test_sim_data_2_groups.R",
+      "status": "partial",
+      "r_intents": [
+        "One treated cohort plus never-treated, no covariates, both controls recover ATT and agree."
+      ],
+      "python_tests": [
+        "test_edge_cases.py::test_single_treated_group_produces_valid_att_gt",
+        "test_edge_cases.py::test_single_treated_group_aggte_types",
+        "test_att_gt.py::test_no_covariates"
+      ],
+      "remaining_gaps": [
+        "Existing tests check valid/recovered effects but do not explicitly assert both control definitions agree for this exact one-treated-cohort design. R variables named universal actually pass base_period=varying; this file does not establish universal-base coverage."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 5,
+          "title_expression": "test_that(\"att_gt works with 2 groups\", {"
+        }
+      ],
+      "r_file_sha256": "a3c85221aa5bd66d45cead18641a9ed6385882bbeb10175410a0237a6ee68a18"
+    },
+    {
+      "r_file": "tests/testthat/test-anticipation-window.R",
+      "status": "partial",
+      "r_intents": [
+        "Anticipation cells t >= g - anticipation use the last unaffected base under varying and universal bases, preserving ATT, SE and full unit influence functions.",
+        "Wald restrictions exclude the anticipation window; universal-base diagnostic counts use the actual observed time grid.",
+        "Event studies retain anticipation effects while the overall ATT averages post-treatment event times."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_anticipation.py::test_anticipation_cells_match_independent_weighted_did",
+        "test_upstream_20261026_inference.py::test_anticipation_cells_are_excluded_from_wald_restrictions",
+        "test_upstream_20261026_inference.py::test_universal_base_warning_counts_actual_irregular_time_grid"
+      ],
+      "remaining_gaps": [
+        "The R Monte Carlo rejection-rate experiment (declared versus ignored anticipation over 20 seeds) is not ported; deterministic cell and Wald oracles do not substitute for that experiment.",
+        "The internal pretreatment_cells_only execution filter has no Python counterpart and is not exercised.",
+        "The exact R event-study anticipation-effect recovery and overall post-treatment average fixture is not reproduced; general dynamic aggregation and the anticipation cell estimates are checked separately."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 20,
+          "title_expression": "test_that(\"anticipation periods use the base period g - anticipation - 1 under both base periods\", {"
+        },
+        {
+          "line": 38,
+          "title_expression": "test_that(\"the pre-test uses only cells with t < g - anticipation\", {"
+        },
+        {
+          "line": 60,
+          "title_expression": "test_that(\"declared anticipation no longer makes the pre-test reject true parallel trends\", {"
+        },
+        {
+          "line": 69,
+          "title_expression": "test_that(\"the pretest-only cell filter follows the same rule\", {"
+        },
+        {
+          "line": 78,
+          "title_expression": "test_that(\"event-study aggregation reports the anticipation effects; the overall ATT averages t >= g only\", {"
+        },
+        {
+          "line": 90,
+          "title_expression": "test_that(\"anticipation = 0 keeps the plain definitions (pseudo-ATTs with base t - 1; pre-test over t < g)\", {"
+        },
+        {
+          "line": 102,
+          "title_expression": "test_that(\"universal-base diagnostics use the actual base on irregular grids\", {"
+        }
+      ],
+      "r_file_sha256": "95613760495201b6f50cab4f2591269237fcf1ec9a865afafd34e598376b46d5"
+    },
+    {
+      "r_file": "tests/testthat/test-conditional-ipw-only.R",
+      "status": "not_applicable",
+      "r_intents": [
+        "The legacy conditional CvM pre-test rejects every estimator other than IPW before data processing.",
+        "A transformed-outcome counterexample separates the legacy conditional-test assumptions from ordinary reg/DR ATT estimation.",
+        "Default versus explicit IPW and resolved panel flags preserve conditional CvM statistics, draws, critical values and p-values."
+      ],
+      "python_tests": [],
+      "remaining_gaps": [],
+      "not_applicable": [
+        "Python exposes the unconditional Wald pre-test, not conditional_did_pretest or its CvM statistics. Its supported-estimator contract, transformed-outcome counterexample and conditional bootstrap are outside this API; ordinary ATT/Wald tests do not count as coverage."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 1,
+          "title_expression": "test_that(\"conditional pre-test rejects unsupported methods before processing data\", {"
+        },
+        {
+          "line": 13,
+          "title_expression": "test_that(\"correct original outcome regression cannot validate the legacy regression test\", {"
+        },
+        {
+          "line": 47,
+          "title_expression": "test_that(\"default and explicit IPW conditional pre-tests remain identical\", {"
+        },
+        {
+          "line": 74,
+          "title_expression": "test_that(\"conditional pre-test uses the resolved panel structure\", {"
+        }
+      ],
+      "r_file_sha256": "fff9638c233c462943c2fa6cad5c59f1043ffe9058b2b5a9d52c0d70d03d504b"
+    },
+    {
+      "r_file": "tests/testthat/test-inference-outcome-units.R",
+      "status": "covered",
+      "r_intents": [
+        "Global outcome rescaling preserves ATT, positive SE, interval endpoints, Wald tests and simultaneous critical values in both modes, with analytic/bootstrap and iid/clustered inference.",
+        "A low-variance cohort retains finite positive SE beside a normal-variance cohort; magnitude relative to other cells does not decide availability.",
+        "Exact-zero and nonfinite influence functions yield unavailable SE and Wald tests; invalid simultaneous critical values fall back to finite pointwise inference.",
+        "Zero-IQR and single-draw bootstraps retain live column identities but cannot estimate their scales; the independent analytic Wald covariance remains available."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_inference.py::test_outcome_units_preserve_inference",
+        "test_upstream_20261026_inference.py::test_low_variance_cohort_remains_available_beside_normal_variance_cohort",
+        "test_upstream_20261026_inference.py::test_zero_and_nonfinite_custom_influence_never_produce_inference",
+        "test_upstream_20261026_inference.py::test_single_draw_retains_live_columns_and_marks_unavailable_scales",
+        "test_upstream_20261026_inference.py::test_single_draw_fit_falls_back_to_pointwise_but_retains_analytic_wald",
+        "test_upstream_20261026_inference.py::test_zero_iqr_column_does_not_remove_other_studentized_columns",
+        "test_review_fixes.py::TestUniversalBaseNaN::test_zero_variance_estimated_cells_and_base_have_unavailable_se"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 31,
+          "title_expression": "test_that(\"outcome units preserve SEs, Wald tests, and simultaneous bands\", {"
+        },
+        {
+          "line": 78,
+          "title_expression": "test_that(\"one low-variance cohort is not filtered relative to other cohorts\", {"
+        },
+        {
+          "line": 94,
+          "title_expression": "test_that(\"exactly zero influence functions remain unavailable in panels and RC\", {"
+        },
+        {
+          "line": 125,
+          "title_expression": "test_that(\"non-finite custom influence functions do not produce finite inference\", {"
+        },
+        {
+          "line": 141,
+          "title_expression": "test_that(\"zero-IQR bootstrap draws are not reported as zero standard errors\", {"
+        },
+        {
+          "line": 151,
+          "title_expression": "test_that(\"a single bootstrap draw retains columns and cannot estimate their scales\", {"
+        }
+      ],
+      "r_file_sha256": "7fd3814578dba2898972d84426496d2682a164919522e2d521dad45aa72fac73",
+      "standalone_audits": [
+        {
+          "script": "csdid/test_csdid/audit20261026/inference_adversarial.py",
+          "entrypoint": "audit_bootstrap",
+          "summary": "csdid/test_csdid/audit20261026/inference_adversarial_summary.json",
+          "results": "csdid/test_csdid/audit20261026/inference_adversarial.json.gz",
+          "scope": "Standalone subprocess audit, not pytest assertions. Built-in dr/reg/ipw exact-zero outcomes on panel and true RC, in both modes, explicitly check every group-time and aggregate ATT/IF/SE component, unavailable Wald test, forced simultaneous-band flags and pointwise fallback critical values. Frozen-multiplier order-statistic calculations independently check bootstrap dimension/scale/critical arithmetic."
+        }
+      ]
+    },
+    {
+      "r_file": "tests/testthat/test-preprocess-name-collisions.R",
+      "status": "partial",
+      "r_intents": [
+        "Renaming outcome, time, id, cohort, covariate, sampling-weight or cluster columns to args preserves sample, ATT, SE and full IF across panel, unbalanced, RC, no-never, balancing-drop and missingness routes.",
+        "Time-column renaming, including cutoff_t and non-identifier names, preserves sample selection and estimation under both control definitions."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_anticipation.py::test_argument_named_columns_preserve_preprocessing_across_routes",
+        "test_upstream_20261026_anticipation.py::test_time_column_names_do_not_change_sample_or_results"
+      ],
+      "remaining_gaps": [
+        "The R tlist renaming grid across outcome/time/id/cohort/covariate roles is not reproduced.",
+        "The exact V1 cohort-name reproduction of the undersized never-treated-group error is not reproduced.",
+        "cutoff_t is checked as a time-column name, but the exact R cutoff_t covariate-name last-cohort-filtering fixture is not reproduced."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 11,
+          "title_expression": "test_that(\"fast preprocessing respects columns named args and tlist\", {"
+        },
+        {
+          "line": 28,
+          "title_expression": "test_that(\"argument name collisions work across preprocessing branches\", {"
+        },
+        {
+          "line": 60,
+          "title_expression": "test_that(\"group size checks use counts even if the cohort is named V1\", {"
+        },
+        {
+          "line": 72,
+          "title_expression": "test_that(\"args can name sampling weights or a cluster column\", {"
+        },
+        {
+          "line": 99,
+          "title_expression": "test_that(\"last-cohort filtering uses the cutoff argument rather than a covariate\", {"
+        }
+      ],
+      "r_file_sha256": "5dc2ae226bf10eee91f9816328e3857b74214ffac686529554dba2bbf34f20d2"
+    },
+    {
+      "r_file": "tests/testthat/test-rc-normalized-support.R",
+      "status": "partial",
+      "r_intents": [
+        "RC outcome support counts finite positive weights after the same local mean normalization as the estimator, distinguishing the smallest retained subnormal from exact underflow to zero.",
+        "DR requires treated and control pre/post outcome designs; reg requires only control designs. Constant-weight rescaling and the physical square-design boundary preserve decisions.",
+        "A second local normalization is checked before backend entry on RC, unbalanced-panel and varying-weight panel routes, with failed-cell ATT/SE/IF missingness."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_support.py::test_rc_support_counts_weights_after_local_normalization",
+        "test_upstream_20261026_support.py::test_rc_support_accepts_smallest_positive_subnormal_and_square_design",
+        "test_upstream_20261026_support.py::test_second_local_normalization_is_checked_before_rc_backend",
+        "test_upstream_20261026_support.py::test_randomized_rc_support_decisions_match_explicit_group_period_counts"
+      ],
+      "remaining_gaps": [
+        "The R first-normalization-loss full public-fit grid over treated/control loss, dr/reg, weight rescaling and compute_inffunc=False/True is not reproduced. Helper-level normalized counts and safe second-normalization backend probes are narrower checks.",
+        "The second-normalization Python backend probe currently uses compute_inffunc=True; the R point-estimates-only branch and its explicit influence-matrix row-count assertions are not reproduced.",
+        "The R explicit empty/all-zero/all-Inf/all-NA helper-input grid is not a dedicated Python fixture."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 1,
+          "title_expression": "test_that(\"RC support counts use the weights after DRDID normalization\", {"
+        },
+        {
+          "line": 30,
+          "title_expression": "test_that(\"normalization loss is rejected before DR/reg backend entry\", {"
+        },
+        {
+          "line": 89,
+          "title_expression": "test_that(\"a second local normalization is checked on every RC route\", {"
+        }
+      ],
+      "r_file_sha256": "f5a9c05e17d376d8a78667e21c6f3af67d2073d47ae0ca6f7b0c1dca1a062a0b"
+    },
+    {
+      "r_file": "tests/testthat/test-stress-balance-support.R",
+      "status": "covered",
+      "r_intents": [
+        "Dynamic balancing retains common nonmissing observed cohort/event support before min_e/max_e display limits and before na_rm drops cells.",
+        "Irregular grids require observed event times shared by eligible cohorts, without inventing globally absent event times; an all-missing observed event time remains required.",
+        "No complete cohort produces a clear error; complete regular and irregular configurations preserve cohort-weighted ATT, full aggregate IF and SE."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_inference.py::test_balancing_precedes_display_limits_and_drops_incomplete_cohort",
+        "test_upstream_20261026_inference.py::test_irregular_grid_balance_requires_common_observed_support",
+        "test_upstream_20261026_inference.py::test_globally_unobserved_event_time_is_not_required",
+        "test_upstream_20261026_inference.py::test_all_missing_event_support_cannot_disappear_during_na_removal",
+        "test_upstream_20261026_inference.py::test_balanced_dynamic_stress_against_explicit_cell_ratio_oracle"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 19,
+          "title_expression": "test_that(\"balance_e retains the same cohorts after missing cells are removed\", {"
+        },
+        {
+          "line": 41,
+          "title_expression": "test_that(\"balance_e requires common event-time support on irregular grids\", {"
+        },
+        {
+          "line": 53,
+          "title_expression": "test_that(\"balance_e uses observed support without inventing absent event times\", {"
+        },
+        {
+          "line": 64,
+          "title_expression": "test_that(\"balance_e errors when no cohort has complete observed support\", {"
+        },
+        {
+          "line": 76,
+          "title_expression": "test_that(\"an event time with all missing estimates still has to be balanced\", {"
+        },
+        {
+          "line": 89,
+          "title_expression": "test_that(\"balance_e preserves the complete regularly spaced aggregation\", {"
+        }
+      ],
+      "r_file_sha256": "e6770afb6e01afefed7242724230a9324c829bb959b43b82a515b3b2d133683a"
+    },
+    {
+      "r_file": "tests/testthat/test-stress-bootstrap-scale.R",
+      "status": "covered",
+      "r_intents": [
+        "Outcome-unit rescaling preserves bootstrap live-dimension support, draws, SE and simultaneous critical values, including extremely small dimensions and clustered draws.",
+        "Public ATT and aggregation bootstrap inference scale with outcomes in both execution modes."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_inference.py::test_bootstrap_dimension_support_does_not_square_tiny_draws",
+        "test_upstream_20261026_inference.py::test_outcome_units_preserve_inference"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 1,
+          "title_expression": "test_that(\"bootstrap degeneracy does not depend on the units of the outcome\", {"
+        },
+        {
+          "line": 25,
+          "title_expression": "test_that(\"rescaling outcomes preserves att_gt and aggte bootstrap inference\", {"
+        }
+      ],
+      "r_file_sha256": "007d1d35f5f72a3436c076a5d0533216e3391dd3e38b7d5bc63d3cf9641d1803"
+    },
+    {
+      "r_file": "tests/testthat/test-stress-pretest-defaults.R",
+      "status": "not_applicable",
+      "r_intents": [
+        "The conditional CvM pre-test resolves omitted covariates to an intercept and omitted RC ids to per-observation ids, preserving statistics and bootstrap draws.",
+        "For intercept-only conditioning, the conditional CvM statistic reduces to n times the sum of squared pre-treatment ATTs."
+      ],
+      "python_tests": [],
+      "remaining_gaps": [],
+      "not_applicable": [
+        "Python has no conditional_did_pretest API or CvM statistic. Omitted-id preprocessing and unconditional Wald tests are different contracts and cannot establish this conditional-test identity."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 1,
+          "title_expression": "test_that(\"conditional pre-test resolves omitted covariates and observation ids\", {"
+        }
+      ],
+      "r_file_sha256": "873ac5296db58d5beb3e3bc4ec38978b3a231821f68f25d1c2a1a5c4df46f9c1"
+    },
+    {
+      "r_file": "tests/testthat/test-tiny-rc-outcome-designs.R",
+      "status": "partial",
+      "r_intents": [
+        "Undersized treated RC outcome regressions are rejected before DR backend entry, leaving failed-cell ATT/SE/IF missing and healthy cells finite.",
+        "Regression and IPW do not require treated outcome regressions; square treated designs remain permitted.",
+        "Physical support counts and safe backend probes apply to panel observations routed through RC estimators."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_support.py::test_rc_tiny_and_square_treated_designs_gate_only_required_outcome_fits",
+        "test_upstream_20261026_support.py::test_rc_support_counts_weights_after_local_normalization",
+        "test_upstream_20261026_support.py::test_rc_support_accepts_smallest_positive_subnormal_and_square_design",
+        "test_upstream_20261026_support.py::test_second_local_normalization_is_checked_before_rc_backend"
+      ],
+      "remaining_gaps": [
+        "The exact R zero-weight treated/control physical-count public-fit fixtures and their per-cell warning counts are not reproduced; normalized helper counts cover their count rule.",
+        "Square-design Python public fits assert finite outputs and missingness masks, but not the R independent direct 2x2 square ATT/full-IF normalization oracle.",
+        "The R tiny-physical-treated panel RC-route fixture with compute_inffunc=False/True and the ordinary balanced-panel exemption is not reproduced; second-normalization route probes test a different failure mechanism."
+      ],
+      "not_applicable": [
+        "The custom DRDID::drdid_rc1 estimator has no packaged Python counterpart; ordinary Python reg/ipw and callable APIs are not counted as a translation of that R estimator."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 35,
+          "title_expression": "test_that(\"small RC treated groups are rejected before the DR backend\", {"
+        },
+        {
+          "line": 70,
+          "title_expression": "test_that(\"RC methods without treated outcome regressions retain small groups\", {"
+        },
+        {
+          "line": 83,
+          "title_expression": "test_that(\"zero-weight rows cannot identify RC treated outcome regressions\", {"
+        },
+        {
+          "line": 99,
+          "title_expression": "test_that(\"square full-rank RC treated regressions are allowed\", {"
+        },
+        {
+          "line": 126,
+          "title_expression": "test_that(\"undersized control-period regressions fail only affected RC cells\", {"
+        },
+        {
+          "line": 146,
+          "title_expression": "test_that(\"unbalanced and varying-weight panel RC routes check treated regressions\", {"
+        }
+      ],
+      "r_file_sha256": "d3f2b8a4f4883994dd8b6b53cf1d4127ecb779e153cc57655a4430898197f280"
+    },
+    {
+      "r_file": "tests/testthat/test-zero-weight-guards.R",
+      "status": "partial",
+      "r_intents": [
+        "Zero-mass extreme covariates cannot spoil preliminary overlap or weighted control-rank feasibility across panel, varying-weight, RC and unbalanced routes.",
+        "Positive normalized support determines overlap; the actual weighted control Gram can retain tiny-weight directions or reject directions with negligible mass, independently of weight units.",
+        "Fast overlap-cache identities include changing weight support; no-user-weight calls preserve the unweighted preliminary guard route."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_support.py::test_zero_mass_extreme_covariate_matches_deleting_observation",
+        "test_upstream_20261026_support.py::test_weighted_control_gram_keeps_tiny_weight_extreme_covariate",
+        "test_upstream_20261026_support.py::test_weighted_control_gram_rejects_lost_direction_independent_of_units",
+        "test_upstream_20261026_support.py::test_overlap_uses_positive_normalized_support_and_empty_support_fails",
+        "test_upstream_20261026_support.py::test_fast_overlap_cache_tracks_time_varying_positive_support",
+        "test_upstream_20261026_support.py::test_intercept_weighted_rank_uses_positive_support_without_underflowing_gram",
+        "test_upstream_20261026_support.py::test_no_user_weights_preserve_unweighted_preliminary_guards"
+      ],
+      "remaining_gaps": [
+        "The exact R direct DRDID panel-DR reference for a zero-weight outlier with both precompute and guard cache disabled is not reproduced. Python has deletion oracles in both modes and a direct regression reference for a tiny positive-weight outlier.",
+        "The exact R downstream DRDID reg_did_panel error oracle for the lost weighted-control direction is not reproduced; the Python preliminary guard decision is directly asserted.",
+        "Python deletion-oracle fits suppress warnings and do not reproduce every R expect_warning(..., NA) assertion."
+      ],
+      "not_applicable": [
+        "R did.disable_precompute and did.disable_check_cache options have no matching Python public option; both Python execution modes and weight-sensitive cache behavior are tested directly."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 13,
+          "title_expression": "test_that(\"zero-weight covariates cannot cause false overlap or rank failures\", {"
+        },
+        {
+          "line": 46,
+          "title_expression": "test_that(\"zero-weight guard fix also applies without positional precompute or guard cache\", {"
+        },
+        {
+          "line": 71,
+          "title_expression": "test_that(\"guard support follows normalization and still rejects unidentified designs\", {"
+        },
+        {
+          "line": 88,
+          "title_expression": "test_that(\"regression feasibility uses the actual weighted control design\", {"
+        }
+      ],
+      "r_file_sha256": "da51788dc2ec39f2ed7280c6652e02b6c3eaa84b0f6810e31a1c2d6043688284"
+    }
+  ],
+  "new_test_files": [
+    "csdid/test_csdid/test_r_test_alignment.py",
+    "csdid/test_csdid/test_upstream_20261026_anticipation.py",
+    "csdid/test_csdid/test_upstream_20261026_inference.py",
+    "csdid/test_csdid/test_upstream_20261026_support.py"
+  ],
+  "delta_notes": {
+    "previous_r_commit": "74b88eb07f1faa644df1271055a0f77848f6550c",
+    "source": "Merged did master (PR279 incorporates PR276 and PR278; PR277 updates the R BMisc dependency).",
+    "scope": "Reviewed all ten added test files and the one changed file against their assertion intents. The other 33 file-level entries and older remaining gaps are preserved. Covered means the stated portable behavior has an assertion oracle, not identical test counts, parameter grids, random draws, or R internals.",
+    "replaced_test": "The removed small-RC block in test-user_bug_fixes.R is superseded by test-tiny-rc-outcome-designs.R and test-rc-normalized-support.R. Its former location is not a remaining gap in the changed file; limits of the replacement coverage are recorded under the new files."
+  }
+}

@@ -18,7 +18,8 @@ from helpers import build_sim_data
 
 
 def _att_se(data, faster_mode, **kw):
-    common = dict(yname="Y", tname="period", idname="id", gname="G", data=data, xformla="Y~X")
+    common = dict(yname="Y", tname="period", idname="id" if kw.get("panel", True) else None,
+                  gname="G", data=data, xformla="Y~X")
     common.update({k: kw[k] for k in ("control_group", "panel", "allow_unbalanced_panel") if k in kw})
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")

@@ -32,7 +32,9 @@ def panel_data():
 @pytest.fixture(scope="module")
 def rcs_data():
     """Same data used in RCS mode (panel=False)."""
-    return build_sim_data(n=1000, time_periods=4, te=1.0, seed=9142024)
+    data = build_sim_data(n=1000, time_periods=4, te=1.0, seed=9142024)
+    data["id"] = np.arange(len(data))
+    return data
 
 
 def _fit(data, em, panel=True, bstrap=False):
