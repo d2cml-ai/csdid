@@ -30,6 +30,11 @@ observed package-name regression, missing badges/examples/citation, duplicate
 case-variant README paths, broken figure links and the corrupted Downloads
 badge query. Maintainers should still review proposed wording and results.
 
+The existing manual workflow trigger can validate a feature branch before
+merging: `gh workflow run gen_readme.yml --ref BRANCH`. Such a run executes the
+renders and guards but skips publishing a bot PR. Automatic main-branch runs
+retain PR publication.
+
 The bot uses `GITHUB_TOKEN`. GitHub does not start push-triggered workflows
 from its automated pushes, so a generated PR still needs the required checks
 to run before it can merge. This change does not add credentials or change the

@@ -12,8 +12,7 @@ concurrency:
 
 jobs:
   CreateQuarto:
-    # Manual runs publish documentation for main, just like automatic runs.
-    if: github.ref == 'refs/heads/main'
+    # Manual runs on other branches validate a preview; only main publishes PRs.
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -70,6 +69,7 @@ jobs:
           python -m unittest discover -s scripts/tests -p 'test_*.py'
 
       - name: Open a PR with the regenerated README
+        if: github.ref == 'refs/heads/main'
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
