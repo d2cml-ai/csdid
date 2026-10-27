@@ -31,6 +31,26 @@ first: an interrupted upload is completed only if its existing artifact matches.
 A reused version with changed source, unexpected build configuration or yanked
 files fails visibly and needs a new version.
 
+After an upload, a separate clean checkout of the tested commit verifies the
+public wheel and source archive again, including source, metadata and PyPI
+hashes. Their filenames, hashes and download URLs must also appear in PyPI's
+public Simple index. This catches a stale preflight 404 followed by an upload
+that skipped an already existing artifact with different contents. It also
+waits for the release to become visible to ordinary package installers.
+The existing-release skip path performs the same bounded public confirmation in
+the read-only gate, so a later scheduled retry can recover from an earlier
+visibility timeout without a build, upload or publishing token.
+
+Missing or partially visible publication data can retry six times, with waits
+of 5, 10, 20, 40 and 60 seconds (135 seconds total backoff). Visible source,
+metadata, hash or index identity mismatches fail immediately. The verification
+step has an eight-minute hard timeout including network calls. A timeout or
+mismatch fails the publisher even when PyPI accepted the upload; it never
+deletes or replaces immutable files. Scheduled retries can finish a matching
+partial release after visibility recovers. Client-side checks cannot make the
+preflight, upload and public index update one atomic transaction, or prevent a
+later owner action from changing publication availability.
+
 ## One-time PyPI configuration
 
 The PyPI `csdid` project must register this GitHub Trusted Publisher:

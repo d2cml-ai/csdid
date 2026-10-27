@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import tarfile
+import time
 from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -66,8 +67,8 @@ def candidate(event_name, event, repository, repository_id, ref, sha):
     return sha
 
 
-def fetch_json(url, token=None):
-    headers = {"Accept": "application/json", "User-Agent": "csdid-release-check"}
+def fetch_json(url, token=None, accept="application/json"):
+    headers = {"Accept": accept, "User-Agent": "csdid-release-check"}
     if token:
         headers["Accept"] = "application/vnd.github+json"
         headers["Authorization"] = "Bearer " + token
@@ -227,7 +228,19 @@ def verify_sdist(value, version, expected_files, build_files, requirements):
         raise GateError("Published csdid source archive metadata differs; use a new version")
 
 
-def release_ready(source_path):
+def csdid_version(source_bytes):
+    assignments = [node for node in ast.parse(source_bytes).body
+                   if isinstance(node, ast.Assign) and any(
+                       isinstance(target, ast.Name) and target.id == "__version" for target in node.targets)]
+    if len(assignments) != 1:
+        raise GateError("Expected one CSDID version assignment")
+    version = ast.literal_eval(assignments[0].value)
+    if not isinstance(version, str) or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+        raise GateError("Expected a complete CSDID release version")
+    return version
+
+
+def release_ready(source_path, release=None, confirm_publication=False):
     """Skip a complete identical release, or wait for its locked backend.
 
     This is a read-only preflight. Publication still rechecks CI and verifies
@@ -246,14 +259,7 @@ def release_ready(source_path):
                         for parent in Path(path).parents if str(parent) != ".")}
     if "csdid/_version.py" not in expected:
         raise GateError("Reviewed CSDID Python source is incomplete")
-    assignments = [node for node in ast.parse(expected["csdid/_version.py"]).body
-                   if isinstance(node, ast.Assign) and any(
-                       isinstance(target, ast.Name) and target.id == "__version" for target in node.targets)]
-    if len(assignments) != 1:
-        raise GateError("Expected one CSDID version assignment")
-    version = ast.literal_eval(assignments[0].value)
-    if not isinstance(version, str) or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
-        raise GateError("Expected a complete CSDID release version")
+    version = csdid_version(expected["csdid/_version.py"])
     setup = ast.parse(git("show", "HEAD:setup.py"))
     build_paths = git("ls-files", "-z", "--", "setup.py", "setup.cfg", "pyproject.toml", "MANIFEST.in").decode().split("\0")
     build_files = {path: git("show", "HEAD:" + path) for path in build_paths if path}
@@ -271,7 +277,8 @@ def release_ready(source_path):
     if backend_requirements != ["drdid==" + lock["version"]]:
         raise GateError("setup.py must require exactly the reviewed backend release")
     try:
-        release = fetch_json("https://pypi.org/pypi/csdid/" + version + "/json")
+        if release is None:
+            release = fetch_json("https://pypi.org/pypi/csdid/" + version + "/json")
     except HTTPError as error:
         if error.code != 404:
             raise
@@ -291,6 +298,10 @@ def release_ready(source_path):
         if sdists:
             verify_sdist(download_artifact(sdists[0]), version, expected, build_files, requirements)
         if wheels and sdists:
+            if confirm_publication:
+                # An earlier postcheck may have timed out after JSON became
+                # visible but before installers could see the Simple entries.
+                wait_for_publication(source)
             return False, "Skipped: csdid " + version + " is already published with matching Python source, build inputs and dependencies."
     try:
         backend = fetch_json("https://pypi.org/pypi/drdid/" + lock["version"] + "/json")
@@ -301,6 +312,59 @@ def release_ready(source_path):
     if not any(item.get("packagetype") == "bdist_wheel" and not item.get("yanked") for item in backend["urls"]):
         return False, "Waiting: the reviewed DRDID wheel is not on PyPI yet; the hourly catch-up will retry automatically."
     return True, "CSDID " + version + " needs publication; the locked backend is available for byte verification."
+
+
+def publication_ready(source_path):
+    """Require verified artifacts and their public installer index entries."""
+    version = csdid_version((Path(source_path) / "csdid/_version.py").read_bytes())
+    try:
+        release = fetch_json("https://pypi.org/pypi/csdid/" + version + "/json")
+        if release.get("info", {}).get("name", "").lower() != "csdid" or release["info"].get("version") != version:
+            raise GateError("Unexpected public CSDID publication identity")
+        if not release["urls"]:
+            return False, "Waiting: the public CSDID release does not list its artifacts yet."
+        if any(item.get("packagetype") not in ("bdist_wheel", "sdist") for item in release["urls"]):
+            raise GateError("Unexpected CSDID publication artifact")
+        # Reuse the full clean-source, wheel/sdist, dependency and digest checks.
+        # Supplying this public snapshot avoids a second inconsistent JSON read.
+        ready, message = release_ready(source_path, release=release)
+        if ready or {item["packagetype"] for item in release["urls"]} != {"bdist_wheel", "sdist"}:
+            return False, "Waiting: both verified CSDID publication artifacts are not visible yet. " + message
+        simple = fetch_json("https://pypi.org/simple/csdid/", accept="application/vnd.pypi.simple.v1+json")
+        if simple.get("name", "").lower() != "csdid":
+            raise GateError("Unexpected CSDID Simple index project name")
+        missing = []
+        for artifact in release["urls"]:
+            entries = [item for item in simple["files"] if item["filename"] == artifact["filename"]]
+            if not entries:
+                missing.append(artifact["filename"])
+                continue
+            if len(entries) != 1:
+                raise GateError("Duplicate CSDID Simple index entries")
+            entry = entries[0]
+            if (entry.get("yanked", False) is not False
+                    or entry.get("hashes", {}).get("sha256") != artifact["digests"]["sha256"]
+                    or entry.get("url") != artifact["url"]):
+                raise GateError("Published CSDID Simple index identity differs from verified artifacts")
+        if missing:
+            return False, "Waiting: the public Simple index does not list these artifacts yet: " + ", ".join(missing)
+    except HTTPError as error:
+        if error.code == 404:
+            return False, "Waiting: public CSDID publication data is not visible yet (HTTP 404)."
+        raise
+    return True, "Verified public csdid " + version + " wheel, source archive and Simple index against reviewed source and PyPI hashes."
+
+
+def wait_for_publication(source_path, delays=(5, 10, 20, 40, 60)):
+    """Six checks; only absent/partial public visibility can consume a retry."""
+    for attempt in range(len(delays) + 1):
+        ready, message = publication_ready(source_path)
+        if ready:
+            return message
+        print(message, flush=True)
+        if attempt == len(delays):
+            raise GateError("Timed out waiting for verified public CSDID publication")
+        time.sleep(delays[attempt])
 
 
 def read_lock(lock_path):
@@ -359,13 +423,16 @@ def output(message, ready=None, sha=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("ci", "backend", "lock", "release"))
+    parser.add_argument("mode", choices=("ci", "backend", "lock", "release", "published"))
     parser.add_argument("--lock")
     parser.add_argument("--peer")
     args = parser.parse_args()
     try:
+        if args.mode == "published":
+            output(wait_for_publication(Path.cwd()))
+            return 0
         if args.mode == "release":
-            ready, message = release_ready(Path.cwd())
+            ready, message = release_ready(Path.cwd(), confirm_publication=True)
             output(message, ready)
             return 0
         if args.mode == "lock":
