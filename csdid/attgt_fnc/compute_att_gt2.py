@@ -201,7 +201,10 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
         weight_idx = earlier_idx
     w = period_w[weight_idx][mask]
     if apply_guard:
-        w = _rescale_weights_if_mean_overflows(w)
+        # Cast before panel subtraction, including in the published reg kernel.
+        ypre = np.asarray(ypre, dtype=float)
+        ypost = np.asarray(ypost, dtype=float)
+        w = _rescale_weights_if_mean_overflows(np.asarray(w, dtype=float))
 
     pscore_cache = None
     if nuisance_cache is not None:
@@ -346,7 +349,8 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
         covariates = full_cov.loc[disdat.index].to_numpy()
 
     if apply_guard:
-        w = _rescale_weights_if_mean_overflows(w)
+        Y = np.asarray(Y, dtype=float)
+        w = _rescale_weights_if_mean_overflows(np.asarray(w, dtype=float))
 
     if apply_rcond and rc_outcome_has_too_few_obs(
             G, post, w, covariates.shape[1], include_treated=est_method == "dr"):

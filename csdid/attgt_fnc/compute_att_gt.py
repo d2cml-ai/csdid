@@ -170,7 +170,11 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
 
                 est_att_f = est_panel
                 if apply_guard:
-                    w = _rescale_weights_if_mean_overflows(w)
+                    # R and the shared standalone kernels operate on doubles.
+                    # Cast before subtraction in legacy regression kernels too.
+                    ypre = np.asarray(ypre, dtype=float)
+                    ypost = np.asarray(ypost, dtype=float)
+                    w = _rescale_weights_if_mean_overflows(np.asarray(w, dtype=float))
 
                 # Propensity-overlap guard (matches R, checked BEFORE the singular
                 # guard so its precedence/message match): NA a dr/ipw cell whose PS
@@ -324,7 +328,8 @@ def compute_att_gt(dp, est_method = "dr", base_period = 'varying', compute_inffu
                 
                 est_att_f = est_rc
                 if apply_guard:
-                    w = _rescale_weights_if_mean_overflows(w)
+                    Y = np.asarray(Y, dtype=float)
+                    w = _rescale_weights_if_mean_overflows(np.asarray(w, dtype=float))
 
                 if apply_rcond and rc_outcome_has_too_few_obs(
                         G, post, w, covariates.shape[1], include_treated=est_method == "dr"):

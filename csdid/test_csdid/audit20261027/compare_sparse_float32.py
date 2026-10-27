@@ -3,6 +3,7 @@
 import argparse
 import gzip
 import importlib.util
+import importlib.metadata
 import json
 import os
 from pathlib import Path
@@ -139,6 +140,8 @@ def main():
         payload_sha256={name: audit.sha256(output / name) for name in (
             "r_references.json.gz", "python_payloads.json.gz", "cases.json", "sessionInfo.txt")},
         shared_csv_sha256={name: audit.sha256(output / name) for name in sorted({z["data"] for z in cases})},
+        packages={name: importlib.metadata.version(name) for name in (
+            "csdid", "drdid", "numpy", "pandas", "scipy", "statsmodels", "pytest")},
         failures=failures,
         scope="Sparse float32 in-memory Python weights; R receives their exact double representations. Analytical inference.")
     (output / "result.json").write_text(json.dumps(record, indent=2) + "\n")

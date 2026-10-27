@@ -262,7 +262,7 @@ def main():
                               wald=dict(atol=1e-5, rtol=1e-5), support_shape_nonfinite_masks="exact"),
         maximum_cross_language_absolute_errors=maximum,
         packages={name: importlib.metadata.version(name) for name in (
-            "numpy", "pandas", "scipy", "statsmodels", "drdid", "pytest")},
+            "csdid", "numpy", "pandas", "scipy", "statsmodels", "drdid", "pytest")},
         payload_sha256={name: sha256(output / name) for name in (
             "r_references.json.gz", "python_payloads.json.gz", "cases.json", "sessionInfo.txt")},
         failures=failures,
