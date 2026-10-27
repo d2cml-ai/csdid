@@ -65,7 +65,7 @@ or via github:
 ### Dependencies
 
 The `drdid` dependency is installed automatically with `csdid`. CSDID
-0.4.4 requires the reviewed DRDID 1.1.7 release. The Python backend is
+0.4.5 requires the reviewed DRDID 1.1.7 release. The Python backend is
 maintained in [DRDIDpy](https://github.com/d2cml-ai/DRDIDpy);
 development checkouts use the exact peer revision recorded in
 [`python_drdid.json`](csdid/test_csdid/joint_sync/python_drdid.json).

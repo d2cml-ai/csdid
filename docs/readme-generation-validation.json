@@ -1,18 +1,18 @@
 {
   "audit_date": "2026-10-27",
-  "base_commit": "86bf96225eb23f6aeffa0a6bb928b378485de383",
+  "base_commit": "d5123fbf315f593221e9589b33cad25aa9741dd4",
   "quarto": "1.8.25",
   "python": "3.12.12",
   "fixed_seed": 12345,
   "direct_dependency_resolution": "passed using reviewed peer source plus all pinned rendering requirements in one install",
   "consecutive_renders_bit_identical": true,
   "rendered_sha256": {
-    "README.md": "aecd536061c0a6765aed0827523e5621cf7917e5bc7d626e447a943873bb531a",
+    "README.md": "cc4fe7a9d9596725053305dc376fb6aa65a05ede350fca73317e312f5e45cfdd",
     "README_files/figure-commonmark/fig-attgt-output-1.png": "af5e8b557dea1a0281dd27de6ee8d30a784dc8f63bac18709e34843f9a2b4a17",
     "README_files/figure-commonmark/fig-calendar-output-1.png": "c3cc20bb076900c677fcebd841e01e272cd926775b0396269158e873cff3463f",
     "README_files/figure-commonmark/fig-dynamic-output-1.png": "b6d1c34b9b043d0d3e0f0a6336283f1ce9c13f0993e0499fd8fc1220cbcb7d63"
   },
-  "guard_tests_passed": 20,
+  "guard_tests_passed": 31,
   "observed_bot_regression_commit": "53e8fc985afaf3057caba0aa83ca0a9a336dc5b1",
   "observed_bot_content_rejections": [
     "bot README: the Python package must be identified as csdid",
@@ -32,24 +32,29 @@
   ],
   "package_metadata_checks": {
     "name": "csdid",
-    "version": "0.4.4",
+    "version": "0.4.5",
     "requires_drdid": "==1.1.7",
     "wheel_long_description_matches_canonical_readme": true,
-    "sdist_has_only_canonical_readme": true
+    "sdist_long_description_matches_canonical_readme": true,
+    "sdist_has_only_canonical_readme": true,
+    "wheel_source_and_sdist_source_match_current_checkout": true
   },
-  "actionlint": "passed",
+  "actionlint": "passed using actionlint with shellcheck disabled",
   "estimator_runtime_changed": false,
-  "scope": "Authored source and generated documentation are preserved; numerical outputs intentionally regenerate from the checkout. Font/OS differences between platforms are outside the same-environment byte-replay claim.",
+  "scope": "Canonical README packaging and rendering correction with a patch version increment; estimator logic and the exact DRDID dependency/peer lock remain unchanged. Same-environment reproducibility covers Markdown and PNG bytes.",
   "historical_validation": "readme-generation-validation-20261026.json",
   "versions": {
-    "csdid": "0.4.4",
+    "csdid": "0.4.5",
     "drdid": "1.1.7",
     "numpy": "2.5.4",
     "pandas": "3.1.0",
     "scipy": "1.18.1",
     "statsmodels": "0.15.0",
     "matplotlib": "3.11.2",
-    "plotnine": "0.15.8"
+    "plotnine": "0.15.8",
+    "fonttools": "4.68.0",
+    "build": "1.6.1",
+    "twine": "7.0.0"
   },
   "peer_lock": {
     "schema_version": 1,
@@ -59,7 +64,7 @@
   },
   "pip_check": "passed",
   "readme_guard_tests": 10,
-  "release_guard_tests": 10,
+  "release_guard_tests": 21,
   "joint_snapshot_documentation_fixtures": [
     "README.qmd",
     "README.md",
@@ -67,5 +72,22 @@
   ],
   "estimator_runtime_changed_vs_current_main": false,
   "figure_outputs_identical_to_previous_validation": true,
-  "render_requirements_sha256": "95c970e2b0e418bc70cefbc8fef317f94a01ace5a1743dadb5b1225f6edaa647"
+  "render_requirements_sha256": "95c970e2b0e418bc70cefbc8fef317f94a01ace5a1743dadb5b1225f6edaa647",
+  "distribution_sha256": {
+    "csdid-0.4.5-py3-none-any.whl": "38830453cead0b8119cb988ce07c88a51dec85bf9aeccd2fbc551c31ef2a34b9",
+    "csdid-0.4.5.tar.gz": "4029860d99bcf51ef0b76d6e4ae7e03f3b4e7e42c26bedf3178ab01c78447611"
+  },
+  "artifact_source_verification": "passed using the actual wheel/sdist and production release verification functions",
+  "validated_at_utc": "2026-10-27T21:37:00.662417+00:00",
+  "validation_parent_commit": "80274ff650c92a0421c159126d2f3844bbc71a9d",
+  "previous_current_validation": "docs/readme-generation-validation-0.4.4.json",
+  "version_file_changed": true,
+  "release_version_reason": "The canonical README path changes setup.py and MANIFEST.in. Publish this packaging/documentation correction as 0.4.5 instead of reusing 0.4.4.",
+  "backend_pypi_verification": "Published drdid 1.1.7 wheel matches every reviewed Python source byte and PyPI SHA256",
+  "distribution_metadata_validation": "python -m twine check passed for the actual wheel and sdist",
+  "release_preflight_on_clean_checkout": {
+    "ready": true,
+    "message": "CSDID 0.4.5 needs publication; the locked backend is available for byte verification.",
+    "mode": "read-only release state preflight; required CI is checked separately by the publication workflow"
+  }
 }
