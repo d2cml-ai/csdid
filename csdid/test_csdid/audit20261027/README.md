@@ -1,10 +1,17 @@
 # Joint installed-package validation
 
-The final tested pair is **CSDID 0.4.4** at
+The full local installed test pair is **CSDID 0.4.4** at
 `e8354bc3454e5ed5bc78eb5f2df3c8b8422b24aa` and **Python DRDID 1.1.7** at
 `eb896640c7fb74e2baac06ec0e208ee19f290d7c`. CSDID declares `drdid==1.1.7`;
 its committed peer lock selects that exact reviewed source. These are tested
 release candidates. Validation did not publish either distribution.
+
+The peer lock subsequently advances to `53a6b76`, which removes an unused
+orphan R gitlink without a `.gitmodules` URL. That entry caused GitHub's
+credential-cleanup checkout step to fail before numerical tests started.
+All Python runtime bytes and fixtures are identical to `eb89664`; the local
+receipts retain their actual tested source IDs. CI rebuilds and tests the
+current committed lock rather than substituting those historical source IDs.
 
 The [joint installed receipt](joint_installed_validation.json) records
 **2,935 tests plus 19 subtests**, with zero failures, errors or skips. Slow tests
