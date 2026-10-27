@@ -10,7 +10,7 @@ print(__version)
 # Long description for PyPI (rendered from the project README).
 _here = os.path.abspath(os.path.dirname(__file__))
 try:
-    with open(os.path.join(_here, 'readme.md'), encoding='utf-8') as _f:
+    with open(os.path.join(_here, 'README.md'), encoding='utf-8') as _f:
         long_description = _f.read()
 except Exception:
     long_description = 'Difference in Difference in Python'

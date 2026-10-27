@@ -334,6 +334,13 @@ def run(csdid, drdid, output, lock_path=DEFAULT_LOCK, csdid_ref="HEAD", drdid_re
             shutil.copytree(sources / "csdid/scripts", csdid_plain / "scripts", ignore=ignore)
             if (csdid_plain / "scripts/tests").is_dir():
                 extra_test_roots.append(csdid_plain / "scripts/tests")
+            # Repository-level documentation guards read the real authored and
+            # rendered README fixtures from their plain snapshot's root.
+            for name in ("README.qmd", "README.md"):
+                if (sources / "csdid" / name).is_file():
+                    shutil.copyfile(sources / "csdid" / name, csdid_plain / name)
+            if (sources / "csdid/README_files").is_dir():
+                shutil.copytree(sources / "csdid/README_files", csdid_plain / "README_files", ignore=ignore)
         (peer_plain / "scripts").mkdir()
         bridge = peer_plain / "scripts/check_csdid_integration.py"
         shutil.copyfile(sources / "drdid/scripts/check_csdid_integration.py", bridge)

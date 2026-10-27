@@ -53,7 +53,7 @@ directory, and `FASTER_MODE.md` for scope and reproduction instructions.
 ### Key Conventions
 
 - Version is defined in `csdid/_version.py` as `__version`; update it there for releases.
-- The README is auto-generated: edit `README.qmd` (Quarto), not `readme.md` directly. CI renders and commits the output on push to `main`.
+- The README is auto-generated: edit `README.qmd` (Quarto), not `README.md` directly. CI renders it on pushes to `main` and proposes a PR for generated changes. Keep badges, examples and citation instructions in `README.qmd`; do not create a second case-variant README file.
 - PyPI publishing is automated via CI on push to `main` using `python setup.py sdist` + Twine.
 
 ## Subprojects

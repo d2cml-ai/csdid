@@ -273,7 +273,7 @@ class ReleaseCatchupChecks(unittest.TestCase):
                     "url": "https://files.pythonhosted.org/packages/reviewed.whl",
                     "digests": {"sha256": hashlib.sha256(value).hexdigest()}}
         self.downloads[artifact["url"]] = value
-        return value, {"info": {"version": "0.4.4"}, "urls": [artifact] + ([self.sdist(dependencies=dependencies)] if sdist else [])}
+        return value, {"info": {"name": "csdid", "version": "0.4.4"}, "urls": [artifact] + ([self.sdist(dependencies=dependencies)] if sdist else [])}
 
     def sdist(self, dependencies=("numpy", "drdid==1.1.7"), changes=None):
         files = dict(self.files, **{"setup.py": (self.root / "setup.py").read_bytes(),
@@ -371,6 +371,106 @@ class ReleaseCatchupChecks(unittest.TestCase):
         setup.write_text("dirty = True\n")
         with self.assertRaisesRegex(gate.GateError, "must be clean"):
             gate.release_ready(self.root)
+
+    def simple(self, release):
+        return {"name": "csdid", "files": [dict(filename=item["filename"], url=item["url"],
+                               hashes={"sha256": item["digests"]["sha256"]}, yanked=False)
+                          for item in release["urls"]]}
+
+    def test_post_upload_cached_404_waits_then_verifies_public_artifacts_and_simple(self):
+        _, release = self.wheel()
+        with patch.object(gate, "fetch_json", side_effect=[self.missing(), release, self.simple(release)]) as fetch, patch.object(gate, "urlopen", side_effect=self.download), patch.object(gate.time, "sleep") as sleep:
+            self.assertIn("Verified public csdid 0.4.4", gate.wait_for_publication(self.root))
+            sleep.assert_called_once_with(5)
+            self.assertEqual(fetch.call_args.kwargs["accept"], "application/vnd.pypi.simple.v1+json")
+
+    def test_post_upload_empty_release_file_list_is_bounded_visibility_pending(self):
+        _, release = self.wheel()
+        empty = dict(release, urls=[])
+        with patch.object(gate, "fetch_json", side_effect=[empty, release, self.simple(release)]), patch.object(gate, "urlopen", side_effect=self.download), patch.object(gate.time, "sleep") as sleep:
+            self.assertIn("Verified public", gate.wait_for_publication(self.root))
+            sleep.assert_called_once_with(5)
+
+    def test_post_upload_waits_for_either_partial_artifact_order_and_simple_visibility(self):
+        _, release = self.wheel()
+        for index in (0, 1):
+            partial = dict(release, urls=[release["urls"][index]])
+            partial_simple = self.simple(partial)
+            responses = [partial, {"urls": [{"packagetype": "bdist_wheel"}]},
+                         release, partial_simple, release, self.simple(release)]
+            with self.subTest(first_artifact=index), patch.object(gate, "fetch_json", side_effect=responses), patch.object(gate, "urlopen", side_effect=self.download), patch.object(gate.time, "sleep") as sleep:
+                self.assertIn("Verified public", gate.wait_for_publication(self.root))
+                self.assertEqual([call.args[0] for call in sleep.call_args_list], [5, 10])
+
+    def test_post_upload_mismatched_existing_source_fails_without_retry(self):
+        _, release = self.wheel(files=dict(self.files, **{"csdid/att_gt.py": b"old = True\n"}))
+        with patch.object(gate, "fetch_json", return_value=release), patch.object(gate, "urlopen", side_effect=self.download), patch.object(gate.time, "sleep") as sleep:
+            with self.assertRaisesRegex(gate.GateError, "use a new version"):
+                gate.wait_for_publication(self.root)
+            sleep.assert_not_called()
+
+    def test_post_upload_simple_hash_url_yank_and_duplicate_mismatches_fail_without_retry(self):
+        _, release = self.wheel()
+        for mutation in ("hash", "url", "yanked", "duplicate", "name"):
+            simple = self.simple(release)
+            if mutation == "hash":
+                simple["files"][0]["hashes"]["sha256"] = "0" * 64
+            elif mutation == "url":
+                simple["files"][0]["url"] = "https://attacker.invalid/unreviewed.whl"
+            elif mutation == "yanked":
+                simple["files"][0]["yanked"] = True
+            elif mutation == "name":
+                simple["name"] = "another-project"
+            else:
+                simple["files"].append(dict(simple["files"][0]))
+            with self.subTest(mutation=mutation), patch.object(gate, "fetch_json", side_effect=[release, simple]), patch.object(gate, "urlopen", side_effect=self.download), patch.object(gate.time, "sleep") as sleep:
+                with self.assertRaises(gate.GateError):
+                    gate.wait_for_publication(self.root)
+                sleep.assert_not_called()
+
+    def test_post_upload_missing_simple_entry_cannot_hide_visible_mismatch(self):
+        _, release = self.wheel()
+        simple = self.simple(release)
+        simple["files"] = simple["files"][1:]
+        simple["files"][0]["hashes"]["sha256"] = "0" * 64
+        with patch.object(gate, "fetch_json", side_effect=[release, simple]), patch.object(gate, "urlopen", side_effect=self.download), patch.object(gate.time, "sleep") as sleep:
+            with self.assertRaisesRegex(gate.GateError, "identity differs"):
+                gate.wait_for_publication(self.root)
+            sleep.assert_not_called()
+
+    def test_post_upload_persistent_absence_times_out_after_six_attempts(self):
+        with patch.object(gate, "fetch_json", side_effect=self.missing()) as fetch, patch.object(gate.time, "sleep") as sleep:
+            with self.assertRaisesRegex(gate.GateError, "Timed out"):
+                gate.wait_for_publication(self.root)
+            self.assertEqual(fetch.call_count, 6)
+            self.assertEqual([call.args[0] for call in sleep.call_args_list], [5, 10, 20, 40, 60])
+
+    def test_post_upload_non_visibility_errors_are_not_retried(self):
+        for error in (HTTPError("url", 503, "Unavailable", {}, None), ValueError("malformed response")):
+            with self.subTest(error=error), patch.object(gate, "fetch_json", side_effect=error), patch.object(gate.time, "sleep") as sleep:
+                with self.assertRaises(type(error)):
+                    gate.wait_for_publication(self.root)
+                sleep.assert_not_called()
+
+    def test_existing_complete_noop_rechecks_installer_visibility_before_skipping_build(self):
+        _, release = self.wheel()
+        missing_simple = dict(self.simple(release), files=[])
+        responses = [release, release, missing_simple, release, self.simple(release)]
+        with patch.object(gate, "fetch_json", side_effect=responses) as fetch, patch.object(gate, "urlopen", side_effect=self.download), patch.object(gate.time, "sleep") as sleep:
+            ready, message = gate.release_ready(self.root, confirm_publication=True)
+            self.assertFalse(ready)
+            self.assertIn("already published", message)
+            sleep.assert_called_once_with(5)
+            self.assertFalse(any('/drdid/' in call.args[0] for call in fetch.call_args_list))
+
+    def test_existing_complete_noop_cannot_hide_persistent_unconfirmed_simple_index(self):
+        _, release = self.wheel()
+        def fetch(url, **kwargs):
+            return dict(self.simple(release), files=[]) if '/simple/' in url else release
+        with patch.object(gate, "fetch_json", side_effect=fetch), patch.object(gate, "urlopen", side_effect=self.download), patch.object(gate.time, "sleep") as sleep:
+            with self.assertRaisesRegex(gate.GateError, "Timed out"):
+                gate.release_ready(self.root, confirm_publication=True)
+            self.assertEqual([call.args[0] for call in sleep.call_args_list], [5, 10, 20, 40, 60])
 
 
 if __name__ == "__main__":

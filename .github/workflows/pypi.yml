@@ -54,6 +54,7 @@ jobs:
       - name: Skip an identical release or wait for its backend
         if: steps.verify.outputs.ready == 'true'
         id: release
+        timeout-minutes: 8
         working-directory: source
         run: python3 scripts/check_release_ci.py release
 
@@ -88,6 +89,7 @@ jobs:
       - name: Recheck release state after any environment delay
         if: steps.verify.outputs.ready == 'true'
         id: release
+        timeout-minutes: 8
         working-directory: source
         run: python3 scripts/check_release_ci.py release
 
@@ -146,9 +148,25 @@ jobs:
 
       - name: Publish to PyPI
         if: steps.final-ci.outputs.ready == 'true'
+        id: publish
         uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
         with:
           packages-dir: source/dist/
           # Safely finish a partial upload. The gate verifies existing artifacts
           # instead of silently accepting changed code under an existing version.
           skip-existing: true
+
+      - name: Check out clean reviewed source for public verification
+        if: steps.publish.outcome == 'success'
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ needs.gate.outputs.sha }}
+          path: publication-source
+          persist-credentials: false
+
+      - name: Verify public artifacts and installer index after upload
+        if: steps.publish.outcome == 'success'
+        # Includes network time, in addition to the bounded 135s of backoff.
+        timeout-minutes: 8
+        working-directory: publication-source
+        run: python3 scripts/check_release_ci.py published

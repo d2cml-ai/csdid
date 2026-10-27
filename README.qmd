@@ -1,7 +1,18 @@
 ---
 title: Difference in Difference in Python
 format: gfm
+output-file: README.md
+execute:
+  cache: false
+  error: false
 ---
+
+[![PyPI version](https://img.shields.io/pypi/v/csdid.svg?color=blue)](https://pypi.org/project/csdid/)
+<a href="https://pepy.tech/project/csdid"><img alt="Downloads" src="https://static.pepy.tech/personalized-badge/csdid?period=total&amp;units=international_system&amp;left_color=blue&amp;right_color=grey&amp;left_text=Downloads" /></a>
+[![Last commit](https://img.shields.io/github/last-commit/d2cml-ai/csdid.svg)](https://github.com/d2cml-ai/csdid/commits/main)
+[![GitHub stars](https://img.shields.io/github/stars/d2cml-ai/csdid.svg?style=social)](https://github.com/d2cml-ai/csdid/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/d2cml-ai/csdid.svg)](https://github.com/d2cml-ai/csdid/issues)
+[![License](https://img.shields.io/github/license/d2cml-ai/csdid.svg)](https://github.com/d2cml-ai/csdid/blob/main/LICENSE)
 
 The **csdid** package contains tools for computing average treatment
 effect parameters in a Difference-in-Differences setup allowing for
@@ -32,17 +43,17 @@ treatment effects or event-study-type estimands.
 ## Getting Started
 
 There has been some recent work on DiD with multiple time periods. The
-**did** package implements the framework put forward in
+**csdid** package implements the framework put forward in
 
 - [Callaway, Brantly and Pedro H.C. Sant’Anna.
   "Difference-in-Differences with Multiple Time Periods." Journal of
   Econometrics, Vol. 225, No. 2,
   pp. 200-230, 2021.](https://doi.org/10.1016/j.jeconom.2020.12.001)
-  or [arXiv](https://arxiv.org/abs/1803.09015
+  or [arXiv](https://arxiv.org/abs/1803.09015).
 
 This project is based on the original [did R package](https://github.com/bcallaway11/did).
 
-## Instalation
+## Installation
 
 You can install **csdid** from `pypi` with:
 
@@ -58,11 +69,12 @@ pip install git+https://github.com/d2cml-ai/csdid/
 
 ### Dependencies
 
-Additionally, I have created an additional library called `drdid`, which can be installed via GitHub.
-
-```
-pip install git+https://github.com/d2cml-ai/DRDID
-```
+The `drdid` dependency is installed automatically with `csdid`. CSDID 0.4.5
+requires the reviewed DRDID 1.1.7 release. The Python backend is maintained in
+[DRDIDpy](https://github.com/d2cml-ai/DRDIDpy); development checkouts use the
+exact peer revision recorded in
+[`python_drdid.json`](csdid/test_csdid/joint_sync/python_drdid.json).
+Update both packages together using their matching reviewed versions.
 
 ## Basic Example
 
@@ -75,15 +87,18 @@ from [Callaway and Sant’Anna
   - [More detailed examples are also
     available](https://bcallaway11.github.io/did/articles/did-basics.html)
 
-A subset of the data is available in the package and can be loaded by
+A subset of the data is available at [data/mpdta.csv](data/mpdta.csv). Run the
+following examples from the repository root:
 
 ```{python}
 from csdid.att_gt import ATTgt
+import numpy as np
 import pandas as pd
-data = pd.read_csv("https://raw.githubusercontent.com/d2cml-ai/csdid/function-aggte/data/mpdta.csv")
+data = pd.read_csv("data/mpdta.csv")
+np.random.seed(12345)
 ```
 
-The dataset contains 500 observations of county-level teen employment
+The dataset contains 2,500 observations for 500 counties, with teen employment
 rates from 2003-2007. Some states are first treated in 2004, some in
 2006, and some in 2007 (see the paper for more details). The important
 variables in the dataset are
@@ -116,13 +131,14 @@ out = ATTgt(yname = "lemp",
 
 Summary table
 
-```{python, eval = False}
+```{python}
 out.summ_attgt().summary2
 ```
 
 In the graphs, a semicolon `;` should be added to prevent printing the class and the graph information.
 
 ```{python}
+#| label: fig-attgt
 out.plot_attgt();
 ```
 
@@ -133,8 +149,65 @@ out.aggte(typec='calendar');
 
 
 ```{python}
+#| label: fig-calendar
 out.plot_aggte();
 ```
+
+## Event studies
+
+Although in the current example it is pretty easy to directly interpret
+the group-time average treatment effects, there are many cases where it
+is convenient to aggregate the group-time average treatment effects into
+a small number of parameters. A main type of aggregation is into an
+*event study* plot.
+
+To make an event study plot in the **csdid** package, one can use the
+**aggte** function with the **dynamic** option:
+
+```{python}
+out.aggte(typec='dynamic');
+```
+
+The column `event time` is for each group relative to when they first
+participate in the treatment. For example, `event time=0` corresponds to
+the *on impact* effect, and `event time=-1` is the *effect* in the period
+before a unit becomes treated. Checking that this is equal to zero is
+potentially useful as a pre-test when no anticipation is specified.
+
+To plot the event study, use **plot_aggte**:
+
+```{python}
+#| label: fig-dynamic
+out.plot_aggte();
+```
+
+The figure here is very similar to the group-time average treatment
+effects. Red dots are pre-treatment periods, blue dots are
+post-treatment periods. The difference is that the x-axis is in event
+time.
+
+## Overall effect of participating in treatment
+
+The event study above reported an overall effect of participating in the
+treatment. This was computed by averaging the average effects computed
+at each length of exposure.
+
+In many cases, a more general purpose overall treatment effect parameter
+is given by computing the average treatment effect for each group, and
+then averaging across groups. This procedure provides an average
+treatment effect parameter with a similar interpretation to the
+Average Treatment Effect on the Treated (ATT) in the two-period,
+two-group case.
+
+To compute this overall average treatment effect parameter, use:
+
+```{python}
+out.aggte(typec='group');
+```
+
+Of particular interest is the `Overall ATT` in the results. Here, we
+estimate that increasing the minimum wage decreased teen employment by
+approximately 3.1% in this example.
 
 ## Additional options
 
@@ -158,9 +231,23 @@ and weighting:
   `faster_mode=False` to use the standard computation path. Both modes use the
   same estimators and inference; speed gains depend on the data and options.
 
-```{python, eval = False}
+```{python}
+#| eval: false
 # Cluster-robust SEs using the default faster computation path:
 out = ATTgt(yname="lemp", gname="first.treat", idname="countyreal", tname="year",
             xformla="lemp~1", data=data,
             clustervar="countyreal").fit(est_method="dr")
+```
+
+## How to cite
+
+If you want to cite CSDID, you can use the following BibTeX entry:
+
+```bibtex
+@software{csdid,
+  author  = {Callaway, Brantly and Sant'Anna, Pedro HC and Quispe, Alexander and Guevara, Carlos},
+  title   = {{csdid: Difference-in-Differences with Multiple Time Periods in Python}},
+  year    = {2024},
+  url     = {https://github.com/d2cml-ai/csdid}
+}
 ```
