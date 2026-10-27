@@ -15,6 +15,7 @@ and the influence-function bookkeeping are identical to ``compute_att_gt``.
 import numpy as np, pandas as pd
 from drdid import reg_did
 from csdid.attgt_fnc import drdid_trim
+from csdid.utils.weights import _rescale_weights_if_mean_overflows
 from csdid.attgt_fnc.compute_att_gt_shared import (
     select_estimators, last_pretreatment_index, plan_cell, rcond_check_fail,
     drdid_design_singular, overlap_check_fail, rc_outcome_has_too_few_obs, BREAK, BASE_ZERO,
@@ -199,6 +200,8 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
     else:
         weight_idx = earlier_idx
     w = period_w[weight_idx][mask]
+    if apply_guard:
+        w = _rescale_weights_if_mean_overflows(w)
 
     pscore_cache = None
     if nuisance_cache is not None:
@@ -341,6 +344,9 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
         covariates = cov_early.reindex(disdat[idname]).to_numpy()
     else:
         covariates = full_cov.loc[disdat.index].to_numpy()
+
+    if apply_guard:
+        w = _rescale_weights_if_mean_overflows(w)
 
     if apply_rcond and rc_outcome_has_too_few_obs(
             G, post, w, covariates.shape[1], include_treated=est_method == "dr"):

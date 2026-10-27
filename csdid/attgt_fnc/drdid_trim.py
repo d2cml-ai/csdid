@@ -2,6 +2,8 @@ import numpy as np
 import statsmodels.api as sm
 import warnings
 
+from csdid.utils.weights import _normalize_weights
+
 
 # Reuse is restricted to the original deterministic statsmodels implementation.
 # A caller replacing GLM (or its solver) must still see every cell's fit.
@@ -103,7 +105,7 @@ def std_ipw_did_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.9
         i_weights = np.asarray(i_weights).flatten()
         if np.min(i_weights) < 0:
             raise ValueError("i_weights must be non-negative")
-    i_weights = i_weights / np.mean(i_weights)
+    i_weights = _normalize_weights(i_weights)
 
     pscore_results = _fit_panel_pscore(D, int_cov, i_weights, _pscore_cache)
     if not pscore_results.converged:
@@ -152,7 +154,7 @@ def drdid_panel(y1, y0, D, covariates=None, i_weights=None, trim_level=0.995,
         i_weights = np.asarray(i_weights).flatten()
         if np.min(i_weights) < 0:
             raise ValueError("i_weights must be non-negative")
-    i_weights = i_weights / np.mean(i_weights)
+    i_weights = _normalize_weights(i_weights)
 
     pscore_results = _fit_panel_pscore(D, int_cov, i_weights, _pscore_cache)
     if not pscore_results.converged:
@@ -227,7 +229,7 @@ def std_ipw_did_rc(y, post, D, covariates=None, i_weights=None, trim_level=0.995
         i_weights = np.asarray(i_weights).flatten()
         if np.min(i_weights) < 0:
             raise ValueError("i_weights must be non-negative")
-    i_weights = i_weights / np.mean(i_weights)
+    i_weights = _normalize_weights(i_weights)
 
     pscore_model = sm.GLM(D, int_cov, family=sm.families.Binomial(), freq_weights=i_weights)
     pscore_results = pscore_model.fit()
@@ -290,7 +292,7 @@ def drdid_rc(y, post, D, covariates=None, i_weights=None, trim_level=0.995):
         i_weights = np.asarray(i_weights).flatten()
         if np.min(i_weights) < 0:
             raise ValueError("i_weights must be non-negative")
-    i_weights = i_weights / np.mean(i_weights)
+    i_weights = _normalize_weights(i_weights)
 
     pscore_model = sm.GLM(D, int_cov, family=sm.families.Binomial(), freq_weights=i_weights)
     pscore_results = pscore_model.fit()

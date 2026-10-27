@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-27",
+  "objective": "Coordinate supported traditionalDR/normalizedIPW/regression results across RDRDID,Rdid,PythonDRDID,PythonCSDID.",
+  "csdid_baseline": "b2e3b0baae0f4226e90e016b73cb0baf9456c3e2",
+  "full_suite_current_pypi_drdid_1_1_6": {
+    "tests": 2469,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "selected_suite_proposed_drdid_wheel": {
+    "tests": 284,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "new_contracts": 159,
+  "before_new_contracts": {
+    "failures": 120,
+    "passed": 39
+  },
+  "live_comparisons": 552,
+  "healthy_bit_identical_workflows": 240,
+  "healthy_bit_identical_aggregations": 960,
+  "pr_links": {
+    "python_drdid": "https://github.com/d2cml-ai/DRDIDpy/pull/21",
+    "r_did": "https://github.com/bcallaway11/did/pull/280"
+  },
+  "scientific_decision": "Equivalent selected-cohort ratio derivatives correct weight-unit artifacts; estimator,sample,trimming and inference methods remain unchanged.",
+  "remaining": [
+    "Proposed standalone upstream requires review/release before CSDID can raise dependency minimum and consolidate cached kernels.",
+    "Rdidcompanion PRcorrects slowpath weight-scaleinference; existingRbaselinefixturepinsremainunchanged until reviewed aftermerge.",
+    "R-onlypushesdonottriggerPythonCIorautomaticallyportchanges; coveredAPIisthesixsharedkernels, notallRDRDIDfeatures."
+  ]
+}
