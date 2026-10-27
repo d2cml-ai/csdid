@@ -27,6 +27,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: x64
 
+      - name: Check README source and generated content
+        run: |
+          python scripts/check_readme.py
+          python -m unittest discover -s scripts/tests -p 'test_*.py'
+
       - name: Install legacy dependency set
         if: matrix.python-version == '3.8'
         run: pip install -r requirements.txt

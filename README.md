@@ -1,12 +1,16 @@
 # Difference in Difference in Python
 
-[![PyPI version](https://img.shields.io/pypi/v/csdid.svg?color=blue)](https://pypi.org/project/csdid/)
-[![Downloads](https://static.pepy.tech/personalized-badge/csdid?period=total&units=international_system&left_color=blue&right_color=grey&left_text=Downloads)](https://pepy.tech/project/csdid)
-[![Last commit](https://img.shields.io/github/last-commit/d2cml-ai/csdid.svg)](https://github.com/d2cml-ai/csdid/commits/main)
-[![GitHub stars](https://img.shields.io/github/stars/d2cml-ai/csdid.svg?style=social)](https://github.com/d2cml-ai/csdid/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/d2cml-ai/csdid.svg)](https://github.com/d2cml-ai/csdid/issues)
-[![License](https://img.shields.io/github/license/d2cml-ai/csdid.svg)](https://github.com/d2cml-ai/csdid/blob/main/LICENSE)
 
+[![PyPI
+version](https://img.shields.io/pypi/v/csdid.svg?color=blue)](https://pypi.org/project/csdid/)
+<a href="https://pepy.tech/project/csdid"><img alt="Downloads" src="https://static.pepy.tech/personalized-badge/csdid?period=total&amp;units=international_system&amp;left_color=blue&amp;right_color=grey&amp;left_text=Downloads" /></a>
+[![Last
+commit](https://img.shields.io/github/last-commit/d2cml-ai/csdid.svg)](https://github.com/d2cml-ai/csdid/commits/main)
+[![GitHub
+stars](https://img.shields.io/github/stars/d2cml-ai/csdid.svg?style=social)](https://github.com/d2cml-ai/csdid/stargazers)
+[![GitHub
+issues](https://img.shields.io/github/issues/d2cml-ai/csdid.svg)](https://github.com/d2cml-ai/csdid/issues)
+[![License](https://img.shields.io/github/license/d2cml-ai/csdid.svg)](https://github.com/d2cml-ai/csdid/blob/main/LICENSE)
 
 The **csdid** package contains tools for computing average treatment
 effect parameters in a Difference-in-Differences setup allowing for
@@ -43,12 +47,12 @@ There has been some recent work on DiD with multiple time periods. The
   “Difference-in-Differences with Multiple Time Periods.” Journal of
   Econometrics, Vol. 225, No. 2, pp. 200-230,
   2021.](https://doi.org/10.1016/j.jeconom.2020.12.001) or
-  \[arXiv\](https://arxiv.org/abs/1803.09015
+  [arXiv](https://arxiv.org/abs/1803.09015).
 
 This project is based on the original [did R
 package](https://github.com/bcallaway11/did).
 
-## Instalation
+## Installation
 
 You can install **csdid** from `pypi` with:
 
@@ -60,8 +64,8 @@ or via github:
 
 ### Dependencies
 
-Additionally, I have created an additional library called `drdid`, which
-can be installed via GitHub.
+The `drdid` dependency is installed automatically with `csdid`. To use
+its development version, install it from GitHub:
 
     pip install git+https://github.com/d2cml-ai/DRDID
 
@@ -75,18 +79,21 @@ from [Callaway and Sant’Anna
 - [More detailed examples are also
   available](https://bcallaway11.github.io/did/articles/did-basics.html)
 
-A subset of the data is available in the package and can be loaded by
+A subset of the data is available at [data/mpdta.csv](data/mpdta.csv).
+Run the following examples from the repository root:
 
 ``` python
 from csdid.att_gt import ATTgt
+import numpy as np
 import pandas as pd
-data = pd.read_csv("https://raw.githubusercontent.com/d2cml-ai/csdid/function-aggte/data/mpdta.csv")
+data = pd.read_csv("data/mpdta.csv")
+np.random.seed(12345)
 ```
 
-The dataset contains 500 observations of county-level teen employment
-rates from 2003-2007. Some states are first treated in 2004, some in
-2006, and some in 2007 (see the paper for more details). The important
-variables in the dataset are
+The dataset contains 2,500 observations for 500 counties, with teen
+employment rates from 2003-2007. Some states are first treated in 2004,
+some in 2006, and some in 2007 (see the paper for more details). The
+important variables in the dataset are
 
 - **lemp** This is the log of county-level teen employment. It is the
   outcome variable
@@ -134,18 +141,18 @@ out.summ_attgt().summary2
 
 |     | Group | Time | ATT(g, t) | Post | Std. Error | \[95% Pointwise | Conf. Band\] |     |
 |-----|-------|------|-----------|------|------------|-----------------|--------------|-----|
-| 0   | 2004  | 2004 | -0.0105   | 0    | 0.0241     | -0.0781         | 0.0571       |     |
-| 1   | 2004  | 2005 | -0.0704   | 0    | 0.0324     | -0.1612         | 0.0204       |     |
-| 2   | 2004  | 2006 | -0.1373   | 0    | 0.0393     | -0.2476         | -0.0269      | \*  |
-| 3   | 2004  | 2007 | -0.1008   | 0    | 0.0360     | -0.2017         | 0.0001       |     |
-| 4   | 2006  | 2004 | 0.0065    | 0    | 0.0238     | -0.0601         | 0.0732       |     |
-| 5   | 2006  | 2005 | -0.0028   | 0    | 0.0188     | -0.0554         | 0.0499       |     |
-| 6   | 2006  | 2006 | -0.0046   | 0    | 0.0172     | -0.0528         | 0.0437       |     |
-| 7   | 2006  | 2007 | -0.0412   | 0    | 0.0201     | -0.0976         | 0.0152       |     |
-| 8   | 2007  | 2004 | 0.0305    | 0    | 0.0147     | -0.0108         | 0.0719       |     |
-| 9   | 2007  | 2005 | -0.0027   | 0    | 0.0160     | -0.0476         | 0.0421       |     |
-| 10  | 2007  | 2006 | -0.0311   | 0    | 0.0173     | -0.0796         | 0.0174       |     |
-| 11  | 2007  | 2007 | -0.0261   | 0    | 0.0171     | -0.0740         | 0.0219       |     |
+| 0   | 2004  | 2004 | -0.0105   | 1    | 0.0243     | -0.0581         | 0.0371       |     |
+| 1   | 2004  | 2005 | -0.0704   | 1    | 0.0348     | -0.1387         | -0.0022      | \*  |
+| 2   | 2004  | 2006 | -0.1373   | 1    | 0.0412     | -0.2179         | -0.0566      | \*  |
+| 3   | 2004  | 2007 | -0.1008   | 1    | 0.0356     | -0.1706         | -0.0311      | \*  |
+| 4   | 2006  | 2004 | 0.0065    | 0    | 0.0249     | -0.0424         | 0.0554       |     |
+| 5   | 2006  | 2005 | -0.0028   | 0    | 0.0197     | -0.0414         | 0.0359       |     |
+| 6   | 2006  | 2006 | -0.0046   | 1    | 0.0173     | -0.0386         | 0.0294       |     |
+| 7   | 2006  | 2007 | -0.0412   | 1    | 0.0197     | -0.0799         | -0.0026      | \*  |
+| 8   | 2007  | 2004 | 0.0305    | 0    | 0.0146     | 0.0019          | 0.0591       | \*  |
+| 9   | 2007  | 2005 | -0.0027   | 0    | 0.0170     | -0.0361         | 0.0306       |     |
+| 10  | 2007  | 2006 | -0.0311   | 0    | 0.0177     | -0.0657         | 0.0035       |     |
+| 11  | 2007  | 2007 | -0.0261   | 1    | 0.0181     | -0.0615         | 0.0094       |     |
 
 </div>
 
@@ -156,14 +163,14 @@ class and the graph information.
 out.plot_attgt();
 ```
 
-    /home/runner/work/csdid/csdid/csdid/plots/gplot.py:19: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value '['2004' '2005' '2006' '2007']' has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-      ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
-    /home/runner/work/csdid/csdid/csdid/plots/gplot.py:19: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value '['2004' '2005' '2006' '2007']' has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-      ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
-    /home/runner/work/csdid/csdid/csdid/plots/gplot.py:19: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value '['2004' '2005' '2006' '2007']' has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-      ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
+<div id="fig-attgt">
 
-![](README_files/figure-commonmark/cell-5-output-2.png)
+<img src="README_files/figure-commonmark/fig-attgt-output-1.png"
+id="fig-attgt" />
+
+Figure 1
+
+</div>
 
 ``` python
 out.aggte(typec='calendar');
@@ -173,15 +180,15 @@ out.aggte(typec='calendar');
 
     Overall summary of ATT's based on calendar time aggregation:
         ATT Std. Error  [95.0%  Conf. Int.]  
-    -0.0417     0.0169 -0.0748      -0.0086 *
+    -0.0417     0.0164 -0.0738      -0.0096 *
 
 
     Time Effects (calendar):
        Time  Estimate  Std. Error  [95.0% Simult.   Conf. Band   
-    0  2004   -0.0105      0.0244          -0.0584      0.0374   
-    1  2005   -0.0704      0.0307          -0.1305     -0.0103  *
-    2  2006   -0.0488      0.0210          -0.0900     -0.0076  *
-    3  2007   -0.0371      0.0136          -0.0637     -0.0105  *
+    0  2004   -0.0105      0.0242          -0.0580      0.0370   
+    1  2005   -0.0704      0.0325          -0.1342     -0.0067  *
+    2  2006   -0.0488      0.0195          -0.0871     -0.0105  *
+    3  2007   -0.0371      0.0146          -0.0657     -0.0084  *
     ---
     Signif. codes: `*' confidence band does not cover 0
     Control Group:  Never Treated , 
@@ -192,13 +199,16 @@ out.aggte(typec='calendar');
 out.plot_aggte();
 ```
 
-    /home/runner/work/csdid/csdid/csdid/plots/gplot.py:19: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value '['2004' '2005' '2006' '2007']' has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-      ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
+<div id="fig-calendar">
 
-![](README_files/figure-commonmark/cell-7-output-2.png)
+<img src="README_files/figure-commonmark/fig-calendar-output-1.png"
+id="fig-calendar" />
 
+Figure 2
 
-**Event Studies**
+</div>
+
+## Event studies
 
 Although in the current example it is pretty easy to directly interpret
 the group-time average treatment effects, there are many cases where it
@@ -207,7 +217,7 @@ a small number of parameters. A main type of aggregation is into an
 *event study* plot.
 
 To make an event study plot in the **csdid** package, one can use the
-**aggte** function with **dynamic** option
+**aggte** function with the **dynamic** option:
 
 ``` python
 out.aggte(typec='dynamic');
@@ -216,19 +226,19 @@ out.aggte(typec='dynamic');
 
 
     Overall summary of ATT's based on event-study/dynamic aggregation:
-    ATT Std. Error  [95.0%  Conf. Int.]  
-    -0.0772     0.0207 -0.1179      -0.0366 *
+        ATT Std. Error  [95.0%  Conf. Int.]  
+    -0.0772     0.0212 -0.1187      -0.0357 *
 
 
     Dynamic Effects:
-      Event time  Estimate  Std. Error  [95.0% Simult.   Conf. Band   
-    0          -3    0.0305      0.0146           0.0019      0.0591  *
-    1          -2   -0.0006      0.0129          -0.0259      0.0248   
-    2          -1   -0.0245      0.0141          -0.0521      0.0032   
-    3           0   -0.0199      0.0117          -0.0428      0.0030   
-    4           1   -0.0510      0.0154          -0.0811     -0.0208  *
-    5           2   -0.1373      0.0366          -0.2091     -0.0655  *
-    6           3   -0.1008      0.0337          -0.1669     -0.0347  *
+       Event time  Estimate  Std. Error  [95.0% Simult.   Conf. Band   
+    0          -3    0.0305      0.0156          -0.0001      0.0612   
+    1          -2   -0.0006      0.0128          -0.0257      0.0246   
+    2          -1   -0.0245      0.0141          -0.0522      0.0033   
+    3           0   -0.0199      0.0118          -0.0430      0.0032   
+    4           1   -0.0510      0.0184          -0.0869     -0.0150  *
+    5           2   -0.1373      0.0408          -0.2172     -0.0574  *
+    6           3   -0.1008      0.0367          -0.1727     -0.0289  *
     ---
     Signif. codes: `*' confidence band does not cover 0
     Control Group:  Never Treated , 
@@ -236,41 +246,45 @@ out.aggte(typec='dynamic');
     Estimation Method:  Doubly Robust
 
 The column `event time` is for each group relative to when they first
-participate in the treatment. To give some examples, `event time=0`
-corresponds to the *on impact* effect, and `event time=-1` is the
-*effect* in the period before a unit becomes treated (checking that this
-is equal to 0 is potentially useful as a pre-test).
+participate in the treatment. For example, `event time=0` corresponds to
+the *on impact* effect, and `event time=-1` is the *effect* in the
+period before a unit becomes treated. Checking that this is equal to
+zero is potentially useful as a pre-test when no anticipation is
+specified.
 
-To plot the event study, use **plot_aggte** method
+To plot the event study, use **plot_aggte**:
+
 ``` python
 out.plot_aggte();
 ```
 
-    /home/runner/work/csdid/csdid/csdid/plots/gplot.py:19: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value '['2004' '2005' '2006' '2007']' has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-      ssresults.loc[:, 'year'] = ssresults['year'].astype(int).astype(str)
+<div id="fig-dynamic">
 
-![](README_files/figure-commonmark/cell-8-output-2.png)
+<img src="README_files/figure-commonmark/fig-dynamic-output-1.png"
+id="fig-dynamic" />
+
+Figure 3
+
+</div>
 
 The figure here is very similar to the group-time average treatment
 effects. Red dots are pre-treatment periods, blue dots are
 post-treatment periods. The difference is that the x-axis is in event
 time.
 
-**Overall Effect of Participating in the Treatment**
+## Overall effect of participating in treatment
 
 The event study above reported an overall effect of participating in the
 treatment. This was computed by averaging the average effects computed
 at each length of exposure.
 
 In many cases, a more general purpose overall treatment effect parameter
-is give by computing the average treatment effect for each group, and
-then averaging across groups. This sort of procedure provides an average
-treatment effect parameter with a very similar interpretation to the
-Average Treatment Effect on the Treated (ATT) in the two period and two
-group case.
+is given by computing the average treatment effect for each group, and
+then averaging across groups. This procedure provides an average
+treatment effect parameter with a similar interpretation to the Average
+Treatment Effect on the Treated (ATT) in the two-period, two-group case.
 
-To compute this overall average treatment effect parameter, use
-
+To compute this overall average treatment effect parameter, use:
 
 ``` python
 out.aggte(typec='group');
@@ -279,15 +293,15 @@ out.aggte(typec='group');
 
 
     Overall summary of ATT's based on group/cohort aggregation:
-    ATT Std. Error  [95.0%  Conf. Int.]  
-    -0.031     0.0124 -0.0553      -0.0067 *
+       ATT Std. Error  [95.0%  Conf. Int.]  
+    -0.031      0.013 -0.0565      -0.0055 *
 
 
     Group Effects:
-      Group  Estimate  Std. Error  [95.0% Simult.   Conf. Band   
-    0   2004   -0.0797      0.0301          -0.1387     -0.0208  *
-    1   2006   -0.0229      0.0172          -0.0567      0.0109   
-    2   2007   -0.0261      0.0174          -0.0601      0.0080   
+       Group  Estimate  Std. Error  [95.0% Simult.   Conf. Band   
+    0   2004   -0.0797      0.0293          -0.1371     -0.0224  *
+    1   2006   -0.0229      0.0166          -0.0554      0.0096   
+    2   2007   -0.0261      0.0163          -0.0581      0.0059   
     ---
     Signif. codes: `*' confidence band does not cover 0
     Control Group:  Never Treated , 
@@ -296,12 +310,47 @@ out.aggte(typec='group');
 
 Of particular interest is the `Overall ATT` in the results. Here, we
 estimate that increasing the minimum wage decreased teen employment by
-3.1% and the effect is marginally statistically significant.
+approximately 3.1% in this example.
 
-# How to cite
-If you want to cite CSDID, you can use the following BibTeX entry:
+## Additional options
+
+`ATTgt(...)` and `.fit(...)` support several options for inference,
+performance, and weighting:
+
+- **Control group**: `control_group="nevertreated"` (default) or
+  `"notyettreated"`.
+- **Estimation method**: `.fit(est_method="dr")` (doubly robust,
+  default), `"reg"` (outcome regression), `"ipw"` (inverse-probability
+  weighting), or a Python callable.
+- **Base period**: `.fit(base_period="varying")` (default) or
+  `"universal"`.
+- **Clustered inference**: pass `clustervar="..."` for cluster-robust
+  standard errors (analytical when `bstrap=False`, or via the multiplier
+  bootstrap).
+- **Point estimates only**: `compute_inffunc=False` skips
+  influence-function and standard-error computation for faster, lighter
+  exploratory runs.
+- **Time-varying weights** (`weights_name`): `fix_weights` controls
+  which period’s weights each 2×2 comparison uses — `None` (earlier
+  period, default), `"base_period"`, `"first_period"`, or `"varying"`.
+- **Faster computation**: `faster_mode=True` is the default starting in
+  0.4.3. It precomputes panel outcomes, weights, and covariates by
+  period. Pass `faster_mode=False` to use the standard computation path.
+  Both modes use the same estimators and inference; speed gains depend
+  on the data and options.
 
 ``` python
+# Cluster-robust SEs using the default faster computation path:
+out = ATTgt(yname="lemp", gname="first.treat", idname="countyreal", tname="year",
+            xformla="lemp~1", data=data,
+            clustervar="countyreal").fit(est_method="dr")
+```
+
+## How to cite
+
+If you want to cite CSDID, you can use the following BibTeX entry:
+
+``` bibtex
 @software{csdid,
   author  = {Callaway, Brantly and Sant'Anna, Pedro HC and Quispe, Alexander and Guevara, Carlos},
   title   = {{csdid: Difference-in-Differences with Multiple Time Periods in Python}},
