@@ -12,7 +12,7 @@
     "README_files/figure-commonmark/fig-calendar-output-1.png": "c3cc20bb076900c677fcebd841e01e272cd926775b0396269158e873cff3463f",
     "README_files/figure-commonmark/fig-dynamic-output-1.png": "b6d1c34b9b043d0d3e0f0a6336283f1ce9c13f0993e0499fd8fc1220cbcb7d63"
   },
-  "guard_tests_passed": 31,
+  "guard_tests_passed": 41,
   "observed_bot_regression_commit": "53e8fc985afaf3057caba0aa83ca0a9a336dc5b1",
   "observed_bot_content_rejections": [
     "bot README: the Python package must be identified as csdid",
@@ -41,7 +41,7 @@
   },
   "actionlint": "passed using actionlint with shellcheck disabled",
   "estimator_runtime_changed": false,
-  "scope": "Canonical README packaging and rendering correction with a patch version increment; estimator logic and the exact DRDID dependency/peer lock remain unchanged. Same-environment reproducibility covers Markdown and PNG bytes.",
+  "scope": "Canonical README packaging and rendering correction with CSDID 0.4.5, plus strict bounded verification of public PyPI distributions and installer index after upload or an existing-release retry. Estimator logic, backend dependency and reviewed peer lock remain unchanged.",
   "historical_validation": "readme-generation-validation-20261026.json",
   "versions": {
     "csdid": "0.4.5",
@@ -64,7 +64,7 @@
   },
   "pip_check": "passed",
   "readme_guard_tests": 10,
-  "release_guard_tests": 21,
+  "release_guard_tests": 31,
   "joint_snapshot_documentation_fixtures": [
     "README.qmd",
     "README.md",
@@ -89,5 +89,24 @@
     "ready": true,
     "message": "CSDID 0.4.5 needs publication; the locked backend is available for byte verification.",
     "mode": "read-only release state preflight; required CI is checked separately by the publication workflow"
+  },
+  "integrated_validation": {
+    "validated_at_utc": "2026-10-27T21:48:27.054847+00:00",
+    "source_commit": "6d432108d06f9843ecf3c9ccafa0fcda3e87e86f",
+    "root_guards_passed": 41,
+    "readme_guard_tests": 10,
+    "release_guard_tests": 31,
+    "canonical_readme_guard": "passed",
+    "source_readme_guard": "passed",
+    "actionlint": "passed with shellcheck disabled",
+    "release_preflight_on_clean_checkout": {
+      "version": "0.4.5",
+      "ready": true,
+      "message": "CSDID 0.4.5 needs publication; the locked backend is available for byte verification."
+    },
+    "backend_pypi_verification": "Published drdid 1.1.7 wheel matches every reviewed Python source byte and PyPI SHA256",
+    "packaged_inputs_unchanged_since": "560d0c9dc5568db2d5cc8b693ffc36f1b405c260",
+    "render_and_distribution_hashes_rechecked": "passed against the actual saved files; no rerender or rebuild was needed for changes outside packaged inputs",
+    "render_and_build_timestamp": "Retain top-level validated_at_utc for the original real render/build verification; this integrated timestamp covers the later release hardening checks."
   }
 }
