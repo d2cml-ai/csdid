@@ -164,6 +164,14 @@ def collect_and_validate_origins(site_packages, expected, modules=None):
     return origins
 
 
+def verify_locked_dependency(requirements, version):
+    backend = [value for value in requirements
+               if re.match(r"drdid(?=\s|[<=>!~(\[;]|$)", value, re.IGNORECASE)]
+    exact = r"drdid\s*(?:==\s*{0}|\(\s*==\s*{0}\s*\))".format(re.escape(version))
+    if len(backend) != 1 or re.fullmatch(exact, backend[0], re.IGNORECASE) is None:
+        raise ValueError("CSDID wheel must require exactly the reviewed DRDID version")
+
+
 def verify_installed_files(site_packages, expected):
     for name, expected_hash in expected.items():
         path = Path(site_packages) / name
@@ -296,6 +304,8 @@ def run(csdid, drdid, output, lock_path=DEFAULT_LOCK, csdid_ref="HEAD", drdid_re
                 receipt["sources"][package]["runtime_files_sha256"],
                 lock["version"] if package == "drdid" else
                 source_version(sources / "csdid/csdid/_version.py", "__version"))
+        if receipt["configuration_binding"]["mode"] == "committed_peer_lock":
+            verify_locked_dependency(receipt["wheels"]["csdid"]["requires_dist"], lock["version"])
         command([executable, "-m", "pip", "install", *selected_wheels], "install-both-candidate-wheels")
         command([executable, "-m", "pip", "check"], "verify-dependency-consistency")
         command([executable, "-c", "import importlib.metadata as m,json,sys,sysconfig; "

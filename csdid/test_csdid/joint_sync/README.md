@@ -7,7 +7,9 @@ which compares raw ATT/full influence output and the declared original outcome
 units for the six shared estimators.
 
 `python_drdid.json` identifies the reviewed peer repository, full commit and
-package version. A requested peer SHA must match it. The driver verifies source,
+package version. A requested peer SHA must match it. The CSDID wheel must declare
+exactly that backend version, preventing future unreviewed releases from being
+selected by a fresh install. The driver verifies source,
 wheel and installed runtime file hashes; every loaded `csdid`/`drdid` module in
 the tests and bridge must come from those installed wheels. Plain test snapshots
 contain fixtures/helpers but no runtime source packages. Optional CSDID

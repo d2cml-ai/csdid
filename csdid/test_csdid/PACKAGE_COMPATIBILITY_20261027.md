@@ -30,7 +30,9 @@ regressions cover these corrections.
 ## One reviewed installed pair
 
 The proposed pair is `csdid==0.4.4` with `drdid==1.1.7`. CSDID now requires
-`drdid>=1.1.7`, so an upgrade cannot silently retain the known-broken 1.1.6.
+`drdid==1.1.7`, so installs cannot silently retain the known-broken 1.1.6 or
+select a future unreviewed backend. A backend upgrade must update the exact
+dependency and peer lock together and pass the coordinated checks.
 The exact reviewed peer commit/version is recorded in
 [joint_sync/python_drdid.json](joint_sync/python_drdid.json).
 
@@ -53,6 +55,13 @@ first. Before CSDID uploads its own release, its workflow requires the backend
 wheel to exist on PyPI and match every reviewed Python source byte and the PyPI
 digest. The existing publishing credentials are retained. No merge or upload is
 performed by this audit.
+
+For later backend upgrades, first validate both candidate commits. DRDID's
+integration job also checks CSDID's default branch, so merge CSDID's reviewed
+lock/pin update first; its publisher will block while the backend is absent.
+Then rerun DRDID's checks against that CSDID branch, merge/release DRDID, and
+retry CSDID publication on the tested main revision. This is a coordinated
+upgrade, not an automatic adoption of a new backend.
 
 ## Boundaries retained explicitly
 

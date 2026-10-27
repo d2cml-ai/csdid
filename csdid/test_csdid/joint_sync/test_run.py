@@ -115,3 +115,13 @@ def test_empty_junit_cannot_be_reported_as_a_successful_joint_suite(tmp_path):
     empty.write_text('<testsuites><testsuite tests="0" failures="0" errors="0" skipped="0"/></testsuites>')
     with pytest.raises(ValueError, match="Empty JUnit"):
         gate._junit_counts(empty)
+
+
+def test_release_dependency_cannot_select_an_unreviewed_backend():
+    gate.verify_locked_dependency(["numpy", "drdid==1.1.7"], "1.1.7")
+    gate.verify_locked_dependency(["DRDID (==1.1.7)"], "1.1.7")
+    for requirements in ([], ["drdid>=1.1.7"], ["drdid==1.1.8"],
+                         ['drdid==1.1.7; python_version < "3.12"'],
+                         ["drdid[extra]==1.1.7"], ["drdid==1.1.7", "drdid>=1.1.6"]):
+        with pytest.raises(ValueError, match="exactly the reviewed"):
+            gate.verify_locked_dependency(requirements, "1.1.7")

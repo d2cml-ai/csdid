@@ -14,10 +14,12 @@ only one repository cannot certify all consumers.
 
 [DRDIDpy PR #21](https://github.com/d2cml-ai/DRDIDpy/pull/21) corrects the six
 existing standalone kernels and adds numerical R and downstream CSDID CI. This
-CSDID correction works with the currently published `drdid==1.1.6` and with the
-proposed upstream implementation. A published upstream release is still needed
-before raising CSDID's minimum dependency or consolidating its local kernels;
-that consolidation must retain cached-fit behavior and the group-time tests.
+CSDID runtime correction was first verified with published `drdid==1.1.6` and
+with the proposed upstream implementation. The coordinated release candidate is
+now `csdid==0.4.4`, requiring `drdid==1.1.7`. Its mandatory Python jobs validate
+both reviewed source revisions as installed wheels. Publication requires that
+the reviewed backend has been released first. The local cached DR/IPW kernels
+remain in place and are compared directly against the standalone kernels.
 
 Compare the same sample, outcome, design, weights, estimator and inference
 settings. R DRDID's high-level default is improved/IPT; R did and CSDID's built-in
@@ -59,8 +61,9 @@ empirical derivatives.
 
 ## Checks and limits
 
-The full Python suite passes 2,497 tests, including 187 new sampling-weight tests
-and the two slow tests. The same new tests fail 140 times on the baseline, with
+The initial sampling-weight revision `afa674b` passed 2,497 tests, including 187
+new sampling-weight tests and the two slow tests. The same new tests fail 140
+times on the baseline, with
 47 passing. The tests cover all public methods, panels/RC, both modes and all
 four aggregations, complete IF and SE, scales from `1e-200` to `1e307`, float32,
 duplicate cohort keys, zero mass, and local support in the presence of an
@@ -77,11 +80,17 @@ unit checks pass with unchanged tolerances. A separate 96-check proof covers
 sparse float32 unit and smallest-positive weights against their exact R double
 representations, bringing the total to 648. Row identities are checked explicitly.
 An independent before/after audit finds 240 healthy workflows and 960 aggregates
-bit-identical, including all numeric fields, warnings and RNG state. Replay
-scripts and compact records are in [audit20261027](audit20261027/).
+bit-identical, including all numeric fields, warnings and RNG state. Repeating
+that audit after the outcome-dtype corrections preserves all 1,920 numeric
+hashes. Replay scripts and compact records are in
+[audit20261027](audit20261027/). Current paired-wheel validation and the retained
+outcome-scale precision limitation are described in
+[PACKAGE_COMPATIBILITY_20261027.md](PACKAGE_COMPATIBILITY_20261027.md).
 
-Reviewed ordinary R fixtures, source pins, tolerances, workflow triggers and
-required checks remain unchanged. The newly discovered R slow-path discrepancy
+Reviewed ordinary R fixtures, source pins, numerical tolerances, workflow
+triggers and required check names remain unchanged. Any tracked R-tree change,
+including a source-only change, now requires review even if the fixed numerical
+grid passes. The newly discovered R slow-path discrepancy
 is reported explicitly; it is not concealed by replacing those fixtures. After
 the R companion merges, the existing upstream drift gate requires review of its
 new tests and source pin before accepting that new default-branch baseline.

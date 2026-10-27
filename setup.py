@@ -41,7 +41,7 @@ setup(
         'twine',
         'joblib',
         'statsmodels',
-        'drdid>=1.1.7'
+        'drdid==1.1.7'
   ],
   packages=find_packages(),
   package_data={
