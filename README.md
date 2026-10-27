@@ -64,10 +64,12 @@ or via github:
 
 ### Dependencies
 
-The `drdid` dependency is installed automatically with `csdid`. To use
-its development version, install it from GitHub:
-
-    pip install git+https://github.com/d2cml-ai/DRDID
+The `drdid` dependency is installed automatically with `csdid`. CSDID
+0.4.4 requires the reviewed DRDID 1.1.7 release. The Python backend is
+maintained in [DRDIDpy](https://github.com/d2cml-ai/DRDIDpy);
+development checkouts use the exact peer revision recorded in
+[`python_drdid.json`](csdid/test_csdid/joint_sync/python_drdid.json).
+Update both packages together using their matching reviewed versions.
 
 ## Basic Example
 

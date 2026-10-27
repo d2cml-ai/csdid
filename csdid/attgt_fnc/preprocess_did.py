@@ -249,6 +249,7 @@ import pandas as pd, numpy as np
 import patsy
 from pandas.api.types import is_numeric_dtype, is_bool_dtype
 from csdid.utils.bmisc import makeBalancedPanel
+from csdid.utils.weights import _weight_mean
 import warnings
 
 fml = patsy.dmatrices
@@ -701,7 +702,8 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
     warnings.warn(f"dropped {ndiff} rows from original data due to missing or non-finite data")
   # The finite-data filter may remove every observation carrying positive weight.
   # Validate the retained weights before balancing, as both R preprocessors do.
-  if weights_name is not None and ((data['w'] < 0).any() or data['w'].mean() <= 0):
+  if weights_name is not None and ((data['w'] < 0).any() or
+      _weight_mean(data['w'].to_numpy(dtype=float)) <= 0):
     raise ValueError(
       f"The weights variable '{weights_name}' must be non-negative with a positive mean."
     )

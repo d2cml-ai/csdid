@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: "Tests (Python ${{ matrix.python-version }})"
@@ -17,12 +20,23 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
         python-version: ["3.8", "3.12"]
+    defaults:
+      run:
+        working-directory: csdid
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          path: csdid
+          fetch-depth: 0
+          persist-credentials: false
       - name: Setup python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -32,6 +46,32 @@ jobs:
           python scripts/check_readme.py
           python -m unittest discover -s scripts/tests -p 'test_*.py'
 
+      - name: Read reviewed Python DRDID source
+        id: peer
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import os
+          from pathlib import Path
+          path = Path('csdid/test_csdid/joint_sync/run.py')
+          spec = importlib.util.spec_from_file_location('joint_gate', path)
+          gate = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(gate)
+          lock = gate.load_lock(path.with_name('python_drdid.json'))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('repository=' + lock['repository'] + '\n')
+              output.write('commit=' + lock['commit'] + '\n')
+          PY
+
+      - name: Checkout reviewed Python DRDID
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: ${{ steps.peer.outputs.repository }}
+          ref: ${{ steps.peer.outputs.commit }}
+          path: python-drdid
+          fetch-depth: 0
+          persist-credentials: false
+
       - name: Install legacy dependency set
         if: matrix.python-version == '3.8'
         run: pip install -r requirements.txt
@@ -40,10 +80,10 @@ jobs:
       # Exercise current compatible dependencies in the modern lane instead.
       - name: Install current dependency set
         if: matrix.python-version == '3.12'
-        run: pip install pytest .
+        run: python -m pip install pytest
 
-      - name: Install DRDID reference implementation
-        run: pip install git+https://github.com/d2cml-ai/DRDID
+      - name: Install reviewed DRDID candidate
+        run: python -m pip install "$GITHUB_WORKSPACE/python-drdid"
 
       - name: Install package
         run: pip install .
@@ -53,3 +93,22 @@ jobs:
       # Missing fixtures, changed support/masks, or numerical mismatches fail.
       - name: Run tests
         run: pytest csdid/test_csdid/ -m "not slow"
+
+      - name: Validate both packages as jointly installed wheels
+        run: |
+          python csdid/test_csdid/joint_sync/run.py \
+            --csdid "$PWD" --drdid "$GITHUB_WORKSPACE/python-drdid" \
+            --output "$RUNNER_TEMP/joint-parity" --skip-slow
+
+      - name: Upload joint package evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: joint-parity-python-${{ matrix.python-version }}
+          path: |
+            ${{ runner.temp }}/joint-parity/receipt.json
+            ${{ runner.temp }}/joint-parity/joint-junit.xml
+            ${{ runner.temp }}/joint-parity/*-module-origins.json
+            ${{ runner.temp }}/joint-parity/logs/
+            ${{ runner.temp }}/joint-parity/wheels/
+          retention-days: 14

@@ -9,7 +9,7 @@ matplotlib==3.11.2
 mizani==0.14.6
 statsmodels==0.15.0
 joblib==1.6.0
-drdid==1.1.6
+drdid==1.1.7
 nbclient==0.11.0
 nbformat==5.11.1
 PyYAML==6.0.3

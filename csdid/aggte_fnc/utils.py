@@ -1,5 +1,6 @@
 from csdid.utils.bmisc import TorF
 from csdid.utils.mboot import mboot
+from csdid.utils.weights import _weight_mean
 
 import numpy as np
 import scipy.stats as stats
@@ -36,15 +37,111 @@ def wif(keepers, pg, weights_ind, G, group):
                          (unit_groups[:, None] == groups[selected]) - selected_pg)
             row_sum = np.sum(numerator, axis=1)
             # Keep builtin sum: the original reduction is sequential.
-            multiplier = selected_pg / sum(selected_pg) ** 2
+            squared_denominator = sum(selected_pg) ** 2
+            if (not np.isfinite(squared_denominator) or
+                    squared_denominator < np.finfo(float).tiny):
+                raise FloatingPointError
+            multiplier = selected_pg / squared_denominator
             numerator /= denominator
             numerator -= np.outer(row_sum, multiplier)
     except FloatingPointError:
+        stable = _wif_scaled(selected, selected_pg, weights, unit_groups, groups)
+        if stable is not None:
+            return stable
         return _wif_legacy(keepers, pg, weights_ind, G, group)
     return numerator
 
 
+def _valid_cohort_labels(values):
+    if values.dtype.kind in "iuf":
+        return np.all(np.isfinite(values))
+    if values.dtype.kind == "O":
+        # orig2t maps never-treated units to None. Those units legitimately
+        # match none of the selected treated cohorts.
+        return all(value is None or
+                   (isinstance(value, (int, float, np.integer, np.floating))
+                    and np.isfinite(value)) for value in values)
+    return False
+
+
+def _wif_scaled(selected, selected_pg, weights, unit_groups, groups):
+    """Equivalent selected-cohort algebra without squaring its total mass."""
+    # Only use the repair for actual cohort means. Unusual direct calls retain
+    # the historical casting, errors and warnings of the legacy helper.
+    if (not _valid_cohort_labels(unit_groups) or
+            not np.all(np.isfinite(groups[selected])) or
+            np.any(weights < 0) or np.any(selected_pg < 0)):
+        return None
+    precision = max([1e-12] + [8 * np.finfo(values.dtype).eps
+                               for values in (selected_pg, weights)
+                               if values.dtype.kind == "f"])
+    # Promotion belongs only to the repair. Ordinary float32/pandas calls keep
+    # their historical casting and reductions in the legacy implementation.
+    original_pg = selected_pg
+    selected_pg = np.asarray(selected_pg, dtype=float)
+    weights = np.asarray(weights, dtype=float)
+    matches = unit_groups[:, None] == groups[selected]
+    empirical_pg = np.array([_weight_mean(weights * matches[:, i])
+                             for i in range(len(selected))])
+    if (original_pg.dtype.kind == "f" and original_pg.dtype.itemsize < 8
+            and np.any((empirical_pg > 0)
+                       & (empirical_pg < np.finfo(original_pg.dtype).tiny))):
+        # A caller's native float32 cohort mean may already have rounded to
+        # zero. Repair only masses consistent with rounding the actual means
+        # back to that dtype, leaving malformed direct-call diagnostics intact.
+        with np.errstate(under="ignore"):
+            rounded_pg = empirical_pg.astype(original_pg.dtype).astype(float)
+        if np.allclose(selected_pg, rounded_pg, rtol=precision, atol=0):
+            selected_pg = empirical_pg
+    if not np.max(selected_pg) > 0:
+        return None
+    if not np.allclose(selected_pg, empirical_pg, rtol=precision, atol=0):
+        return None
+    with np.errstate(all="ignore"):
+        scale = np.max(selected_pg)
+        scaled_pg = selected_pg / scale
+        # Mask before dividing: weights in excluded cohorts can have a very
+        # different scale and have no contribution to this conditional average.
+        numerator = (weights[:, None] * matches) / scale - scaled_pg
+        numerator /= np.sum(scaled_pg)
+        result = numerator - np.outer(np.sum(numerator, axis=1),
+                                      scaled_pg / sum(scaled_pg))
+    return result if np.all(np.isfinite(result)) else None
+
+
 def _wif_legacy(keepers, pg, weights_ind, G, group):
+    # Valid float32 and pandas inputs also need the numerical repair, but retain
+    # the original implementation whenever its denominator arithmetic is safe.
+    pg_array, weights = np.asarray(pg), np.asarray(weights_ind)
+    unit_groups, groups = np.asarray(G), np.asarray(group)
+    selected = np.asarray(keepers)
+    if (isinstance(weights_ind, (np.ndarray, pd.Series)) and
+            pg_array.ndim == weights.ndim == unit_groups.ndim == groups.ndim == 1 and
+            selected.ndim == 1 and selected.size and selected.dtype.kind in "iu" and
+            pg_array.dtype.kind == "f" and weights.dtype.kind in "fiu" and
+            _valid_cohort_labels(unit_groups) and groups.dtype.kind in "iuf" and
+            weights.shape == unit_groups.shape and
+            np.all((selected >= 0) & (selected < len(pg_array))) and
+            np.all(selected < len(groups))):
+        selected_pg = pg_array[selected]
+        with np.errstate(all="ignore"):
+            total = sum(selected_pg)
+            squared = total ** 2
+            multiplier = selected_pg / squared
+        tiny = np.finfo(np.asarray(squared).dtype).tiny
+        low_precision_mass = (
+            weights.dtype.kind == "f" and weights.dtype.itemsize < 8
+            and np.any((selected_pg > 0)
+                       & (selected_pg < np.finfo(weights.dtype).tiny)))
+        if (not np.isfinite(squared) or squared < tiny or low_precision_mass or
+                not np.all(np.isfinite(multiplier))):
+            stable = _wif_scaled(selected, selected_pg, weights, unit_groups, groups)
+            if stable is not None:
+                return stable
+    return _wif_legacy_unscaled(keepers, pg, weights_ind, G, group)
+
+
+def _wif_legacy_unscaled(keepers, pg, weights_ind, G, group):
     # note: weights are all of the form P(G=g|cond)/sum_cond(P(G=g|cond))
     # this is equal to P(G=g)/sum_cond(P(G=g)) which simplifies things here
     pg = np.array(pg)

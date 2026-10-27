@@ -1,18 +1,18 @@
 {
-  "audit_date": "2026-10-26",
-  "base_commit": "b2e3b0baae0f4226e90e016b73cb0baf9456c3e2",
+  "audit_date": "2026-10-27",
+  "base_commit": "86bf96225eb23f6aeffa0a6bb928b378485de383",
   "quarto": "1.8.25",
-  "python": "3.12.12 (main, Oct  9 2025, 11:07:00) [Clang 17.0.0 (clang-1700.4.4.1)]",
+  "python": "3.12.12",
   "fixed_seed": 12345,
-  "direct_dependency_resolution": "passed",
+  "direct_dependency_resolution": "passed using reviewed peer source plus all pinned rendering requirements in one install",
   "consecutive_renders_bit_identical": true,
   "rendered_sha256": {
-    "README.md": "13d979e420c4d24c622a0c2ea8b76e015aee68190c850acf43df55fde9480ea7",
+    "README.md": "aecd536061c0a6765aed0827523e5621cf7917e5bc7d626e447a943873bb531a",
     "README_files/figure-commonmark/fig-attgt-output-1.png": "af5e8b557dea1a0281dd27de6ee8d30a784dc8f63bac18709e34843f9a2b4a17",
     "README_files/figure-commonmark/fig-calendar-output-1.png": "c3cc20bb076900c677fcebd841e01e272cd926775b0396269158e873cff3463f",
     "README_files/figure-commonmark/fig-dynamic-output-1.png": "b6d1c34b9b043d0d3e0f0a6336283f1ce9c13f0993e0499fd8fc1220cbcb7d63"
   },
-  "guard_tests_passed": 10,
+  "guard_tests_passed": 20,
   "observed_bot_regression_commit": "53e8fc985afaf3057caba0aa83ca0a9a336dc5b1",
   "observed_bot_content_rejections": [
     "bot README: the Python package must be identified as csdid",
@@ -32,10 +32,40 @@
   ],
   "package_metadata_checks": {
     "name": "csdid",
+    "version": "0.4.4",
+    "requires_drdid": "==1.1.7",
     "wheel_long_description_matches_canonical_readme": true,
     "sdist_has_only_canonical_readme": true
   },
   "actionlint": "passed",
   "estimator_runtime_changed": false,
-  "scope": "Authored source and generated documentation are preserved; numerical outputs intentionally regenerate from the checkout. Font/OS differences between platforms are outside the same-environment byte-replay claim."
+  "scope": "Authored source and generated documentation are preserved; numerical outputs intentionally regenerate from the checkout. Font/OS differences between platforms are outside the same-environment byte-replay claim.",
+  "historical_validation": "readme-generation-validation-20261026.json",
+  "versions": {
+    "csdid": "0.4.4",
+    "drdid": "1.1.7",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "scipy": "1.18.1",
+    "statsmodels": "0.15.0",
+    "matplotlib": "3.11.2",
+    "plotnine": "0.15.8"
+  },
+  "peer_lock": {
+    "schema_version": 1,
+    "repository": "d2cml-ai/DRDIDpy",
+    "commit": "53a6b764724c9e3c7221909502de95761eda9c6d",
+    "version": "1.1.7"
+  },
+  "pip_check": "passed",
+  "readme_guard_tests": 10,
+  "release_guard_tests": 10,
+  "joint_snapshot_documentation_fixtures": [
+    "README.qmd",
+    "README.md",
+    "README_files"
+  ],
+  "estimator_runtime_changed_vs_current_main": false,
+  "figure_outputs_identical_to_previous_validation": true,
+  "render_requirements_sha256": "95c970e2b0e418bc70cefbc8fef317f94a01ace5a1743dadb5b1225f6edaa647"
 }

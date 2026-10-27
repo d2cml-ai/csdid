@@ -57,6 +57,7 @@ def histories(tmp_path):
             _write(repo / path, text)
         _write(repo / "tests/testthat/helper-fixture.R", "make_fixture <- function() 1\n")
         _write(repo / "tests/testthat/_snaps/output.md", "baseline snapshot\n")
+        _write(repo / "DESCRIPTION", f"Package: {package}\nVersion: 1.0.0\n")
         _write(repo / "R/estimator.R", "estimate <- function() 1\n")
         commit = _commit(repo)
         sources[package] = {"commit": commit, "files_sha256": {
@@ -119,24 +120,94 @@ def test_unchanged_histories_and_cli_are_deterministic(histories):
     assert audit_module.DEFAULT_BASELINE == AUDIT_PATH.resolve().parents[1] / "r_ref/current/manifest.json"
 
 
-def test_source_changes_are_separate_and_do_not_trigger_test_drift(histories):
-    repo = histories["repos"]["DRDID"]
+@pytest.mark.parametrize("package", ["did", "DRDID"])
+def test_source_only_changes_require_review_without_claiming_test_drift(histories, package):
+    repo = histories["repos"][package]
     updated = "estimate <- function() 2\n"
     _write(repo / "R/estimator.R", updated)
     _write(repo / "NEWS.md", "A code change.\n")
     current = _commit(repo)
     report = _audit(histories)
-    assert report["status"] == "source_only_changes"
-    assert report["exit_code"] == 0
-    result = report["packages"]["DRDID"]
+    assert report["status"] == "manual_review_required"
+    assert report["exit_code"] == 3
+    result = report["packages"][package]
+    assert result["status"] == "manual_review_required"
     assert result["current_commit"] == current
     assert result["test_changes"] == []
     assert [(item["path"], item["status"]) for item in result["source_changes"]] == [
         ("NEWS.md", "added"), ("R/estimator.R", "modified"),
     ]
     change = result["source_changes"][1]
-    assert change["old"]["sha256"] == histories["sources"]["DRDID"]["files_sha256"]["R/estimator.R"]
+    assert change["old"]["sha256"] == histories["sources"][package]["files_sha256"]["R/estimator.R"]
     assert change["new"]["sha256"] == _sha(updated)
+    assert audit_module.main(_args(histories)) == 3
+    summary = (histories["root"] / "summary.md").read_text()
+    assert "manual source review required" in summary
+    assert "0 test-tree changes; 2 other tracked-file changes" in summary
+
+
+@pytest.mark.parametrize("path", ["src/estimator.cpp", "DESCRIPTION", "README.md",
+                                  ".github/workflows/check.yml"])
+def test_every_tracked_tree_category_requires_review(histories, path):
+    repo = histories["repos"]["did"]
+    _write(repo / path, "changed tracked source or metadata\n")
+    _commit(repo)
+    report = _audit(histories)
+    assert report["exit_code"] == 3
+    result = report["packages"]["did"]
+    assert result["test_changes"] == []
+    assert [change["path"] for change in result["source_changes"]] == [path]
+
+
+@pytest.mark.parametrize("comparison_code,expected_status,expected_exit", [
+    (0, "coverage_review_required", 3),
+    (1, "numerical_mismatch", 1),
+])
+def test_real_source_only_git_drift_keeps_runner_numerical_stages(
+        histories, monkeypatch, comparison_code, expected_status, expected_exit):
+    # The Git audit is real; R generation and estimator execution are stubbed
+    # here. The separate live source-only probe checks actual R/Python numbers.
+    spec = importlib.util.spec_from_file_location(
+        "source_only_runner", AUDIT_PATH.with_name("run.py"))
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    repo = histories["repos"]["did"]
+    _write(repo / "R/estimator.R", "estimate <- function() 2\n")
+    _commit(repo)
+    pinned = histories["root"] / "reviewed"
+    pinned.mkdir()
+    for name in runner.INPUTS + ("generate.R", "manifest.json"):
+        (pinned / name).write_text("reviewed " + name)
+    monkeypatch.setattr(runner, "PINNED", pinned)
+    before = runner._hashes(pinned)
+    output = histories["root"] / "runner-output"
+    numerical_stages = []
+
+    def execute(command, log, environment, **kwargs):
+        if log.stem == "audit":
+            args = _args(histories)
+            args[args.index("--output") + 1] = str(output / "audit.json")
+            args[args.index("--summary") + 1] = str(output / "audit.md")
+            with log.open("w") as stream:
+                return subprocess.run([sys.executable, str(AUDIT_PATH), *args],
+                                      env=environment, stdout=stream,
+                                      stderr=subprocess.STDOUT, check=False).returncode
+        numerical_stages.append(log.stem)
+        log.write_text("stubbed numerical subprocess\n")
+        return comparison_code if log.stem == "pytest" else 0
+
+    monkeypatch.setattr(runner, "_command", execute)
+    assert runner.run(repo, histories["repos"]["DRDID"], output) == expected_exit
+    report = json.loads((output / "report.json").read_text())
+    audit = json.loads((output / "audit.json").read_text())
+    assert audit["exit_code"] == 3
+    assert audit["packages"]["did"]["test_changes"] == []
+    assert [change["path"] for change in audit["packages"]["did"]["source_changes"]] == ["R/estimator.R"]
+    assert numerical_stages == ["r-generation", "pytest"]
+    assert report["stages"] == {"test_coverage_audit": 3, "r_generation": 0,
+                                "numerical_comparison": comparison_code}
+    assert report["status"] == expected_status
+    assert runner._hashes(pinned) == before
 
 
 @pytest.mark.parametrize("package", ["did", "DRDID"])

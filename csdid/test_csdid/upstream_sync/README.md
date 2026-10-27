@@ -3,8 +3,9 @@
 The reviewed numerical fixtures remain pinned. A separate GitHub Actions
 [workflow](../../../.github/workflows/r-upstream-parity.yml) checks the latest
 default branches of `bcallaway11/did` and `pedrohcgs/DRDID`, generates temporary
-R references, and compares them with this Python checkout. It also inventories
-upstream test changes. It never commits reference updates or ports R assertions
+R references, and compares them with this Python checkout. Every unreviewed
+tracked R Git-tree change requires review, even when the fixed numerical grid
+still passes. It never commits reference updates or ports R assertions
 automatically.
 
 ## When checks run
@@ -29,8 +30,10 @@ an artifact retained for 14 days. Setup failures also retain available logs.
    commits. Install their dependencies and selected package sources.
 3. Compare each R Git tree with the reviewed baseline. Validate baseline source
    hashes and the complete did/DRDID test-file crosswalk before reporting drift.
-   Every changed file under `tests/` requires coverage review, including helper
-   code, fixtures and snapshots. Other tracked changes are reported separately.
+   Every tracked-tree difference requires review: runtime R/native code,
+   tests, helpers, fixtures, snapshots, documentation and build metadata.
+   Test-tree and other source changes are reported separately, so a source-only
+   change does not imply that R tests changed or that new behavior is covered.
 4. Write a strict `source-lock.json` containing the selected commits and package
    versions. Copy the five frozen input/multiplier CSVs to a new directory.
 5. Generate all 25 R configurations in both R modes, then run all 50 Python
@@ -45,15 +48,18 @@ R is needed for the upstream workflow, not for ordinary pinned tests.
 
 | Exit | Meaning | Required response |
 |---:|---|---|
-| 0 | Numerical comparisons passed; no upstream test-tree changes | Review any reported source changes before advancing pins |
+| 0 | Numerical comparisons passed; no upstream tracked-tree changes | Retain the recorded source identities and comparison evidence |
 | 1 | Python and the generated R output disagree | Diagnose the discrepancy; preserve the evidence |
 | 2 | Evidence or execution failed, including source, schema, generation or environment errors | Fix the failure and rerun; this is not a parity pass |
-| 3 | Numbers passed, but upstream tests changed | Review and port applicable assertions before updating coverage records |
+| 3 | Numbers passed, but the upstream tracked tree changed | Review source and test changes, port applicable assertions, and update the reviewed baseline explicitly |
 
-Numerical comparisons still run when the test-change audit returns 3. If both
-test changes and numerical failures occur, exit 1 takes precedence and the
-coverage audit remains in the report. A passing fixed grid does not demonstrate
-coverage of new R features, tests or estimators outside csdid's supported routes.
+Numerical comparisons still run when the change audit returns 3, including for
+source-only changes. If upstream drift and numerical failures both occur, exit 1
+takes precedence and the audit remains in the report. Invalid evidence or failed
+execution remains exit 2. The runner retains its existing
+`coverage_review_required` status name for exit 3. A passing fixed grid does not
+demonstrate coverage of new R behavior, tests or estimators outside csdid's
+supported routes.
 
 ## Local replay
 
@@ -69,12 +75,12 @@ python csdid/test_csdid/upstream_sync/run.py \
 ```
 
 The output must be new or empty and separate from source checkouts and reviewed
-fixtures. It contains the source lock, test-change audit, generated references,
+fixtures. It contains the source lock, upstream change audit, generated references,
 R/Python logs, JUnit output, `report.json` and `summary.md`. The workflow stores
 these under `comparison/`, alongside checkout identities and Python self-test
 logs. One numerical thread is used throughout.
 
-For a coverage-only review without R or Python estimator dependencies:
+For an offline upstream review without R or Python estimator dependencies:
 
 ```sh
 python csdid/test_csdid/upstream_sync/audit.py \
@@ -137,3 +143,20 @@ the runner correctly exits **3 / coverage_review_required**, identifies the
 added test and leaves the reviewed fixtures unchanged. This verifies drift
 detection from the expanded 44-file did baseline rather than relying only on
 the earlier 34-file audit or mocked failure tests.
+
+On 2026-10-27 the review gate was extended to the entire tracked upstream tree.
+Runtime source changes now require review even when no R tests change and the
+fixed numerical grid still passes. Source and test changes remain separate
+evidence categories. The combined pinned-comparison, audit and runner suite
+passes **169 tests**, including **44 audit/runner tests**. New temporary-Git
+cases exercise runtime R code, native source, documentation and build metadata,
+plus numerical-failure precedence when source-only review is required.
+
+A separate live probe starts from did `48863b6` and commits only an executable,
+equivalent positive-support comparison change in `R/utility_functions.R`
+(`normalized > 0` becomes `0 < normalized`). No R tests change. Actual R
+generation succeeds and all **125 numerical/provenance checks pass**, while
+the audit and runner both return **3** and identify exactly one source change
+and zero test changes. The reviewed fixtures remain unchanged. This live R
+probe is distinct from the runner unit tests, which use real Git audits but
+stub the R/numerical subprocesses to isolate control flow.

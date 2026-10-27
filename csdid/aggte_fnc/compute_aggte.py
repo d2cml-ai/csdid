@@ -8,6 +8,7 @@ from csdid.aggte_fnc.utils import (
     get_agg_inf_func, get_se, wif, AGGTEobj, _make_cached_get_se,
 )
 from csdid.utils.mboot import mboot
+from csdid.utils.weights import _weight_mean, _cohort_proportions, _cohort_average
 import warnings
 import numbers
 
@@ -223,7 +224,17 @@ def compute_aggte(MP,
         dta = data[data[tname] == tlist[0]]
     else:
         dta_cols = [idname, gname, "w1"]
-        dta = data.loc[:, dta_cols].groupby(idname, as_index=False).mean()
+        cohort_data = data.loc[:, dta_cols]
+        if cohort_data['w1'].dtype.kind == "f" and cohort_data['w1'].dtype.itemsize < 8:
+            # R reduces these numeric weights in double precision. Promote a
+            # temporary column before grouping, preserving the user's data.
+            cohort_data = cohort_data.assign(w1=cohort_data['w1'].to_numpy(dtype=np.float64))
+        dta = cohort_data.groupby(idname, as_index=False).mean()
+        if not np.all(np.isfinite(dta['w1'].to_numpy())):
+            # Pandas' grouped sum can overflow although each unit's mean is
+            # finite. Repair only those weight reductions, leaving data raw.
+            stable_means = cohort_data.groupby(idname)['w1'].agg(_weight_mean)
+            dta['w1'] = dta[idname].map(stable_means)
         dta = dta.drop(columns=[idname], errors="ignore")
 
 # =============================================================================
@@ -265,11 +276,11 @@ def compute_aggte(MP,
         
     # Set the weights
     # return data.columns
-    weights_ind = dta['w1'].to_numpy()
+    weights_ind = dta['w1'].to_numpy(dtype=np.float64)
     
     # We can work in overall probabilities because conditioning will cancel out
     # since it shows up in numerator and denominator
-    pg = np.array([np.mean(weights_ind * (dta[gname].to_numpy() == g)) for g in originalglist])
+    pg = np.array([_weight_mean(weights_ind * (dta[gname].to_numpy() == g)) for g in originalglist])
     
     # Length of this is equal to the number of groups
     pgg = pg
@@ -311,7 +322,7 @@ def compute_aggte(MP,
         # Simple ATT
         # Averages all post-treatment ATT(g,t) with weights given by group size
         pg = np.array(pg)
-        simple_att = np.sum(att[keepers] * pg[keepers]) / np.sum(pg[keepers])
+        simple_att = _cohort_average(att[keepers], pg[keepers])
         if np.isnan(simple_att):
             simple_att = None
     
@@ -322,7 +333,7 @@ def compute_aggte(MP,
         simple_if = get_agg_inf_func(att = att , 
                                      inffunc = inffunc , 
                                      whichones = keepers ,
-                                     weights_agg = np.array(pg)[keepers]/np.sum(np.array(pg)[keepers]) , 
+                                     weights_agg = _cohort_proportions(np.array(pg)[keepers]),
                                      wif = simple_wif )[:, None]
     
         # Get standard errors from the overall influence function
@@ -360,7 +371,7 @@ def compute_aggte(MP,
         selective_se_inner = [None] * len(glist)
         for i, g in enumerate(glist):
             whichg = np.flatnonzero((group == g) & in_window)
-            weightsg =  pg[whichg] / np.sum(pg[whichg])
+            weightsg =  _cohort_proportions(pg[whichg])
             inf_func_g = get_agg_inf_func(att = att , 
                                             inffunc = inffunc , 
                                             whichones = whichg ,
@@ -401,7 +412,7 @@ def compute_aggte(MP,
   
         # get overall att under selective treatment timing
         # (here use pgg instead of pg because we can just look at each group)            
-        selective_att = np.sum(selective_att_g * pgg) / np.sum(pgg)
+        selective_att = _cohort_average(selective_att_g, pgg)
         
         # account for having to estimate pgg in the influence function.
         # `keepers` indexes the DISTINCT groups (pgg/selective_att_g are per-group),
@@ -419,7 +430,7 @@ def compute_aggte(MP,
         selective_inf_func = get_agg_inf_func(att = selective_att_g, 
                                               inffunc = selective_inf_func_g,
                                               whichones = np.arange(1, len(glist)+1)-1, 
-                                              weights_agg = pgg/np.sum(pgg),
+                                              weights_agg = _cohort_proportions(pgg),
                                               wif = selective_wif)[:, None]    
         
         # get overall standard error        
@@ -508,13 +519,13 @@ def compute_aggte(MP,
         for e in eseq:
             whiche = np.where((originalt - originalgroup == e) & include_balanced_gt)
             atte = att[whiche]
-            pge = pg[whiche] / np.sum(pg[whiche])
+            pge = _cohort_proportions(pg[whiche])
             dynamic_att_e.append(np.sum(atte * pge))
         
         dynamic_se_inner = []
         for e in eseq:
             whiche = np.where((originalt - originalgroup == e) & (include_balanced_gt) )[0]
-            pge = pg[whiche] / sum(pg[whiche])
+            pge = _cohort_proportions(pg[whiche], sequential=True)
             wif_e = wif(whiche, 
                         pg, 
                         weights_ind, 
@@ -620,7 +631,7 @@ def compute_aggte(MP,
         for t1 in calendar_tlist:
             whicht = np.where((t == t1) & (group <= t))[0]
             attt = att[whicht]
-            pgt = pg[whicht] / np.sum(pg[whicht])
+            pgt = _cohort_proportions(pg[whicht])
             calendar_att_t.append(np.sum(pgt * attt))
             
         # get standard errors and influence functions
@@ -628,7 +639,7 @@ def compute_aggte(MP,
         calendar_se_inner = []
         for t1 in calendar_tlist:
             which_t = np.where((t == t1) & (group <= t))[0]
-            pgt = pg[which_t] / np.sum(pg[which_t])
+            pgt = _cohort_proportions(pg[which_t])
             wif_t = wif(keepers=which_t, 
                         pg=pg, 
                         weights_ind=weights_ind, 

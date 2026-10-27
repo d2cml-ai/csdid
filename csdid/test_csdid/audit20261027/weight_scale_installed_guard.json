@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "joint_receipt_sha256": "623b063cf8f54467f3728053c9851b3e49e8a8296c544d5dd86d00fe94d70e87",
+  "wrapper_sha256": "0de72feeca96b7fd24fdefed8fa541d2d0404b2d24705e02465d836a7e65e601",
+  "executable": "/private/tmp/csdid-joint-locked-release-20261027/venv/bin/python",
+  "isolated_mode": true,
+  "audit": "compare_weight_scale",
+  "origins_before": {
+    "csdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/__init__.py",
+    "drdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/__init__.py"
+  },
+  "packages": {
+    "csdid": "0.4.4",
+    "drdid": "1.1.7"
+  },
+  "audit_sha256": "37ff255278b95730ff1a4f19d44651dc131b6a46658504d4368663208f095e8b",
+  "audit_arguments": [
+    "--csdid-root",
+    "/tmp/csdid-cross-package-20261027",
+    "--did",
+    "/tmp/did-weight-scale-20261027",
+    "--drdid",
+    "/tmp/csdid-parity-20261026/DRDID",
+    "--input-dir",
+    "/tmp/csdid-huge-weight-probe-20261027",
+    "--output",
+    "/tmp/csdid-installed-weight-proof-20261027"
+  ],
+  "origins_after": {
+    "csdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/__init__.py",
+    "drdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/__init__.py",
+    "csdid.aggte_fnc": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/aggte_fnc/__init__.py",
+    "csdid.utils": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/__init__.py",
+    "csdid.utils.bmisc": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/bmisc.py",
+    "csdid.utils.mboot": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/mboot.py",
+    "csdid.utils.weights": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/weights.py",
+    "csdid.aggte_fnc.utils": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/aggte_fnc/utils.py",
+    "csdid.aggte_fnc.compute_aggte": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/aggte_fnc/compute_aggte.py",
+    "csdid.aggte_fnc.aggte": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/aggte_fnc/aggte.py",
+    "csdid.attgt_fnc": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/__init__.py",
+    "csdid.attgt_fnc.preprocess_did": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/preprocess_did.py",
+    "drdid._validation": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/_validation.py",
+    "drdid._estimators": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/_estimators.py",
+    "drdid.reg_did": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/reg_did.py",
+    "csdid.attgt_fnc.drdid_trim": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/drdid_trim.py",
+    "csdid.attgt_fnc.compute_att_gt_shared": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/compute_att_gt_shared.py",
+    "csdid.attgt_fnc.compute_att_gt": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/compute_att_gt.py",
+    "csdid.attgt_fnc.compute_att_gt2": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/compute_att_gt2.py",
+    "csdid.plots": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/plots/__init__.py",
+    "csdid.plots.gplot": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/plots/gplot.py",
+    "csdid.att_gt": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/att_gt.py"
+  },
+  "numeric_receipt_sha256": "413c2b512dc07e39e3496309635f4acabc87e9c881c11e85817874085fbfb1ba",
+  "returncode": 0
+}
