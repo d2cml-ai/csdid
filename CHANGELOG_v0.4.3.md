@@ -62,6 +62,9 @@ requirement does not introduce a Python dependency.
 
 The [2026-10-26 synchronization audit](csdid/test_csdid/UPSTREAM_SYNC_20261026.md)
 records fresh comparisons, remaining numerical limits, and reproduction commands.
+The complete updated local suite passes 2,242 tests, including 289 new targeted
+regressions, with no failures or skips. Five serial timing rounds measure a
+0.4%–2.9% median cost for the new guards across eight healthy workloads.
 At outcome scale `1e10`, near-zero aggregate influence components fail the
 unchanged absolute tolerance in 36 stress comparisons; R's own modes also
 differ there. These failures are retained, while all public estimate and

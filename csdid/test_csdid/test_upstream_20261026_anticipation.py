@@ -120,4 +120,3 @@ def test_argument_named_columns_preserve_preprocessing_across_routes(mode, route
     np.testing.assert_array_equal(actual.results["se"], reference.results["se"])
     np.testing.assert_array_equal(actual.MP["inffunc"]["inffunc"],
                                   reference.MP["inffunc"]["inffunc"])
-
