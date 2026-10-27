@@ -165,6 +165,11 @@ def compute_aggte(MP,
             "No post-treatment ATT(g,t) cells are available: all cells have t < g."
         )
 
+    # Retain original observed support: an all-missing event time still counts
+    # for balancing, while a time absent from this grid does not.
+    full_group = group.copy()
+    full_t = t.copy()
+
     # Removing missing values
     if na_rm:
         notna = ~np.isnan(att)
@@ -257,7 +262,6 @@ def compute_aggte(MP,
     group = [orig2t(orig) for orig in originalgroup]
     glist = [orig2t(orig) for orig in originalglist]
     tlist = np.asarray(list(set(t)))
-    maxT  = max(t)
         
     # Set the weights
     # return data.columns
@@ -324,14 +328,6 @@ def compute_aggte(MP,
         # Get standard errors from the overall influence function
         simple_se = get_se_for_call(simple_if, dp)
         
-        # AGG-sentinel (O5-F-A / C3-F7): use np.nan, not None, for the
-        # degenerate-SE sentinel so downstream `overall_att + cval*overall_se`
-        # in AGGTEobj degrades to NaN gracefully (matching dynamic/calendar)
-        # instead of crashing with `float * None`. Mirrors R `simple.se <- NA`.
-        if simple_se is not None:
-            if simple_se <= np.sqrt(np.finfo(float).eps) * 10:
-                simple_se = np.nan
-
         AGGTEobj_print = AGGTEobj(overall_att=simple_att, 
                                   overall_se=simple_se, 
                                   typec=typec,
@@ -376,7 +372,6 @@ def compute_aggte(MP,
         # recover standard errors separately by group   
         selective_se_g = np.asarray([item['se'] for item in selective_se_inner]).T
         
-        selective_se_g[selective_se_g <= np.sqrt(np.finfo(float).eps) * 10] = None
         
         selective_inf_func_g = np.column_stack([elem["inf_func"] for elem in selective_se_inner])
   
@@ -429,12 +424,6 @@ def compute_aggte(MP,
         
         # get overall standard error        
         selective_se = get_se_for_call(selective_inf_func, dp)
-        # AGG-sentinel (O5-F-A / C3-F7): np.nan, not None, so AGGTEobj's
-        # `overall_att + cval*overall_se` degrades to NaN instead of crashing
-        # with `float * None`. Mirrors R `selective.se <- NA`.
-        if not np.isnan(selective_se):
-            if selective_se <= np.sqrt(np.finfo(float).eps) * 10:
-                selective_se = np.nan
     
         AGGTEobj_print = AGGTEobj(overall_att = selective_att, 
                             overall_se = selective_se, 
@@ -472,10 +461,35 @@ def compute_aggte(MP,
         include_balanced_gt = np.repeat(True, len(originalgroup))
 
         if balance_e is not None:
-            include_balanced_gt = (t2orig(maxT) - originalgroup >= balance_e)        
+            balance_max_t = np.max(full_t)
+            full_event_time = full_t - full_group
+            eligible_full = balance_max_t - full_group >= balance_e
+            eligible_g = np.unique(full_group[eligible_full])
+            required_e = np.unique(full_event_time[
+                eligible_full & (full_event_time >= 0) & (full_event_time <= balance_e)
+            ])
+            # Count distinct cohort/event pairs once, without scans per cohort.
+            group_index = np.searchsorted(eligible_g, originalgroup)
+            event_index = np.searchsorted(required_e, originalt - originalgroup)
+            present = np.isin(originalgroup, eligible_g) & np.isin(
+                originalt - originalgroup, required_e
+            )
+            complete = np.zeros(len(eligible_g), dtype=bool)
+            if len(required_e):
+                pair_key = group_index[present] + len(eligible_g) * event_index[present]
+                unique_pairs = np.unique(pair_key)
+                counts = np.bincount(unique_pairs % len(eligible_g), minlength=len(eligible_g))
+                complete = counts == len(required_e)
+            if not np.any(complete):
+                raise ValueError(
+                    "No groups have non-missing ATT(g,t) estimates at every observed "
+                    "post-treatment event time through 'balance_e'. Reduce 'balance_e' "
+                    "or inspect the missing group-time estimates."
+                )
+            include_balanced_gt = np.isin(originalgroup, eligible_g[complete])
             eseq = np.unique(originalt[include_balanced_gt] - originalgroup[include_balanced_gt])
             eseq = np.sort(eseq)      
-            eseq = eseq[(eseq <= balance_e) & (eseq >= balance_e - t2orig(maxT) + t2orig(1))]
+            eseq = eseq[(eseq <= balance_e) & (eseq >= balance_e - balance_max_t + t2orig(1))]
         eseq = eseq[(eseq >= min_e) & (eseq <= max_e)]
 
         # AGG-empty-window (O6-F3 / C3-F6): a window (min_e>max_e, out-of-range
@@ -516,7 +530,6 @@ def compute_aggte(MP,
 
         dynamic_se_e = np.array([item['se'] for item in dynamic_se_inner]).T
         
-        dynamic_se_e[dynamic_se_e <= np.sqrt(np.finfo(float).eps) * 10] = np.nan
         
         dynamic_inf_func_e = np.column_stack([item['inf_func'] for item in dynamic_se_inner])
                 
@@ -549,9 +562,6 @@ def compute_aggte(MP,
                                             wif=None)[:, None]
         
         dynamic_se = get_se_for_call(dynamic_inf_func, dp)
-        if not np.isnan(dynamic_se):
-            if dynamic_se <= np.sqrt(np.finfo(float).eps) * 10:
-                dynamic_se = np.nan
 
         AGGTEobj_print = AGGTEobj(overall_att=dynamic_att,
                                 overall_se=dynamic_se,
@@ -636,7 +646,6 @@ def compute_aggte(MP,
     
         # recover standard errors separately by time
         calendar_se_t = np.array([se["se"] for se in calendar_se_inner]).T
-        calendar_se_t[calendar_se_t <= np.sqrt(np.finfo(float).eps) * 10] = np.nan
         
         # recover influence function separately by time
         calendar_inf_func_t = np.column_stack([se["inf_func"] for se in calendar_se_inner])
@@ -680,9 +689,6 @@ def compute_aggte(MP,
         
         # get overall standard error
         calendar_se = get_se_for_call(calendar_inf_func, dp)
-        if not np.isnan(calendar_se):
-            if calendar_se <= np.sqrt(np.finfo(float).eps) * 10:
-                calendar_se = np.nan
         
         AGGTEobj_print = AGGTEobj(overall_att=calendar_att,
                                 overall_se=calendar_se,

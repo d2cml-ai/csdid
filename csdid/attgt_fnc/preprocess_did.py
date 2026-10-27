@@ -737,12 +737,12 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
         "coerced as 'never-treated' units, and data from periods at/after that cohort "
         "is being filtered out (no available comparison groups)."
       )
-      data = data.query(f'{tname} < @cutoff_t')
+      data = data.loc[data[tname] < cutoff_t].copy()
       data.loc[data[gname] == latest_g, gname] = 0
     else:
       # notyettreated: drop late periods; the last cohort stays in the data as the
       # not-yet-treated comparison group.
-      data = data.query(f'{tname} < @cutoff_t')
+      data = data.loc[data[tname] < cutoff_t].copy()
     if len(data) == 0:
       raise ValueError(
         "No periods before the last treated cohort's treatment date (net of "
@@ -853,7 +853,7 @@ def pre_process_did(yname, tname, idname, gname, data: pd.DataFrame,
       if n < n_old:
         warnings.warn(f"Dropped {n_old-n} observations while converting to balanced panel.")
       tn = tlist[0]
-      n = len(data.query(f'{tname} == @tn'))
+      n = int((data[tname] == tn).sum())
 
       # Balancing removes whole units, so both the cohort list and the
       # never-treated fallback must be resolved again on the retained sample.

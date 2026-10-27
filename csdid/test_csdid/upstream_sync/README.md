@@ -97,12 +97,15 @@ or mark new R tests covered merely to obtain a passing run.
 
 ## Validation record
 
-The implementation's scope is an independently reviewable automation PR on top
-of #84. It changes no estimator runtime code or statistical target. Acceptance
+The implementation adds independently reviewable automation to `main` after
+#84 merged. It changes no estimator runtime code or statistical target. Acceptance
 requires real R generation/comparison, preserved pinned numerical fixtures,
 failure tests for numerical/test/schema/source drift, and a successful Linux
 workflow. Unit tests use temporary Git histories and injected subprocess
 failures; the live run uses actual R sources. These are distinct checks.
+
+The initial 2026-10-24 validation below is historical. The current reviewed
+baseline is did `48863b6` (2.5.1.904) and DRDID `eaac3b4` (1.4.0).
 
 The first local live run used did `74b88eb` and DRDID `eaac3b4`, independently
 confirmed as GitHub HEADs on 2026-10-24. It generated 25 configurations and passed
@@ -113,3 +116,24 @@ or numerical reference payload. The full local suite passed **2,021 tests**, wit
 25 warnings and no failures or skips. This adds 68 tests: 31 source-lock checks,
 22 runner failure cases and 15 temporary-Git audit cases. The Linux workflow
 results are recorded in the PR.
+
+After #84 merged on 2026-10-26, #85 was synchronized with `main`. The generator
+and test defaults now use the updated reviewed baseline while retaining the
+explicit source-lock override and the corrected retained-data RC ID mapping.
+The merge changes no estimator runtime files relative to `main`.
+
+The complete integrated suite passes **2,310 tests**, with 25 warnings and no
+failures, errors or skips. A normal pinned R replay preserves all five frozen
+input/draw CSVs, case definitions, numerical references and R mode checks
+byte-for-byte; the manifest changes only its generation timestamp and exporter
+hash. A separate live source-lock replay against freshly verified official R
+HEADs passes all **125 comparison/provenance checks**, audits all **44 did and
+29 DRDID test files**, and reports zero source/test drift. It leaves the reviewed
+fixture tree unchanged. Actionlint and an independent integration review pass.
+
+A new end-to-end probe adds one R test in an isolated clean did commit while
+leaving runtime R sources unchanged. All 125 numerical checks still pass, but
+the runner correctly exits **3 / coverage_review_required**, identifies the
+added test and leaves the reviewed fixtures unchanged. This verifies drift
+detection from the expanded 44-file did baseline rather than relying only on
+the earlier 34-file audit or mocked failure tests.

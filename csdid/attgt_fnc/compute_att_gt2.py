@@ -17,7 +17,7 @@ from drdid import reg_did
 from csdid.attgt_fnc import drdid_trim
 from csdid.attgt_fnc.compute_att_gt_shared import (
     select_estimators, last_pretreatment_index, plan_cell, rcond_check_fail,
-    drdid_design_singular, overlap_check_fail, BREAK, BASE_ZERO,
+    drdid_design_singular, overlap_check_fail, rc_outcome_has_too_few_obs, BREAK, BASE_ZERO,
     _ORIGINAL_PANEL_GUARDS)
 import warnings
 
@@ -150,14 +150,15 @@ def compute_att_gt2(dp, est_method="dr", base_period="varying", compute_inffunc=
                     unit_ids, unit_g, never_treated, anticipation, tlist, tfac,
                     period_y, period_w, period_cov, global_pos, n,
                     fix_weights, est_panel, add_att_data, t_i,
-                    apply_rcond, apply_guard, est_method, apply_overlap, nuisance_cache)
+                    apply_rcond, apply_guard, est_method, apply_overlap, nuisance_cache,
+                    weighted=weights_name is not None)
             else:
                 _att_gt_rc_cell(
                     g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
                     data, tname, idname, yname, gname, never_treated, anticipation,
                     tlist, tfac, full_cov, rowid_unique, n, fix_weights,
                     est_rc, add_att_data, t_i, apply_rcond, apply_guard, est_method,
-                    apply_overlap, xcov_cols)
+                    apply_overlap, xcov_cols, weighted=weights_name is not None)
 
     output = {'group': group, 'year': year, "att": att_est, 'post': post_array}
     if compute_inffunc:
@@ -170,7 +171,7 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
                        period_y, period_w, period_cov, global_pos, n,
                        fix_weights, est_att_f, add_att_data, t_i, apply_rcond=False,
                        apply_guard=False, est_method="dr", apply_overlap=False,
-                       nuisance_cache=None):
+                       nuisance_cache=None, weighted=False):
     Gm = (unit_g == g)
     if never_treated:
         Cm = (unit_g == 0)
@@ -203,7 +204,8 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
     if nuisance_cache is not None:
         # Treatment labels are fixed within the cohort; the exact mask captures
         # changing not-yet-treated controls, including gaps between cohorts.
-        overlap_key = (nuisance_cache['cov_keys'][earlier_idx], mask.tobytes())
+        overlap_key = (nuisance_cache['cov_keys'][earlier_idx], mask.tobytes(),
+                       nuisance_cache['weight_keys'][weight_idx])
         pscore_key = (overlap_key, nuisance_cache['weight_keys'][weight_idx])
         if pscore_key != nuisance_cache['pscore_key']:
             nuisance_cache['pscore_key'] = pscore_key
@@ -214,7 +216,7 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
     overlap_failed = False
     if apply_overlap:
         if nuisance_cache is None or overlap_key != nuisance_cache['overlap_key']:
-            overlap_failed = overlap_check_fail(covariates, G)
+            overlap_failed = overlap_check_fail(covariates, G, i_weights=w if weighted else None)
             if nuisance_cache is not None:
                 nuisance_cache['overlap_key'] = overlap_key
                 nuisance_cache['overlap_failed'] = overlap_failed
@@ -232,7 +234,7 @@ def _att_gt_panel_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
 
     # Regression-feasibility guard (matches R): control pre-check + DRDID's
     # per-group designs (incl. the treated outcome regression).
-    if (apply_rcond and rcond_check_fail(covariates[G == 0])) or (
+    if (apply_rcond and rcond_check_fail(covariates, G, i_weights=w if weighted else None)) or (
             apply_guard and drdid_design_singular(
                 covariates, w, G, est_method, post=None)):
         warnings.warn(
@@ -273,7 +275,7 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
                     tlist, tfac, full_cov, rowid_unique, n, fix_weights,
                     est_att_f, add_att_data, t_i, apply_rcond=False,
                     apply_guard=False, est_method="dr", apply_overlap=False,
-                    xcov_cols=None):
+                    xcov_cols=None, weighted=False):
     if never_treated:
         C_main = (data[gname] == 0)
     else:
@@ -340,8 +342,17 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
     else:
         covariates = full_cov.loc[disdat.index].to_numpy()
 
+    if apply_rcond and rc_outcome_has_too_few_obs(
+            G, post, w, covariates.shape[1], include_treated=est_method == "dr"):
+        warnings.warn(
+            f"Outcome regression design is singular (fewer positive-weight observations "
+            f"than covariates) for group {g} in time period {tn}; "
+            f"the ATT for this cell will be set to NA.")
+        add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
+        return
+
     # Propensity-overlap guard (matches R), checked before the singular guard.
-    if apply_overlap and overlap_check_fail(covariates, G):
+    if apply_overlap and overlap_check_fail(covariates, G, i_weights=w if weighted else None):
         warnings.warn(
             f"overlap condition violated for group {g} in time period {tn}")
         add_att_data(att=np.nan, pst=post_treat, inf_f=np.full(n, np.nan))
@@ -349,7 +360,7 @@ def _att_gt_rc_cell(g, tn, tn_idx, pret, pret_g, pret_year, post_treat,
 
     # Regression-feasibility guard (matches R): control pre-check + DRDID's
     # per-period, per-group designs (incl. the treated outcome regression).
-    if (apply_rcond and rcond_check_fail(covariates[G == 0])) or (
+    if (apply_rcond and rcond_check_fail(covariates, G, i_weights=w if weighted else None)) or (
             apply_guard and drdid_design_singular(
                 covariates, w, G, est_method, post=post)):
         warnings.warn(

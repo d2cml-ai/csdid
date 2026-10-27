@@ -145,8 +145,8 @@ def _analytical_cluster_se(inffunc, dp):
 def _wald_pretest(inffunc, att, group, year, dp):
     """Parallel-trends Wald pre-test ``(W, Wpval)``, matching R `did` 2.5.0 `att_gt`.
 
-    Wald test that the pre-treatment ``ATT(g,t)`` (the cells with cohort ``g`` first
-    treated strictly after period ``t``) are jointly zero, using the ANALYTIC
+    Wald test that the pre-treatment ``ATT(g,t)`` (the cells with
+    ``t < g - anticipation``) are jointly zero, using the ANALYTIC
     influence-function covariance ``V`` -- the same ``V`` the analytic SEs derive from
     (the pre-test always uses the analytic variance, never the bootstrap one, even
     when ``bstrap=True``). Returns ``(W, Wpval)`` or ``(None, None)`` when not
@@ -202,18 +202,28 @@ def _wald_pretest(inffunc, att, group, year, dp):
     # `NaN <= x` is False, so a NaN-variance cell would otherwise survive this filter,
     # leave NaN in preV, and force the pre-test to bail with None even when other pre
     # cells are valid -- R instead computes the Wald over the valid subset (F45-1).
-    zero_na = (se <= np.sqrt(np.finfo(float).eps) * 10) | ~np.isfinite(se)
+    zero_na = (se <= 0) | ~np.isfinite(se)
 
-    pre = np.where(group > year)[0]
+    pre = np.where(group - dp.get('anticipation', 0) > year)[0]
+    n_pre_cells = pre.size
+    if dp.get('base_period') == 'universal' and pre.size:
+        time_grid = np.asarray(dp['tlist'])
+        base_indices = np.searchsorted(
+            time_grid, group[pre] - dp.get('anticipation', 0), side='left'
+        ) - 1
+        n_pre_cells = np.count_nonzero(year[pre] != time_grid[base_indices])
     pre = pre[~zero_na[pre]]
     if pre.size == 0:
-        # No usable pre-treatment cells -> the Wald pre-test of parallel trends
-        # cannot be computed. R `did` warns here rather than silently dropping it
-        # (V4-V2); e.g. a two-period (T=2) panel has no pre-treatment periods.
-        warnings.warn(
-            "No pre-treatment periods available for the Wald pre-test of parallel "
-            "trends. The pre-test will not be reported."
-        )
+        msg = "No pre-treatment periods available for the Wald pre-test of parallel trends. "
+        if n_pre_cells:
+            msg += ("Pre-treatment ATT(g,t) estimates exist, but all of them have "
+                    "missing or zero variance, so they were dropped from the pre-test.")
+        else:
+            msg += "No pre-treatment ATT(g,t) estimates exist."
+            if dp.get('anticipation', 0) > 0:
+                msg += (f" Note: anticipation={dp['anticipation']} further reduces "
+                        "the number of available pre-treatment periods.")
+        warnings.warn(msg)
         return None, None
     preatt = att[pre]
     preV = V[np.ix_(pre, pre)]
@@ -246,6 +256,13 @@ def _wald_pretest(inffunc, att, group, year, dp):
 
 # class ATTgt(AGGte):
 class ATTgt:
+  """Estimate group-time treatment effects and their influence functions.
+
+  With ``anticipation=a``, periods ``g-a <= t < g`` use the last observed
+  period before ``g-a`` as their reference under either base-period option.
+  These anticipation effects appear in dynamic aggregation and are excluded
+  from the parallel-trends Wald test. Other aggregations average ``t >= g``.
+  """
   def __init__(self, yname, tname, idname, gname, data, control_group = ['nevertreated', 'notyettreated'],
   xformla: str = None, panel = True, allow_unbalanced_panel = False,
   clustervar = None, weights_name = None, anticipation = 0,
@@ -417,23 +434,34 @@ class ATTgt:
               np.sqrt(np.mean(inffunc_arr ** 2, axis = 1)) / np.sqrt(n_len),
               np.zeros(len(att)),
           )
+      invalid_analytic_se = ~np.isfinite(se) | (se <= 0)
       if bstrap:
         # v7-O2/O3: thread pl/cores through to the multiplier bootstrap.
         ref_se = mboot(inffunc.T, dp, pl=self.pl, cores=self.cores)
         se = ref_se['se']
         if dp['cband']:
           crit_val = ref_se['crit_val']
+          if not np.isfinite(crit_val):
+            warnings.warn(
+                'Simultaneous critical value is not finite, likely because the '
+                'standard errors could not be computed. Falling back to '
+                'pointwise confidence intervals.'
+            )
+            crit_val = norm.ppf(1 - dp['alp'] / 2)
+            dp['cband'] = False
         V = ref_se['V']
       else:
         # Analytical cluster-robust SEs when a cluster variable is set (matches R).
         cl_se = _analytical_cluster_se(inffunc, dp)
         if cl_se is not None:
           se = cl_se
+          invalid_analytic_se = ~np.isfinite(se) | (se <= 0)
+      se = np.asarray(se, dtype=float)
+      se[invalid_analytic_se | ~np.isfinite(se) | (se <= 0)] = np.nan
       # Universal base period: each cohort's base cell has att=0 by construction
       # and an undefined SE; R `did` reports NA there. Identify that cell by its
-      # position -- year == the cohort's last pre-treatment period -- NOT by an
-      # all-zero influence function, since a degenerate-but-valid estimated cell
-      # can also have an all-zero IF and must keep its (zero) SE.
+      # position -- year == the cohort's last pre-treatment period. Estimated
+      # cells with zero or unavailable variance also have undefined SEs above.
       if base_period == 'universal':
         tl = np.asarray(dp['tlist'])
         ant = dp['anticipation']

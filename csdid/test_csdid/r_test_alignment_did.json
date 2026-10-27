@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "audit_date": "2026-10-23",
+  "audit_date": "2026-10-26",
   "r_repository": "https://github.com/bcallaway11/did",
-  "r_commit": "74b88eb07f1faa644df1271055a0f77848f6550c",
+  "r_commit": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
   "scope": "Assertion-intent file-level crosswalk. Existing tests were read; filenames, generated counts, and translation docstrings were not treated as evidence of full parity. Current-source numerical reference tests are a separate layer.",
   "status_definitions": {
     "covered": "The stated portable behavioral intents have direct Python assertion oracles; language-specific internals may be explicitly excluded.",
@@ -1943,7 +1943,7 @@
     },
     {
       "r_file": "tests/testthat/test-user_bug_fixes.R",
-      "status": "partial",
+      "status": "covered",
       "r_intents": [
         "Column t1, missing covariates/variables, fewer periods than groups, zero pre-outcomes and late-cohort anticipation retention."
       ],
@@ -1952,9 +1952,7 @@
         "test_review_fixes.py",
         "test_percell_failure.py"
       ],
-      "remaining_gaps": [
-        "R53-71 small RC group with multiple covariates expects a warning and numeric SE rather than a crash; Python does not reproduce this particular branch oracle."
-      ],
+      "remaining_gaps": [],
       "not_applicable": [],
       "r_test_blocks": [
         {
@@ -1967,26 +1965,22 @@
         },
         {
           "line": 53,
-          "title_expression": "test_that(\"repeated cross sections small groups with covariates\", {"
-        },
-        {
-          "line": 74,
           "title_expression": "test_that(\"fewer time periods than groups\", {"
         },
         {
-          "line": 106,
+          "line": 85,
           "title_expression": "test_that(\"0 pre-treatment estimates when outcomes are 0\", {"
         },
         {
-          "line": 135,
+          "line": 114,
           "title_expression": "test_that(\"variables not in dataset\", {"
         },
         {
-          "line": 146,
+          "line": 125,
           "title_expression": "test_that(\"groups treated after max(t) but within anticipation window are not coerced to never-treated\", {"
         }
       ],
-      "r_file_sha256": "0f77671d0453cade68ac730401d9c44c4946344866196f80f0a36ebc610c8979"
+      "r_file_sha256": "bec928849861585369e616c37eedeb3d4da47971fae2c045718d167469b2adc4"
     },
     {
       "r_file": "tests/testthat/test_sim_data_2_groups.R",
@@ -2010,6 +2004,421 @@
         }
       ],
       "r_file_sha256": "a3c85221aa5bd66d45cead18641a9ed6385882bbeb10175410a0237a6ee68a18"
+    },
+    {
+      "r_file": "tests/testthat/test-anticipation-window.R",
+      "status": "partial",
+      "r_intents": [
+        "Anticipation cells t >= g - anticipation use the last unaffected base under varying and universal bases, preserving ATT, SE and full unit influence functions.",
+        "Wald restrictions exclude the anticipation window; universal-base diagnostic counts use the actual observed time grid.",
+        "Event studies retain anticipation effects while the overall ATT averages post-treatment event times."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_anticipation.py::test_anticipation_cells_match_independent_weighted_did",
+        "test_upstream_20261026_inference.py::test_anticipation_cells_are_excluded_from_wald_restrictions",
+        "test_upstream_20261026_inference.py::test_universal_base_warning_counts_actual_irregular_time_grid"
+      ],
+      "remaining_gaps": [
+        "The R Monte Carlo rejection-rate experiment (declared versus ignored anticipation over 20 seeds) is not ported; deterministic cell and Wald oracles do not substitute for that experiment.",
+        "The internal pretreatment_cells_only execution filter has no Python counterpart and is not exercised.",
+        "The exact R event-study anticipation-effect recovery and overall post-treatment average fixture is not reproduced; general dynamic aggregation and the anticipation cell estimates are checked separately."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 20,
+          "title_expression": "test_that(\"anticipation periods use the base period g - anticipation - 1 under both base periods\", {"
+        },
+        {
+          "line": 38,
+          "title_expression": "test_that(\"the pre-test uses only cells with t < g - anticipation\", {"
+        },
+        {
+          "line": 60,
+          "title_expression": "test_that(\"declared anticipation no longer makes the pre-test reject true parallel trends\", {"
+        },
+        {
+          "line": 69,
+          "title_expression": "test_that(\"the pretest-only cell filter follows the same rule\", {"
+        },
+        {
+          "line": 78,
+          "title_expression": "test_that(\"event-study aggregation reports the anticipation effects; the overall ATT averages t >= g only\", {"
+        },
+        {
+          "line": 90,
+          "title_expression": "test_that(\"anticipation = 0 keeps the plain definitions (pseudo-ATTs with base t - 1; pre-test over t < g)\", {"
+        },
+        {
+          "line": 102,
+          "title_expression": "test_that(\"universal-base diagnostics use the actual base on irregular grids\", {"
+        }
+      ],
+      "r_file_sha256": "95613760495201b6f50cab4f2591269237fcf1ec9a865afafd34e598376b46d5"
+    },
+    {
+      "r_file": "tests/testthat/test-conditional-ipw-only.R",
+      "status": "not_applicable",
+      "r_intents": [
+        "The legacy conditional CvM pre-test rejects every estimator other than IPW before data processing.",
+        "A transformed-outcome counterexample separates the legacy conditional-test assumptions from ordinary reg/DR ATT estimation.",
+        "Default versus explicit IPW and resolved panel flags preserve conditional CvM statistics, draws, critical values and p-values."
+      ],
+      "python_tests": [],
+      "remaining_gaps": [],
+      "not_applicable": [
+        "Python exposes the unconditional Wald pre-test, not conditional_did_pretest or its CvM statistics. Its supported-estimator contract, transformed-outcome counterexample and conditional bootstrap are outside this API; ordinary ATT/Wald tests do not count as coverage."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 1,
+          "title_expression": "test_that(\"conditional pre-test rejects unsupported methods before processing data\", {"
+        },
+        {
+          "line": 13,
+          "title_expression": "test_that(\"correct original outcome regression cannot validate the legacy regression test\", {"
+        },
+        {
+          "line": 47,
+          "title_expression": "test_that(\"default and explicit IPW conditional pre-tests remain identical\", {"
+        },
+        {
+          "line": 74,
+          "title_expression": "test_that(\"conditional pre-test uses the resolved panel structure\", {"
+        }
+      ],
+      "r_file_sha256": "fff9638c233c462943c2fa6cad5c59f1043ffe9058b2b5a9d52c0d70d03d504b"
+    },
+    {
+      "r_file": "tests/testthat/test-inference-outcome-units.R",
+      "status": "covered",
+      "r_intents": [
+        "Global outcome rescaling preserves ATT, positive SE, interval endpoints, Wald tests and simultaneous critical values in both modes, with analytic/bootstrap and iid/clustered inference.",
+        "A low-variance cohort retains finite positive SE beside a normal-variance cohort; magnitude relative to other cells does not decide availability.",
+        "Exact-zero and nonfinite influence functions yield unavailable SE and Wald tests; invalid simultaneous critical values fall back to finite pointwise inference.",
+        "Zero-IQR and single-draw bootstraps retain live column identities but cannot estimate their scales; the independent analytic Wald covariance remains available."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_inference.py::test_outcome_units_preserve_inference",
+        "test_upstream_20261026_inference.py::test_low_variance_cohort_remains_available_beside_normal_variance_cohort",
+        "test_upstream_20261026_inference.py::test_zero_and_nonfinite_custom_influence_never_produce_inference",
+        "test_upstream_20261026_inference.py::test_single_draw_retains_live_columns_and_marks_unavailable_scales",
+        "test_upstream_20261026_inference.py::test_single_draw_fit_falls_back_to_pointwise_but_retains_analytic_wald",
+        "test_upstream_20261026_inference.py::test_zero_iqr_column_does_not_remove_other_studentized_columns",
+        "test_review_fixes.py::TestUniversalBaseNaN::test_zero_variance_estimated_cells_and_base_have_unavailable_se"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 31,
+          "title_expression": "test_that(\"outcome units preserve SEs, Wald tests, and simultaneous bands\", {"
+        },
+        {
+          "line": 78,
+          "title_expression": "test_that(\"one low-variance cohort is not filtered relative to other cohorts\", {"
+        },
+        {
+          "line": 94,
+          "title_expression": "test_that(\"exactly zero influence functions remain unavailable in panels and RC\", {"
+        },
+        {
+          "line": 125,
+          "title_expression": "test_that(\"non-finite custom influence functions do not produce finite inference\", {"
+        },
+        {
+          "line": 141,
+          "title_expression": "test_that(\"zero-IQR bootstrap draws are not reported as zero standard errors\", {"
+        },
+        {
+          "line": 151,
+          "title_expression": "test_that(\"a single bootstrap draw retains columns and cannot estimate their scales\", {"
+        }
+      ],
+      "r_file_sha256": "7fd3814578dba2898972d84426496d2682a164919522e2d521dad45aa72fac73",
+      "standalone_audits": [
+        {
+          "script": "csdid/test_csdid/audit20261026/inference_adversarial.py",
+          "entrypoint": "audit_bootstrap",
+          "summary": "csdid/test_csdid/audit20261026/inference_adversarial_summary.json",
+          "results": "csdid/test_csdid/audit20261026/inference_adversarial.json.gz",
+          "scope": "Standalone subprocess audit, not pytest assertions. Built-in dr/reg/ipw exact-zero outcomes on panel and true RC, in both modes, explicitly check every group-time and aggregate ATT/IF/SE component, unavailable Wald test, forced simultaneous-band flags and pointwise fallback critical values. Frozen-multiplier order-statistic calculations independently check bootstrap dimension/scale/critical arithmetic."
+        }
+      ]
+    },
+    {
+      "r_file": "tests/testthat/test-preprocess-name-collisions.R",
+      "status": "partial",
+      "r_intents": [
+        "Renaming outcome, time, id, cohort, covariate, sampling-weight or cluster columns to args preserves sample, ATT, SE and full IF across panel, unbalanced, RC, no-never, balancing-drop and missingness routes.",
+        "Time-column renaming, including cutoff_t and non-identifier names, preserves sample selection and estimation under both control definitions."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_anticipation.py::test_argument_named_columns_preserve_preprocessing_across_routes",
+        "test_upstream_20261026_anticipation.py::test_time_column_names_do_not_change_sample_or_results"
+      ],
+      "remaining_gaps": [
+        "The R tlist renaming grid across outcome/time/id/cohort/covariate roles is not reproduced.",
+        "The exact V1 cohort-name reproduction of the undersized never-treated-group error is not reproduced.",
+        "cutoff_t is checked as a time-column name, but the exact R cutoff_t covariate-name last-cohort-filtering fixture is not reproduced."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 11,
+          "title_expression": "test_that(\"fast preprocessing respects columns named args and tlist\", {"
+        },
+        {
+          "line": 28,
+          "title_expression": "test_that(\"argument name collisions work across preprocessing branches\", {"
+        },
+        {
+          "line": 60,
+          "title_expression": "test_that(\"group size checks use counts even if the cohort is named V1\", {"
+        },
+        {
+          "line": 72,
+          "title_expression": "test_that(\"args can name sampling weights or a cluster column\", {"
+        },
+        {
+          "line": 99,
+          "title_expression": "test_that(\"last-cohort filtering uses the cutoff argument rather than a covariate\", {"
+        }
+      ],
+      "r_file_sha256": "5dc2ae226bf10eee91f9816328e3857b74214ffac686529554dba2bbf34f20d2"
+    },
+    {
+      "r_file": "tests/testthat/test-rc-normalized-support.R",
+      "status": "partial",
+      "r_intents": [
+        "RC outcome support counts finite positive weights after the same local mean normalization as the estimator, distinguishing the smallest retained subnormal from exact underflow to zero.",
+        "DR requires treated and control pre/post outcome designs; reg requires only control designs. Constant-weight rescaling and the physical square-design boundary preserve decisions.",
+        "A second local normalization is checked before backend entry on RC, unbalanced-panel and varying-weight panel routes, with failed-cell ATT/SE/IF missingness."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_support.py::test_rc_support_counts_weights_after_local_normalization",
+        "test_upstream_20261026_support.py::test_rc_support_accepts_smallest_positive_subnormal_and_square_design",
+        "test_upstream_20261026_support.py::test_second_local_normalization_is_checked_before_rc_backend",
+        "test_upstream_20261026_support.py::test_randomized_rc_support_decisions_match_explicit_group_period_counts"
+      ],
+      "remaining_gaps": [
+        "The R first-normalization-loss full public-fit grid over treated/control loss, dr/reg, weight rescaling and compute_inffunc=False/True is not reproduced. Helper-level normalized counts and safe second-normalization backend probes are narrower checks.",
+        "The second-normalization Python backend probe currently uses compute_inffunc=True; the R point-estimates-only branch and its explicit influence-matrix row-count assertions are not reproduced.",
+        "The R explicit empty/all-zero/all-Inf/all-NA helper-input grid is not a dedicated Python fixture."
+      ],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 1,
+          "title_expression": "test_that(\"RC support counts use the weights after DRDID normalization\", {"
+        },
+        {
+          "line": 30,
+          "title_expression": "test_that(\"normalization loss is rejected before DR/reg backend entry\", {"
+        },
+        {
+          "line": 89,
+          "title_expression": "test_that(\"a second local normalization is checked on every RC route\", {"
+        }
+      ],
+      "r_file_sha256": "f5a9c05e17d376d8a78667e21c6f3af67d2073d47ae0ca6f7b0c1dca1a062a0b"
+    },
+    {
+      "r_file": "tests/testthat/test-stress-balance-support.R",
+      "status": "covered",
+      "r_intents": [
+        "Dynamic balancing retains common nonmissing observed cohort/event support before min_e/max_e display limits and before na_rm drops cells.",
+        "Irregular grids require observed event times shared by eligible cohorts, without inventing globally absent event times; an all-missing observed event time remains required.",
+        "No complete cohort produces a clear error; complete regular and irregular configurations preserve cohort-weighted ATT, full aggregate IF and SE."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_inference.py::test_balancing_precedes_display_limits_and_drops_incomplete_cohort",
+        "test_upstream_20261026_inference.py::test_irregular_grid_balance_requires_common_observed_support",
+        "test_upstream_20261026_inference.py::test_globally_unobserved_event_time_is_not_required",
+        "test_upstream_20261026_inference.py::test_all_missing_event_support_cannot_disappear_during_na_removal",
+        "test_upstream_20261026_inference.py::test_balanced_dynamic_stress_against_explicit_cell_ratio_oracle"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 19,
+          "title_expression": "test_that(\"balance_e retains the same cohorts after missing cells are removed\", {"
+        },
+        {
+          "line": 41,
+          "title_expression": "test_that(\"balance_e requires common event-time support on irregular grids\", {"
+        },
+        {
+          "line": 53,
+          "title_expression": "test_that(\"balance_e uses observed support without inventing absent event times\", {"
+        },
+        {
+          "line": 64,
+          "title_expression": "test_that(\"balance_e errors when no cohort has complete observed support\", {"
+        },
+        {
+          "line": 76,
+          "title_expression": "test_that(\"an event time with all missing estimates still has to be balanced\", {"
+        },
+        {
+          "line": 89,
+          "title_expression": "test_that(\"balance_e preserves the complete regularly spaced aggregation\", {"
+        }
+      ],
+      "r_file_sha256": "e6770afb6e01afefed7242724230a9324c829bb959b43b82a515b3b2d133683a"
+    },
+    {
+      "r_file": "tests/testthat/test-stress-bootstrap-scale.R",
+      "status": "covered",
+      "r_intents": [
+        "Outcome-unit rescaling preserves bootstrap live-dimension support, draws, SE and simultaneous critical values, including extremely small dimensions and clustered draws.",
+        "Public ATT and aggregation bootstrap inference scale with outcomes in both execution modes."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_inference.py::test_bootstrap_dimension_support_does_not_square_tiny_draws",
+        "test_upstream_20261026_inference.py::test_outcome_units_preserve_inference"
+      ],
+      "remaining_gaps": [],
+      "not_applicable": [],
+      "r_test_blocks": [
+        {
+          "line": 1,
+          "title_expression": "test_that(\"bootstrap degeneracy does not depend on the units of the outcome\", {"
+        },
+        {
+          "line": 25,
+          "title_expression": "test_that(\"rescaling outcomes preserves att_gt and aggte bootstrap inference\", {"
+        }
+      ],
+      "r_file_sha256": "007d1d35f5f72a3436c076a5d0533216e3391dd3e38b7d5bc63d3cf9641d1803"
+    },
+    {
+      "r_file": "tests/testthat/test-stress-pretest-defaults.R",
+      "status": "not_applicable",
+      "r_intents": [
+        "The conditional CvM pre-test resolves omitted covariates to an intercept and omitted RC ids to per-observation ids, preserving statistics and bootstrap draws.",
+        "For intercept-only conditioning, the conditional CvM statistic reduces to n times the sum of squared pre-treatment ATTs."
+      ],
+      "python_tests": [],
+      "remaining_gaps": [],
+      "not_applicable": [
+        "Python has no conditional_did_pretest API or CvM statistic. Omitted-id preprocessing and unconditional Wald tests are different contracts and cannot establish this conditional-test identity."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 1,
+          "title_expression": "test_that(\"conditional pre-test resolves omitted covariates and observation ids\", {"
+        }
+      ],
+      "r_file_sha256": "873ac5296db58d5beb3e3bc4ec38978b3a231821f68f25d1c2a1a5c4df46f9c1"
+    },
+    {
+      "r_file": "tests/testthat/test-tiny-rc-outcome-designs.R",
+      "status": "partial",
+      "r_intents": [
+        "Undersized treated RC outcome regressions are rejected before DR backend entry, leaving failed-cell ATT/SE/IF missing and healthy cells finite.",
+        "Regression and IPW do not require treated outcome regressions; square treated designs remain permitted.",
+        "Physical support counts and safe backend probes apply to panel observations routed through RC estimators."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_support.py::test_rc_tiny_and_square_treated_designs_gate_only_required_outcome_fits",
+        "test_upstream_20261026_support.py::test_rc_support_counts_weights_after_local_normalization",
+        "test_upstream_20261026_support.py::test_rc_support_accepts_smallest_positive_subnormal_and_square_design",
+        "test_upstream_20261026_support.py::test_second_local_normalization_is_checked_before_rc_backend"
+      ],
+      "remaining_gaps": [
+        "The exact R zero-weight treated/control physical-count public-fit fixtures and their per-cell warning counts are not reproduced; normalized helper counts cover their count rule.",
+        "Square-design Python public fits assert finite outputs and missingness masks, but not the R independent direct 2x2 square ATT/full-IF normalization oracle.",
+        "The R tiny-physical-treated panel RC-route fixture with compute_inffunc=False/True and the ordinary balanced-panel exemption is not reproduced; second-normalization route probes test a different failure mechanism."
+      ],
+      "not_applicable": [
+        "The custom DRDID::drdid_rc1 estimator has no packaged Python counterpart; ordinary Python reg/ipw and callable APIs are not counted as a translation of that R estimator."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 35,
+          "title_expression": "test_that(\"small RC treated groups are rejected before the DR backend\", {"
+        },
+        {
+          "line": 70,
+          "title_expression": "test_that(\"RC methods without treated outcome regressions retain small groups\", {"
+        },
+        {
+          "line": 83,
+          "title_expression": "test_that(\"zero-weight rows cannot identify RC treated outcome regressions\", {"
+        },
+        {
+          "line": 99,
+          "title_expression": "test_that(\"square full-rank RC treated regressions are allowed\", {"
+        },
+        {
+          "line": 126,
+          "title_expression": "test_that(\"undersized control-period regressions fail only affected RC cells\", {"
+        },
+        {
+          "line": 146,
+          "title_expression": "test_that(\"unbalanced and varying-weight panel RC routes check treated regressions\", {"
+        }
+      ],
+      "r_file_sha256": "d3f2b8a4f4883994dd8b6b53cf1d4127ecb779e153cc57655a4430898197f280"
+    },
+    {
+      "r_file": "tests/testthat/test-zero-weight-guards.R",
+      "status": "partial",
+      "r_intents": [
+        "Zero-mass extreme covariates cannot spoil preliminary overlap or weighted control-rank feasibility across panel, varying-weight, RC and unbalanced routes.",
+        "Positive normalized support determines overlap; the actual weighted control Gram can retain tiny-weight directions or reject directions with negligible mass, independently of weight units.",
+        "Fast overlap-cache identities include changing weight support; no-user-weight calls preserve the unweighted preliminary guard route."
+      ],
+      "python_tests": [
+        "test_upstream_20261026_support.py::test_zero_mass_extreme_covariate_matches_deleting_observation",
+        "test_upstream_20261026_support.py::test_weighted_control_gram_keeps_tiny_weight_extreme_covariate",
+        "test_upstream_20261026_support.py::test_weighted_control_gram_rejects_lost_direction_independent_of_units",
+        "test_upstream_20261026_support.py::test_overlap_uses_positive_normalized_support_and_empty_support_fails",
+        "test_upstream_20261026_support.py::test_fast_overlap_cache_tracks_time_varying_positive_support",
+        "test_upstream_20261026_support.py::test_intercept_weighted_rank_uses_positive_support_without_underflowing_gram",
+        "test_upstream_20261026_support.py::test_no_user_weights_preserve_unweighted_preliminary_guards"
+      ],
+      "remaining_gaps": [
+        "The exact R direct DRDID panel-DR reference for a zero-weight outlier with both precompute and guard cache disabled is not reproduced. Python has deletion oracles in both modes and a direct regression reference for a tiny positive-weight outlier.",
+        "The exact R downstream DRDID reg_did_panel error oracle for the lost weighted-control direction is not reproduced; the Python preliminary guard decision is directly asserted.",
+        "Python deletion-oracle fits suppress warnings and do not reproduce every R expect_warning(..., NA) assertion."
+      ],
+      "not_applicable": [
+        "R did.disable_precompute and did.disable_check_cache options have no matching Python public option; both Python execution modes and weight-sensitive cache behavior are tested directly."
+      ],
+      "r_test_blocks": [
+        {
+          "line": 13,
+          "title_expression": "test_that(\"zero-weight covariates cannot cause false overlap or rank failures\", {"
+        },
+        {
+          "line": 46,
+          "title_expression": "test_that(\"zero-weight guard fix also applies without positional precompute or guard cache\", {"
+        },
+        {
+          "line": 71,
+          "title_expression": "test_that(\"guard support follows normalization and still rejects unidentified designs\", {"
+        },
+        {
+          "line": 88,
+          "title_expression": "test_that(\"regression feasibility uses the actual weighted control design\", {"
+        }
+      ],
+      "r_file_sha256": "da51788dc2ec39f2ed7280c6652e02b6c3eaa84b0f6810e31a1c2d6043688284"
     }
-  ]
+  ],
+  "new_test_files": [
+    "csdid/test_csdid/test_r_test_alignment.py",
+    "csdid/test_csdid/test_upstream_20261026_anticipation.py",
+    "csdid/test_csdid/test_upstream_20261026_inference.py",
+    "csdid/test_csdid/test_upstream_20261026_support.py"
+  ],
+  "delta_notes": {
+    "previous_r_commit": "74b88eb07f1faa644df1271055a0f77848f6550c",
+    "source": "Merged did master (PR279 incorporates PR276 and PR278; PR277 updates the R BMisc dependency).",
+    "scope": "Reviewed all ten added test files and the one changed file against their assertion intents. The other 33 file-level entries and older remaining gaps are preserved. Covered means the stated portable behavior has an assertion oracle, not identical test counts, parameter grids, random draws, or R internals.",
+    "replaced_test": "The removed small-RC block in test-user_bug_fixes.R is superseded by test-tiny-rc-outcome-designs.R and test-rc-normalized-support.R. Its former location is not a remaining gap in the changed file; limits of the replacement coverage are recorded under the new files."
+  }
 }

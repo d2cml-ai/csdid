@@ -27,7 +27,7 @@ from r_reference_checks import assert_numeric, decode_numeric, support_order
 
 DEFAULT_REFERENCE_DIR = (Path(__file__).parent / "r_ref" / "current").resolve()
 PINNED_SOURCES = {
-    "did": {"commit": "74b88eb07f1faa644df1271055a0f77848f6550c", "version": "2.5.1.902"},
+    "did": {"commit": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e", "version": "2.5.1.904"},
     "DRDID": {"commit": "eaac3b49cd225d0d7706c633858555a5f204e21e", "version": "1.4.0"},
 }
 
@@ -457,11 +457,12 @@ def test_source_override_requires_an_explicit_separate_reference_directory(tmp_p
 
 
 def test_reference_directory_alone_preserves_pinned_source_authority(tmp_path):
+    original = copy.deepcopy(PINNED_SOURCES)
     directory, sources = _reference_context({"CSDID_R_REFERENCE_DIR": str(tmp_path)})
     assert directory == tmp_path.resolve()
     assert sources == PINNED_SOURCES
     sources["did"]["commit"] = "a" * 40
-    assert PINNED_SOURCES["did"]["commit"] == "74b88eb07f1faa644df1271055a0f77848f6550c"
+    assert PINNED_SOURCES == original
 
 
 def test_explicit_source_lock_changes_only_expected_source_identity(tmp_path):
