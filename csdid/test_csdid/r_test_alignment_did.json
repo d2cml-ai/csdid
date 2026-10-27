@@ -2091,7 +2091,7 @@
     },
     {
       "r_file": "tests/testthat/test-inference-outcome-units.R",
-      "status": "partial",
+      "status": "covered",
       "r_intents": [
         "Global outcome rescaling preserves ATT, positive SE, interval endpoints, Wald tests and simultaneous critical values in both modes, with analytic/bootstrap and iid/clustered inference.",
         "A low-variance cohort retains finite positive SE beside a normal-variance cohort; magnitude relative to other cells does not decide availability.",
@@ -2107,10 +2107,7 @@
         "test_upstream_20261026_inference.py::test_zero_iqr_column_does_not_remove_other_studentized_columns",
         "test_review_fixes.py::TestUniversalBaseNaN::test_zero_variance_estimated_cells_and_base_have_unavailable_se"
       ],
-      "remaining_gaps": [
-        "The zero-influence public-fit oracle uses a custom estimator in panel and RC routes, plus deterministic panel IPW. The full R zero-outcome grid over built-in dr/reg/ipw in both panel and RC routes is not reproduced.",
-        "The R zero-IF aggregation fixture explicitly forces cband=TRUE and asserts every aggregate component, fallback flag and critical value; Python currently checks unavailable overall aggregate SE and the group-time fallback contract separately."
-      ],
+      "remaining_gaps": [],
       "not_applicable": [],
       "r_test_blocks": [
         {
@@ -2138,7 +2135,16 @@
           "title_expression": "test_that(\"a single bootstrap draw retains columns and cannot estimate their scales\", {"
         }
       ],
-      "r_file_sha256": "7fd3814578dba2898972d84426496d2682a164919522e2d521dad45aa72fac73"
+      "r_file_sha256": "7fd3814578dba2898972d84426496d2682a164919522e2d521dad45aa72fac73",
+      "standalone_audits": [
+        {
+          "script": "csdid/test_csdid/audit20261026/inference_adversarial.py",
+          "entrypoint": "audit_bootstrap",
+          "summary": "csdid/test_csdid/audit20261026/inference_adversarial_summary.json",
+          "results": "csdid/test_csdid/audit20261026/inference_adversarial.json.gz",
+          "scope": "Standalone subprocess audit, not pytest assertions. Built-in dr/reg/ipw exact-zero outcomes on panel and true RC, in both modes, explicitly check every group-time and aggregate ATT/IF/SE component, unavailable Wald test, forced simultaneous-band flags and pointwise fallback critical values. Frozen-multiplier order-statistic calculations independently check bootstrap dimension/scale/critical arithmetic."
+        }
+      ]
     },
     {
       "r_file": "tests/testthat/test-preprocess-name-collisions.R",

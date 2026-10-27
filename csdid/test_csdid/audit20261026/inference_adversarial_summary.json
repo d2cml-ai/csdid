@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-10-26",
+  "policy": {
+    "outcome_normalized_atol": 1e-10,
+    "outcome_normalized_rtol": 1e-09,
+    "wald_atol": 1e-08,
+    "wald_rtol": 1e-09,
+    "support_and_nonfinite_masks": "exact",
+    "dimensionful_comparison": "Divide by the known absolute outcome multiplier before comparing. This independent equation gate does not replace the permanent raw-scale R parity gate or clear its retained large-scale IF cancellation failures."
+  },
+  "oracle_corrections_after_results": [
+    {
+      "stage": "First exploratory 1,000-balance-case run",
+      "observed": "23 apparent current-source failures; no product conclusion was drawn.",
+      "diagnosis": "The first oracle retained missing negative-event cells after na_rm, although those cells do not enter the post-treatment balance requirement and must be omitted from the displayed event-specific averages. It also assigned statistical meaning to the overall-IF placeholder when the display window contained no post-treatment event.",
+      "correction": "Build displayed events and their cell averages from finite estimates, while retaining original support solely for the balance requirement. With no displayed post-treatment event, require unavailable overall ATT/SE and mark its internal IF placeholder not applicable.",
+      "unchanged": "Data seeds, all 1,000 case definitions, source checkouts, numerical tolerances, and production code.",
+      "disposition": "Correct oracle; rerun both isolated sources. All 1,000 current-source cases then pass. This is not counted as a product fix."
+    }
+  ],
+  "baseline_failure_classification": {
+    "public_ATT_IF_SE_interval_or_Wald_equation_error": 288,
+    "diagnostic_only_refusal_message": 346,
+    "returned_aggregate_when_refusal_required": 365,
+    "aggregate_selection_numerical_or_scale_error": 142,
+    "bootstrap_dimension_scale_or_critical_error": 28,
+    "unavailable_scale_critical_value_or_fallback_error": 12
+  },
+  "harness_sha256": "daff69f4856d5a9ac896ff4c216dd9914dddd2c8af0a9266c0b52529a4adcae0",
+  "counts": {
+    "corrected": 1181,
+    "preserved_correct": 303,
+    "regressed": 0,
+    "still_failing": 0
+  },
+  "numerical_and_decision_counts": {
+    "total_cases": 1484,
+    "baseline_correct": 649,
+    "candidate_correct": 1484,
+    "corrected_excluding_diagnostic_only": 835,
+    "diagnostic_only_message_changes": 346,
+    "regressions": 0
+  },
+  "source_identity": {
+    "before": {
+      "commit": "2a36b48e2c435d87c6dfaecda36734a4336c78ec",
+      "tracked_status": "",
+      "verified_imports": {
+        "csdid.att_gt": "/private/tmp/csdid-sync-baseline-20261026/csdid/att_gt.py",
+        "csdid.aggte_fnc.compute_aggte": "/private/tmp/csdid-sync-baseline-20261026/csdid/aggte_fnc/compute_aggte.py",
+        "csdid.utils.mboot": "/private/tmp/csdid-sync-baseline-20261026/csdid/utils/mboot.py"
+      },
+      "source_sha256": {
+        "csdid/att_gt.py": "c4f690322440d7ae80138a5213393eac682f50832db81eeba2ccd067561a8d2b",
+        "csdid/aggte_fnc/compute_aggte.py": "545262dfad0ad7ef20f03de2ee16968ded4697eeeb1f643132a22389c58a378b",
+        "csdid/aggte_fnc/utils.py": "7477a7b98f5dd8a9ae57ce5903da967d5f6755fb2ad8338cb5f016fe5e31a226",
+        "csdid/utils/mboot.py": "f99b41fc58062f8c99a98497b11bccdea6190156abe25036bb6fe471a0013b4b",
+        "csdid/attgt_fnc/compute_att_gt_shared.py": "0fba0cbba6c7d23f06555e05bae49ecb62bcddadf6e8bdaa02ad033b38c7b1af",
+        "csdid/attgt_fnc/compute_att_gt.py": "b3a3b6cd8559f06eff56a461197cbb166557ed53636e780d38e3728fa7d03de7",
+        "csdid/attgt_fnc/compute_att_gt2.py": "7eca8ec1629d98b17ccdd7170e72d7afd298eebd41a42f6cb4247afc6c5d6b7c",
+        "csdid/attgt_fnc/preprocess_did.py": "3f2c603b7b1c2ed8ad883f171c7a6915eb4cda14b37bbbb9994b0deb7baecb66"
+      },
+      "input_panel_sha256": {
+        "regular": "b3ca9f376cd311367403897a8c89b853146e7b07360bd97509945c1aa45c68c0",
+        "irregular_negative": "1acb4c7aee7ac6bdbd3ab7d7fe795612236c81c6c22ff9ef4e06115e946be288",
+        "fractional": "ce9b3fc5e20da2e5851a591ae22c7afde2ea4ab6d6df1b828a17ef55d3e02461"
+      },
+      "counts": {
+        "public_panel_equations": {
+          "cases": 432,
+          "passed": 144,
+          "failed": 288
+        },
+        "dynamic_ratio_equations": {
+          "cases": 1000,
+          "passed": 147,
+          "failed": 853
+        },
+        "frozen_multiplier_order_statistics": {
+          "cases": 40,
+          "passed": 12,
+          "failed": 28
+        },
+        "public_zero_outcome_exact_degeneracy": {
+          "cases": 12,
+          "passed": 0,
+          "failed": 12
+        }
+      }
+    },
+    "after": {
+      "commit": "81fa18073a239f40173c9a9a60e5c5d4934073be",
+      "tracked_status": "M csdid/test_csdid/UPSTREAM_SYNC_20261026.md",
+      "verified_imports": {
+        "csdid.att_gt": "/Users/pedrosantanna/Documents/GitHub/csdid_python/csdid/att_gt.py",
+        "csdid.aggte_fnc.compute_aggte": "/Users/pedrosantanna/Documents/GitHub/csdid_python/csdid/aggte_fnc/compute_aggte.py",
+        "csdid.utils.mboot": "/Users/pedrosantanna/Documents/GitHub/csdid_python/csdid/utils/mboot.py"
+      },
+      "source_sha256": {
+        "csdid/att_gt.py": "5d6ef09799dc880581ee90ab529c17a0e18909242e750ba81917b13d366694c8",
+        "csdid/aggte_fnc/compute_aggte.py": "921fd3d10c51ea9ee4ed1c9a2bd6bb65db3ae7f57f5f3fdd4d0cacab2b31c688",
+        "csdid/aggte_fnc/utils.py": "9c180ce80f66af790ae1a041aa2bb96ad61f5d68531d33ee60c4296f2a529000",
+        "csdid/utils/mboot.py": "46919752135a38f7cd40d8b97be59cb9e61957860e3601dfff9b4566ecf630ef",
+        "csdid/attgt_fnc/compute_att_gt_shared.py": "f8201dfd6151662bce9c6592bec763a3cb45a14239fec3417e08ea639420d94b",
+        "csdid/attgt_fnc/compute_att_gt.py": "7a3522eb15ee6a3473950646d5fe2a53d0519d48b993ca19617155779fc460f6",
+        "csdid/attgt_fnc/compute_att_gt2.py": "c14b4a8abeccfa8530616ea313e3025db0493c18c2e189a79e6dda357302fa22",
+        "csdid/attgt_fnc/preprocess_did.py": "4823a5803c03b2a4cca200a7869f29c55b3bc5d08eb79ab7546d8894d8223d2c"
+      },
+      "input_panel_sha256": {
+        "regular": "b3ca9f376cd311367403897a8c89b853146e7b07360bd97509945c1aa45c68c0",
+        "irregular_negative": "1acb4c7aee7ac6bdbd3ab7d7fe795612236c81c6c22ff9ef4e06115e946be288",
+        "fractional": "ce9b3fc5e20da2e5851a591ae22c7afde2ea4ab6d6df1b828a17ef55d3e02461"
+      },
+      "counts": {
+        "public_panel_equations": {
+          "cases": 432,
+          "passed": 432,
+          "failed": 0
+        },
+        "dynamic_ratio_equations": {
+          "cases": 1000,
+          "passed": 1000,
+          "failed": 0
+        },
+        "frozen_multiplier_order_statistics": {
+          "cases": 40,
+          "passed": 40,
+          "failed": 0
+        },
+        "public_zero_outcome_exact_degeneracy": {
+          "cases": 12,
+          "passed": 12,
+          "failed": 0
+        }
+      }
+    }
+  },
+  "details": {
+    "path": "csdid/test_csdid/audit20261026/inference_adversarial.json.gz",
+    "sha256": "f60279ddc1f5f2b03cac2983ea1f49fc2aaf8e815f961b891e53390b052a03e2",
+    "uncompressed_sha256": "35c0284ed494b90e5c11dee64b356a847d0630354528d99fc5c1bbd1131d5951"
+  },
+  "limits": [
+    "The baseline diagnostic-only refusal messages are separate from numerical or support failures.",
+    "These seeded analytical identities are not Monte Carlo coverage or proof of identifying assumptions.",
+    "An unavailable overall target has no statistical IF; its internal placeholder is not compared.",
+    "The corrected oracle and unchanged numerical thresholds are documented after the exploratory run.",
+    "Outcome-unit-normalized analytic identities are separate from the permanent raw-scale R parity gate; the retained large-scale cancellation misses are not cleared."
+  ]
+}

@@ -49,10 +49,12 @@ estimators, both base-period choices, both control groups, anticipation
 0/1/2, and small/large outcome-scale probes. All public outputs, unit/cell/event
 support, nonfinite masks and every cell/aggregate IF component are compared.
 The 252 ordinary/small-scale Python mode comparisons pass. A separate
-24-configuration irregular-clock/missing-cell `balance_e` grid passes all
+24-configuration irregular-clock/display-limit `balance_e` grid passes all
 48 Python comparisons and the R mode checks. Another 48 weighted-support
 comparisons pass, with maximum absolute differences of approximately
 `8.0e-15` for ATT, `5.6e-16` for SE and `2.1e-13` for cell IF components.
+Missing ATT cells are exercised separately by the portable analytical and
+randomized aggregation oracles; they were not injected into this R grid.
 
 The large-scale probes retain **36 failed comparisons** at outcome multiplier
 `1e10`: near-zero aggregate IF components exceed the fixed componentwise
@@ -78,6 +80,66 @@ The updated [R assertion crosswalk](r_test_alignment_did.json) records all
 the remaining new partial coverage, including Monte Carlo rejection-rate
 assertions, R-only pretest internals and some exact diagnostic/backend probes.
 It does not claim one-to-one coverage of all R APIs or assertions.
+
+The additional adversarial review compares isolated old `2a36b48` and corrected
+`81fa180` sources using independent equations rather than R agreement alone.
+No further runtime changes were needed. Its
+[1,484-case equation audit](audit20261026/inference_adversarial_summary.json)
+checks weighted panel ATT/full IF/SE/interval/Wald identities, 1,000 randomized
+dynamic aggregation decisions and ratio-estimator influences, 40 frozen-draw
+bootstrap cases, and 12 exact-zero panel/RC fits. All corrected cases pass.
+The old source satisfies 649 numerical/decision cases; 835 substantive
+failures become correct. Another 346 old refusals differ only in their diagnostic
+message and are explicitly separated from statistical fixes. No previously
+correct numerical/decision case regresses. The equation checks normalize
+dimensionful quantities to the known outcome units; this supplemental policy
+does not replace the raw R gate or clear its retained extreme-scale IF failures.
+
+A separate [known-DGP calibration check](audit_anticipation_calibration.py)
+uses 200 fixed paired replications, 400 units each, parallel untreated trends,
+an anticipation effect of one and a treatment effect of two. Declaring the
+true anticipation window changes the pre-test rejection rate from 100% in
+the old source to 6% in the correction. The second anticipation-period mean
+changes from 0.0064 to 0.9987, against truth 1; its independent sample-mean
+formula agrees to `2.2e-15`. The corrected Wald quadratic form agrees with the
+independent covariance calculation to `1.9e-14`. All 400 post-treatment mean
+records, and all 200 records with anticipation undeclared, remain bit-identical.
+Ignoring anticipation still rejects in 100% of these samples. These are
+findings for this specified DGP, not a general finite-sample size guarantee.
+[The compressed paired results](audit_anticipation_calibration_results_20261026.json.gz)
+retain every seed, old/new outcome, source hash and prespecified check.
+
+The [independent anticipation review](INDEPENDENT_ANTICIPATION_REVIEW_20261026.md)
+adds 576 healthy anticipation-zero workflows with complete bit-identical
+public outputs and cell/aggregate IFs, plus six seeded bootstrap workflows
+with identical outputs and RNG state. It checks missing rows/outcomes,
+absence of never-treated units, invariant/varying covariates, all estimators,
+both engines, both controls and both base choices. Another 96 nonzero-window
+fits match independent weighted-mean/full-IF/Wald oracles; unaffected true
+pre-period and post-treatment outputs stay unchanged. Twelve noiseless fits
+recover a known 0.8 anticipation effect; the old varying-base fits lose it.
+
+The [support audit](validate_support_adversarial_results_20261026.json) adds
+864 healthy old/new workflow pairs with bit-identical complete outputs,
+all aggregation IFs, warnings and RNG states. Together with the preceding
+582 workflows, this is 1,446 unchanged healthy workflows across the tested
+data, anchor, weight, control, base, method and engine configurations.
+Its 64 targeted checks include 32 independent base-R weighted-mean,
+normal-equation and logistic-score/IF oracles, without calling did or DRDID.
+They reproduce formerly discarded valid weighted cells, restore 64 missing
+group-time results across eight fits, and preserve unaffected cells exactly.
+Across three RC routes, both engines and IF enabled/disabled, 48 old entries
+into an unsupported outcome fit become zero, with healthy cells preserved.
+Four deliberately broken weight-cache keys are detected, checking that the
+cache regression assertions are sensitive to the defect. Tiny designs already
+rejected by the old code and square designs already accepted are recorded
+separately as preserved behavior, rather than counted as repaired estimates.
+
+A fresh wheel installed outside the checkout also passes all 50 permanent
+numerical workflows, including complete IFs and shared-draw bootstrap.
+[Installed-wheel evidence](installed_wheel_results_20261026.json) verifies
+runtime import paths and wheel source hashes; test and R reference artifacts
+are excluded. The new audit scripts are validation tools, not package runtime.
 
 Five serial alternating-source timing rounds compare the updated branch with
 the prior PR head `2a36b48`, under the same interpreter/dependencies and one
