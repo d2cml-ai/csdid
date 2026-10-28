@@ -27,12 +27,22 @@ python3.12 -m venv /tmp/csdid-readme-venv
 QUARTO_PYTHON=/tmp/csdid-readme-venv/bin/python \
   OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
   MPLBACKEND=Agg PYTHONHASHSEED=0 quarto render README.qmd
+python scripts/normalize_readme_png.py
 python scripts/check_readme.py
 python -m unittest discover -s scripts/tests -p 'test_*.py'
 ```
 
 The README workflow renders twice and compares Markdown and PNG hashes before
 opening a PR. It may commit only `README.md` and generated figure PNGs. The
+PNG normalizer runs after those two-render checks. It restores tracked HEAD
+bytes only when every non-IDAT chunk and the inflated IDAT stream match
+exactly, preventing compression-only Linux/macOS differences from opening a
+redundant PR. It validates PNG chunk framing/CRCs and complete zlib streams,
+with 32 MiB file and 64 MiB inflated-data limits, before changing any figure.
+Pixel/scanline or metadata changes, new valid figures and removals remain.
+The helper uses only the standard library and does not decode pixels; different
+scanline/filter encodings are conservatively retained. Its focused tests run
+with the other pre-install guards in both Python 3.8 and 3.12 CI lanes. The
 content guard also runs in both mandatory Python CI jobs; it rejects the
 observed package-name regression, missing badges/examples/citation, duplicate
 case-variant README paths, broken figure links and the corrupted Downloads
