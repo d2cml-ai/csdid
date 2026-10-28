@@ -83,6 +83,9 @@ jobs:
             | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/readme-second.sha256"
           cmp "$RUNNER_TEMP/readme-first.sha256" "$RUNNER_TEMP/readme-second.sha256"
 
+      - name: Restore equivalent PNGs with compression-only changes
+        run: python scripts/normalize_readme_png.py
+
       - name: Check generated content and regression guards
         run: |
           python scripts/check_readme.py
