@@ -4,7 +4,8 @@ This stdlib-only command never fetches sources or translates tests. Every
 tracked Git-tree change requires human review, including runtime sources,
 tests, helpers, fixtures, documentation and build metadata. Test and other
 source changes remain separate evidence categories. Exact reviewed automation
-additions are retained in the report without requiring a numerical rebaseline.
+additions and a bounded DESCRIPTION version bump are retained in the report
+without requiring a numerical rebaseline.
 Exit codes: 0 = no unreviewed drift, 3 = review required, 2 = invalid evidence.
 """
 from __future__ import annotations
@@ -131,10 +132,10 @@ def _reviewed_automation(path, sources):
             or not isinstance(record["packages"], dict) \
             or set(record["packages"]) != set(sources):
         raise AuditError("Reviewed automation must identify exactly did and DRDID")
-    reviewed = {}
+    reviewed, versions = {}, {}
     for package, entry in record["packages"].items():
         if not isinstance(entry, dict) \
-                or set(entry) != {"baseline_commit", "rationale", "additions"} \
+                or set(entry) - {"version_metadata"} != {"baseline_commit", "rationale", "additions"} \
                 or entry["baseline_commit"] != sources[package]["commit"]:
             raise AuditError(f"{package} reviewed automation baseline does not match numerical baseline")
         if not isinstance(entry["rationale"], str) or not entry["rationale"].strip() \
@@ -158,7 +159,66 @@ def _reviewed_automation(path, sources):
                 raise AuditError(f"Duplicate {package} reviewed automation path: {name}")
             additions[name] = addition
         reviewed[package] = additions
-    return reviewed
+        metadata = entry.get("version_metadata", [])
+        if not isinstance(metadata, list) or len(metadata) > 1:
+            raise AuditError(f"Invalid {package} reviewed version metadata records")
+        versions[package] = metadata[0] if metadata else None
+        if not metadata:
+            continue
+        version = metadata[0]
+        if not isinstance(version, dict) or set(version) != {
+                "path", "status", "kind", "mode", "before_sha256", "after_sha256",
+                "before_version", "after_version", "rationale"}:
+            raise AuditError(f"Invalid {package} reviewed version metadata record")
+        before, after = version["before_version"], version["after_version"]
+        if package != "did" or version["path"] != "DESCRIPTION" \
+                or version["status"] != "modified" or version["kind"] != "blob" \
+                or version["mode"] != "100644" \
+                or not isinstance(version["rationale"], str) or not version["rationale"].strip() \
+                or any(not isinstance(version[key], str) or not _SHA256.fullmatch(version[key])
+                       for key in ("before_sha256", "after_sha256")) \
+                or any(not isinstance(value, str) or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+", value)
+                       for value in (before, after)):
+            raise AuditError(f"Invalid {package} reviewed DESCRIPTION identity/hash/version")
+        old_parts, new_parts = before.split("."), after.split(".")
+        if old_parts[:3] != new_parts[:3] or int(new_parts[3]) != int(old_parts[3]) + 1:
+            raise AuditError(f"{package} reviewed DESCRIPTION must increment only the fourth version component")
+    return reviewed, versions
+
+
+def _description_version(content):
+    """Locate exactly one complete Version field without normalizing bytes."""
+    if content is None:
+        return None
+    fields, offset = [], 0
+    for line in content.splitlines(keepends=True):
+        if line.startswith(b"Version:"):
+            fields.append((offset, line))
+        offset += len(line)
+    if len(fields) != 1:
+        return None
+    offset, line = fields[0]
+    match = re.fullmatch(rb"Version:[ \t]*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)[ \t]*(?:\r?\n)?", line)
+    if match is None:
+        return None
+    return (match.group(1).decode("ascii"), offset + match.start(1), offset + match.end(1))
+
+
+def _reviewed_description_content(package, record, tree, content):
+    """Validate both recorded hashes against a version-only baseline edit."""
+    if record is None:
+        return None
+    old = tree.get("DESCRIPTION")
+    original = content(old)
+    field = _description_version(original)
+    if old is None or old["kind"] != record["kind"] or old["mode"] != record["mode"] \
+            or original is None or _hash(original) != record["before_sha256"] \
+            or field is None or field[0] != record["before_version"]:
+        raise AuditError(f"{package} reviewed DESCRIPTION baseline content/mode/version mismatch")
+    updated = original[:field[1]] + record["after_version"].encode("ascii") + original[field[2]:]
+    if _hash(updated) != record["after_sha256"]:
+        raise AuditError(f"{package} reviewed DESCRIPTION after hash is not the exact version-only edit")
+    return updated
 
 
 def _crosswalk(path, package, commit):
@@ -189,7 +249,7 @@ def _crosswalk(path, package, commit):
     return result
 
 
-def _audit_package(package, repo, baseline, crosswalk_path, reviewed_automation):
+def _audit_package(package, repo, baseline, crosswalk_path, reviewed_automation, version_metadata):
     commit = baseline["commit"]
     # A shallow checkout without the pinned tree must fail, never look unchanged.
     _git(repo, "cat-file", "-e", commit + "^{commit}")
@@ -211,6 +271,7 @@ def _audit_package(package, repo, baseline, crosswalk_path, reviewed_automation)
             cache[oid] = _git(repo, "cat-file", "blob", oid)
         return cache[oid]
 
+    reviewed_description = _reviewed_description_content(package, version_metadata, old_tree, content)
     for path, digest in baseline["files_sha256"].items():
         original = content(old_tree.get(path))
         if original is None or _hash(original) != digest:
@@ -254,13 +315,26 @@ def _audit_package(package, repo, baseline, crosswalk_path, reviewed_automation)
                         and all(change["new"][key] == reviewed[key]
                                 for key in ("kind", "mode", "sha256")))
             change["source_review"] = "reviewed_automation" if accepted else "required"
+            if (version_metadata is not None and path == "DESCRIPTION"
+                    and change["status"] == version_metadata["status"]
+                    and old is not None and new is not None
+                    and all(old[key] == new[key] == version_metadata[key] for key in ("kind", "mode"))
+                    and change["old"]["sha256"] == version_metadata["before_sha256"]
+                    and change["new"]["sha256"] == version_metadata["after_sha256"]
+                    and _description_version(new_content) is not None
+                    and _description_version(new_content)[0] == version_metadata["after_version"]
+                    and new_content == reviewed_description):
+                change["source_review"] = "reviewed_version_metadata"
             source_changes.append(change)
     reviewed_paths = [item["path"] for item in source_changes
                       if item["source_review"] == "reviewed_automation"]
     unreviewed_paths = [item["path"] for item in source_changes
                         if item["source_review"] == "required"]
+    version_paths = [item["path"] for item in source_changes
+                     if item["source_review"] == "reviewed_version_metadata"]
     review_required = bool(test_changes or unreviewed_paths)
     status = ("manual_review_required" if review_required else
+              "reviewed_changes_only" if version_paths else
               "reviewed_automation_only" if reviewed_paths else "unchanged")
     return {
         "baseline_commit": commit, "current_commit": head, "status": status,
@@ -270,6 +344,8 @@ def _audit_package(package, repo, baseline, crosswalk_path, reviewed_automation)
         "source_review_required": review_required,
         "reviewed_automation_paths": reviewed_paths,
         "reviewed_automation_change_count": len(reviewed_paths),
+        "reviewed_version_metadata_paths": version_paths,
+        "reviewed_version_metadata_change_count": len(version_paths),
         "unreviewed_source_paths": unreviewed_paths,
         "unreviewed_source_change_count": len(unreviewed_paths),
     }
@@ -280,15 +356,18 @@ def audit(did, drdid, baseline=DEFAULT_BASELINE, did_crosswalk=DEFAULT_CROSSWALK
           reviewed_automation=DEFAULT_REVIEWED_AUTOMATION):
     """Return deterministic evidence for two clean, already-fetched checkouts."""
     sources = _baseline(baseline)
-    reviewed = _reviewed_automation(reviewed_automation, sources)
+    reviewed, versions = _reviewed_automation(reviewed_automation, sources)
     packages = {}
     for package, repo, crosswalk in (("did", did, did_crosswalk), ("DRDID", drdid, drdid_crosswalk)):
-        packages[package] = _audit_package(package, repo, sources[package], crosswalk, reviewed[package])
+        packages[package] = _audit_package(package, repo, sources[package], crosswalk,
+                                           reviewed[package], versions[package])
     review_required = any(item["source_review_required"] for item in packages.values())
     accepted = any(item["reviewed_automation_paths"] for item in packages.values())
+    accepted_metadata = any(item["reviewed_version_metadata_paths"] for item in packages.values())
     return {
         "schema_version": 1,
         "status": ("manual_review_required" if review_required else
+                   "reviewed_changes_only" if accepted_metadata else
                    "reviewed_automation_only" if accepted else "unchanged"),
         "exit_code": 3 if review_required else 0,
         "source_review_required": review_required,
@@ -323,14 +402,17 @@ def _markdown(report):
             lines.extend(["", "Every listed test-tree change requires manual coverage review; prior coverage is not a new-tree verdict.", ""])
         if result["source_changes"]:
             label = ("manual source review required" if result["unreviewed_source_paths"]
+                     else "reviewed changes only" if result["reviewed_version_metadata_paths"]
                      else "reviewed automation only")
             lines.extend([f"Other tracked-file changes ({label}):", ""])
             for change in result["source_changes"]:
-                review = ("reviewed automation" if change["source_review"] == "reviewed_automation"
-                          else "manual review required")
+                review = {"reviewed_automation": "reviewed automation",
+                          "reviewed_version_metadata": "reviewed version metadata",
+                          "required": "manual review required"}[change["source_review"]]
                 lines.append(f"- {change['status']}: `{change['path']}` ({review})")
             lines.append(f"\n{result['reviewed_automation_change_count']} reviewed automation additions; "
                          f"{result['unreviewed_source_change_count']} unreviewed other tracked-file changes.")
+            lines.append(f"{result['reviewed_version_metadata_change_count']} reviewed DESCRIPTION version changes.")
             lines.append("")
     return "\n".join(lines)
 

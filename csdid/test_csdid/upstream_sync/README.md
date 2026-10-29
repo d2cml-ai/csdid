@@ -37,8 +37,9 @@ an artifact retained for 14 days. Setup failures also retain available logs.
    tests, helpers, fixtures, snapshots, documentation and build metadata.
    Test-tree and other source changes are reported separately, so a source-only
    change does not imply that R tests changed or that new behavior is covered.
-   The two exact, reviewed downstream-caller workflow additions are recorded
-   separately as described below; their raw tree changes remain visible.
+   The two exact, reviewed downstream-caller workflow additions and one bounded
+   did version metadata edit are recorded separately as described below; their
+   raw tree changes remain visible.
 4. Write a strict `source-lock.json` containing the selected commits and package
    versions. Copy the five frozen input/multiplier CSVs to a new directory.
 5. Generate all 25 R configurations in both R modes, then run all 50 Python
@@ -93,7 +94,7 @@ python csdid/test_csdid/upstream_sync/audit.py \
   --output /tmp/r-test-changes.json --summary /tmp/r-test-changes.md
 ```
 
-## Reviewed automation additions
+## Reviewed automation and version metadata
 
 The [review record](reviewed_automation.json) accepts only the exact added
 `.github/workflows/python-downstream.yml` file reviewed on 2026-10-29 in each R
@@ -102,17 +103,30 @@ push; they do not change R package sources, tests, build inputs or numerical
 fixtures. This limited review does not advance the pinned numerical baseline
 or claim coverage of additional R assertions.
 
-Each record binds the original numerical baseline commit, added path, SHA256,
+Each automation record binds the original numerical baseline commit, added path, SHA256,
 regular-blob kind and `100644` mode. The path must be absent from that baseline.
-Different bytes or file mode, any change to an existing file, any extra path,
-and every test-tree change still require review. There is no directory ignore
-rule. Missing, malformed, duplicate or baseline-mismatched review records fail
-as invalid evidence.
+Different bytes or file mode, any extra path, and every test-tree change still
+require review. There is no directory ignore rule. Missing, malformed, duplicate
+or baseline-mismatched review records fail as invalid evidence.
+
+One separate did `version_metadata` record anticipates the existing R
+`bump-version.yml` policy after the caller PR merges: `2.5.1.904` becomes
+`2.5.1.905` in `DESCRIPTION`. It binds both complete file hashes and both version
+strings to the original baseline. Both files must be regular `100644` blobs
+with exactly one Version field, the first three version components must remain
+identical, and the fourth must increase by one. Replacing only the baseline
+Version value must reproduce every current file byte. Dependency edits, any
+other metadata change, mode changes, runtime/test changes and later version
+bumps remain unreviewed. The workflow-only checkout before the bump also
+passes; this record does not require a bump or change the existing R policy.
 
 The audit retains `source_changes` and its raw `source_change_count`, annotates
-each source change with its review status, and reports reviewed additions and
-unreviewed paths separately. Only exact reviewed additions produce
-`reviewed_automation_only` with audit exit 0. The numerical runner must still
+each source change with its review status, and reports reviewed additions,
+reviewed version metadata and unreviewed paths with separate counts. Exact
+reviewed additions produce `reviewed_automation_only`; an accepted version
+edit is labeled `reviewed_version_metadata` and produces `reviewed_changes_only`.
+These statuses have audit exit 0 only when there are no unreviewed changes.
+The numerical runner must still
 generate fresh R output and pass the unchanged comparisons before its overall
 exit can be 0. The audit report also records the review file's SHA256.
 

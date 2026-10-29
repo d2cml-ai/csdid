@@ -57,7 +57,7 @@ def histories(tmp_path):
             _write(repo / path, text)
         _write(repo / "tests/testthat/helper-fixture.R", "make_fixture <- function() 1\n")
         _write(repo / "tests/testthat/_snaps/output.md", "baseline snapshot\n")
-        _write(repo / "DESCRIPTION", f"Package: {package}\nVersion: 1.0.0\n")
+        _write(repo / "DESCRIPTION", f"Package: {package}\nVersion: 1.0.0.904\n")
         _write(repo / "R/estimator.R", "estimate <- function() 1\n")
         commit = _commit(repo)
         sources[package] = {"commit": commit, "files_sha256": {
@@ -279,11 +279,120 @@ def test_review_record_cannot_approve_a_preexisting_workflow(histories):
         _audit(histories)
 
 
+def _review_version(history, apply=True):
+    path = history["repos"]["did"] / "DESCRIPTION"
+    before = path.read_text()
+    after = before.replace("Version: 1.0.0.904\n", "Version: 1.0.0.905\n")
+    assert before != after
+    record = json.loads(history["reviewed"].read_text())
+    record["packages"]["did"]["version_metadata"] = [{
+        "path": "DESCRIPTION", "status": "modified", "kind": "blob", "mode": "100644",
+        "before_sha256": _sha(before), "after_sha256": _sha(after),
+        "before_version": "1.0.0.904", "after_version": "1.0.0.905",
+        "rationale": "Exact expected development-version bump after the reviewed automation merge",
+    }]
+    _json(history["reviewed"], record)
+    if apply:
+        path.write_text(after)
+    return before, after
+
+
+@pytest.mark.parametrize("workflow", [False, True])
+def test_pending_version_review_does_not_require_the_bump_to_exist(histories, workflow):
+    _review_version(histories, apply=False)
+    if workflow:
+        _review_workflow(histories, "did")
+        _commit(histories["repos"]["did"])
+    report = _audit(histories)
+    assert report["exit_code"] == 0
+    assert report["status"] == ("reviewed_automation_only" if workflow else "unchanged")
+    assert report["packages"]["did"]["reviewed_version_metadata_change_count"] == 0
+
+
+@pytest.mark.parametrize("workflow", [False, True])
+def test_exact_reviewed_version_edit_retains_raw_description_change(histories, workflow):
+    before, after = _review_version(histories)
+    if workflow:
+        _review_workflow(histories, "did")
+    _commit(histories["repos"]["did"])
+    report = _audit(histories)
+    assert report["exit_code"] == 0 and report["status"] == "reviewed_changes_only"
+    result = report["packages"]["did"]
+    assert result["source_change_count"] == 1 + int(workflow)
+    assert result["reviewed_automation_change_count"] == int(workflow)
+    assert result["reviewed_version_metadata_change_count"] == 1
+    assert result["reviewed_version_metadata_paths"] == ["DESCRIPTION"]
+    assert result["unreviewed_source_paths"] == [] and result["test_change_count"] == 0
+    change = next(item for item in result["source_changes"] if item["path"] == "DESCRIPTION")
+    assert change["status"] == "modified" and change["source_review"] == "reviewed_version_metadata"
+    assert change["old"]["sha256"] == _sha(before) and change["new"]["sha256"] == _sha(after)
+    assert audit_module.main(_args(histories)) == 0
+    assert "1 reviewed DESCRIPTION version changes" in (histories["root"] / "summary.md").read_text()
+
+
+@pytest.mark.parametrize("tamper", ["unexpected_version", "first_component", "dependency",
+                                  "duplicate_version", "executable", "symlink", "runtime"])
+def test_version_review_cannot_accept_other_versions_description_bytes_modes_or_code(histories, tamper):
+    _, after = _review_version(histories)
+    repo = histories["repos"]["did"]
+    path = repo / "DESCRIPTION"
+    if tamper == "unexpected_version":
+        path.write_text(after.replace("1.0.0.905", "1.0.0.906"))
+    elif tamper == "first_component":
+        path.write_text(after.replace("1.0.0.905", "2.0.0.905"))
+    elif tamper == "dependency":
+        path.write_text(after + "Imports: unreviewedDependency\n")
+    elif tamper == "duplicate_version":
+        path.write_text(after + "Version: 1.0.0.905\n")
+    elif tamper == "executable":
+        path.chmod(0o755)
+    elif tamper == "symlink":
+        path.unlink()
+        path.symlink_to("R/estimator.R")
+    else:
+        _write(repo / "R/estimator.R", "estimate <- function() 99\n")
+    _commit(repo)
+    report = _audit(histories)
+    assert report["exit_code"] == 3 and report["status"] == "manual_review_required"
+    result = report["packages"]["did"]
+    assert result["source_review_required"] is True
+    assert result["reviewed_version_metadata_paths"] == (["DESCRIPTION"] if tamper == "runtime" else [])
+    assert result["unreviewed_source_paths"] == (["R/estimator.R"] if tamper == "runtime" else ["DESCRIPTION"])
+
+
+@pytest.mark.parametrize("field,value", [
+    ("before_sha256", "0" * 64), ("after_sha256", "0" * 64),
+    ("before_version", "1.0.1.904"), ("after_version", "1.0.0.906"),
+    ("path", "R/estimator.R"), ("mode", "100755"), ("status", "added"),
+])
+def test_invalid_version_review_record_cannot_redefine_the_accepted_edit(histories, field, value):
+    _review_version(histories)
+    _commit(histories["repos"]["did"])
+    record = json.loads(histories["reviewed"].read_text())
+    record["packages"]["did"]["version_metadata"][0][field] = value
+    _json(histories["reviewed"], record)
+    assert audit_module.main(_args(histories)) == 2
+
+
+def test_version_review_after_hash_cannot_include_a_dependency_change(histories):
+    _, after = _review_version(histories)
+    changed = after + "Imports: unreviewedDependency\n"
+    _write(histories["repos"]["did"] / "DESCRIPTION", changed)
+    _commit(histories["repos"]["did"])
+    record = json.loads(histories["reviewed"].read_text())
+    record["packages"]["did"]["version_metadata"][0]["after_sha256"] = _sha(changed)
+    _json(histories["reviewed"], record)
+    with pytest.raises(audit_module.AuditError, match="exact version-only edit"):
+        _audit(histories)
+
+
 @pytest.mark.parametrize("reviewed,comparison_code,expected_status,expected_exit", [
     (False, 0, "coverage_review_required", 3),
     (False, 1, "numerical_mismatch", 1),
     (True, 0, "passed", 0),
     (True, 1, "numerical_mismatch", 1),
+    ("version", 0, "passed", 0),
+    ("version", 1, "numerical_mismatch", 1),
 ])
 def test_real_git_audit_keeps_runner_numerical_stages_and_failure_precedence(
         histories, monkeypatch, reviewed, comparison_code, expected_status, expected_exit):
@@ -294,7 +403,10 @@ def test_real_git_audit_keeps_runner_numerical_stages_and_failure_precedence(
     runner = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(runner)
     repo = histories["repos"]["did"]
-    if reviewed:
+    if reviewed == "version":
+        _review_version(histories)
+        changed_path = "DESCRIPTION"
+    elif reviewed:
         changed_path = _review_workflow(histories, "did")
     else:
         changed_path = "R/estimator.R"
@@ -328,7 +440,8 @@ def test_real_git_audit_keeps_runner_numerical_stages_and_failure_precedence(
     audit = json.loads((output / "audit.json").read_text())
     audit_code = 0 if reviewed else 3
     assert audit["exit_code"] == audit_code
-    assert audit["status"] == ("reviewed_automation_only" if reviewed else "manual_review_required")
+    assert audit["status"] == ("reviewed_changes_only" if reviewed == "version" else
+                               "reviewed_automation_only" if reviewed else "manual_review_required")
     assert audit["packages"]["did"]["test_changes"] == []
     assert [change["path"] for change in audit["packages"]["did"]["source_changes"]] == [changed_path]
     assert numerical_stages == ["r-generation", "pytest"]

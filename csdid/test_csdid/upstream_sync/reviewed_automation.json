@@ -12,6 +12,19 @@
           "mode": "100644",
           "sha256": "36fa4ff19b2d4525cac62d14431ea0edf22aa8b5baa0aa93b737f175b0051224"
         }
+      ],
+      "version_metadata": [
+        {
+          "path": "DESCRIPTION",
+          "status": "modified",
+          "kind": "blob",
+          "mode": "100644",
+          "before_version": "2.5.1.904",
+          "after_version": "2.5.1.905",
+          "before_sha256": "b1341908477e1508d46d8e3d0f3d90271e12c13469935492842b14cd0e2f6cd5",
+          "after_sha256": "3509d9d03974f53f102667fe4833225147c44c590d272aa438fd21ce616ed741",
+          "rationale": "Reviewed 2026-10-29: the R did repository's existing bump-version workflow increments the fourth DESCRIPTION version component when the downstream-caller PR is merged. Accept only this single expected metadata edit; every other DESCRIPTION byte remains identical to the pinned baseline. This does not advance the numerical fixtures or accept later version bumps."
+        }
       ]
     },
     "DRDID": {
