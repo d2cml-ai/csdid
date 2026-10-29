@@ -1,0 +1,4667 @@
+{
+  "panel_dr_never_varying": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 1.24344978758018e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 6.93889390390723e-18
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 4.21884749357559e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 6.93889390390723e-18
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 9.71445146547012e-17
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-15
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 3.10862446895044e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 7.99360577730113e-15
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 5.32907051820075e-15
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 1.99840144432528e-15
+    }
+  ],
+  "panel_dr_notyet_universal": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 2.4980018054066e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 1.55431223447522e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 5.32907051820075e-15
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 1.50990331349021e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 6.93889390390723e-18
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 3.5527136788005e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 9.71445146547012e-17
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 4.32986979603811e-15
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 2.66453525910038e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 8.88178419700125e-15
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 3.10862446895044e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 1.80411241501588e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 1.50990331349021e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 4.10782519111308e-15
+    }
+  ],
+  "panel_reg_never_varying": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 9.71445146547012e-17
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 7.7715611723761e-16
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 5.32907051820075e-15
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 7.99360577730113e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 6.93889390390723e-18
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 5.32907051820075e-15
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 5.32907051820075e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 1.24344978758018e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-17
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 7.105427357601e-15
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 4.77395900588817e-15
+    }
+  ],
+  "panel_reg_notyet_universal": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 1.88737914186277e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 1.52655665885959e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 1.66533453693773e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 2.1094237467878e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 8.88178419700125e-15
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 1.59872115546023e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 5.32907051820075e-15
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 7.7715611723761e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-17
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 8.88178419700125e-15
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 3.99680288865056e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 1.15463194561016e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-15
+    }
+  ],
+  "panel_ipw_never_varying": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 6.93889390390723e-17
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 1.06581410364015e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 6.93889390390723e-18
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 2.08166817117217e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 7.105427357601e-15
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 6.21724893790088e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-17
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 1.15463194561016e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 5.99520433297585e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 7.04991620636974e-15
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 2.94209101525666e-15
+    }
+  ],
+  "panel_ipw_notyet_universal": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 3.44169137633799e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 1.66533453693773e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 3.10862446895044e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 3.77475828372553e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 7.105427357601e-15
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 2.57571741713036e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 5.32907051820075e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 8.88178419700125e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 6.43929354282591e-15
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 3.99680288865056e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 7.7715611723761e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 1.15463194561016e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 3.44169137633799e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 2.57571741713036e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 6.21724893790088e-15
+    }
+  ],
+  "rc_dr_never_varying": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 7.7715611723761e-16
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 8.88178419700125e-15
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 6.3948846218409e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 4.61852778244065e-14
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 9.43689570931383e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 3.19744231092045e-14
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 3.37507799486048e-14
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 3.88578058618805e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 2.4980018054066e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 6.3948846218409e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 3.19744231092045e-14
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 9.71445146547012e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 3.05311331771918e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 3.90798504668055e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 3.19744231092045e-14
+    }
+  ],
+  "rc_dr_notyet_universal": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 1.4432899320127e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 2.4980018054066e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 1.55431223447522e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 1.33226762955019e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 1.33226762955019e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 7.105427357601e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 2.8421709430404e-14
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 7.7715611723761e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 9.43689570931383e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 3.19744231092045e-14
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 2.66453525910038e-14
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 8.88178419700125e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 2.4980018054066e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 5.32907051820075e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 1.77635683940025e-14
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 7.7715611723761e-16
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 6.3948846218409e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 1.95399252334028e-14
+    }
+  ],
+  "rc_reg_never_varying": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 5.21804821573824e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 1.66533453693773e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 5.44009282066327e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 4.88498130835069e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 3.73034936274053e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 1.56319401867222e-13
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 3.90798504668055e-14
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 7.7715611723761e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 5.21804821573824e-15
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 1.3855583347322e-13
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 4.79616346638068e-14
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 9.99200722162641e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 3.77475828372553e-15
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-17
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 1.56319401867222e-13
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 4.79616346638068e-14
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 1.99840144432528e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 6.75015598972095e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 2.8421709430404e-14
+    }
+  ],
+  "rc_reg_notyet_universal": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 6.55031584528842e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 3.60822483003176e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 6.55031584528842e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 6.43929354282591e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 7.28306304154103e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 2.41584530158434e-13
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 1.77635683940025e-15
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 7.46069872548105e-14
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 5.21804821573824e-15
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 1.3855583347322e-13
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 4.9737991503207e-14
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 3.77475828372553e-15
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 1.56319401867222e-13
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 4.48530101948563e-14
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-15
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 1.52655665885959e-16
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 5.10702591327572e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 5.27355936696949e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 2.41584530158434e-13
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 1.17239551400417e-13
+    }
+  ],
+  "rc_ipw_never_varying": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 6.21724893790088e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 6.27276008913213e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 6.21724893790088e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 1.91846538655227e-13
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 5.15143483426073e-14
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 9.71445146547012e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 6.21724893790088e-15
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 1.3855583347322e-13
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 4.88498130835069e-14
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-15
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 1.91846538655227e-13
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 4.35207425653061e-14
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-15
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 8.5265128291212e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 2.89768209427166e-14
+    }
+  ],
+  "rc_ipw_notyet_universal": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 1.0769163338864e-14
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 3.60822483003176e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 1.0547118733939e-14
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-14
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-15
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 2.41584530158434e-13
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 2.55351295663786e-15
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 7.8159700933611e-14
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 1.22124532708767e-15
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 6.99440505513849e-15
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 1.70530256582424e-13
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 5.50670620214078e-14
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 2.44249065417534e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 6.93889390390723e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 4.66293670342566e-15
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 1.4210854715202e-13
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 3.73034936274053e-14
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 2.88657986402541e-15
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 1.94289029309402e-16
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 8.10462807976364e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 1.77635683940025e-13
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 1.06581410364015e-13
+    }
+  ],
+  "unbalanced_dr_never_varying": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 9.99200722162641e-16
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-16
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 1.33226762955019e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 1.50990331349021e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 2.48689957516035e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 5.77315972805081e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 6.93889390390723e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 9.99200722162641e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 1.15463194561016e-14
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 7.54951656745106e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 7.7715611723761e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 3.05311331771918e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 1.95399252334028e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 3.10862446895044e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 7.7715611723761e-16
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 1.06581410364015e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 4.88498130835069e-15
+    }
+  ],
+  "unbalanced_dr_notyet_universal": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 3.66373598126302e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 3.60822483003176e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 2.99760216648792e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 4.32986979603811e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 7.99360577730113e-15
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 3.73034936274053e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 6.21724893790088e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 9.99200722162641e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 1.15463194561016e-14
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 7.54951656745106e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 1.77635683940025e-15
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 1.77635683940025e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 9.71445146547012e-17
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 1.33226762955019e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 4.21884749357559e-15
+    }
+  ],
+  "unbalanced_reg_never_varying": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 1.77635683940025e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 1.72084568816899e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 1.88737914186277e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 3.28626015289046e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 2.1316282072803e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 3.5527136788005e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 7.7715611723761e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-17
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 8.43769498715119e-15
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 5.32907051820075e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 8.88178419700125e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 1.94289029309402e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 2.1316282072803e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-17
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 1.31908373113276e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 5.99520433297585e-15
+    }
+  ],
+  "unbalanced_reg_notyet_universal": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 3.5527136788005e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 1.94289029309402e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 3.44169137633799e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 3.66373598126302e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 6.3948846218409e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 4.08562073062058e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 7.7715611723761e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 5.71764857681956e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 1.22124532708767e-15
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-17
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 1.17128529097954e-14
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 5.10702591327572e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 1.77635683940025e-15
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 1.94289029309402e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 2.1316282072803e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 7.54951656745106e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 9.99200722162641e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 1.55431223447522e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 9.71445146547012e-17
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 2.09693373776076e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 8.77076189453874e-15
+    }
+  ],
+  "unbalanced_ipw_never_varying": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 4.10782519111308e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 1.94289029309402e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 4.21884749357559e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 3.99680288865056e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 4.17443857259059e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 2.75335310107039e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 9.76996261670138e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 1.66533453693773e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 2.75335310107039e-14
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 1.33226762955019e-14
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 4.10782519111308e-15
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-14
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 1.88737914186277e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-17
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 1.95399252334028e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-15
+    }
+  ],
+  "unbalanced_ipw_notyet_universal": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 4.10782519111308e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 2.91433543964104e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 4.21884749357559e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 3.99680288865056e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 7.19424519957101e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 4.2632564145606e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-14
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 1.33226762955019e-15
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 1.66533453693773e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 2.75335310107039e-14
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 1.4210854715202e-14
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 4.10782519111308e-15
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 3.11348169468317e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 1.19904086659517e-14
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 8.88178419700125e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 2.44249065417534e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 1.52655665885959e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 3.08642000845794e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 1.4210854715202e-14
+    }
+  ],
+  "panel_dr_never_varying_varying_weights": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 1.22124532708767e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 2.4980018054066e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 8.88178419700125e-16
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 1.55431223447522e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 2.04281036531029e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 2.8421709430404e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 2.08166817117217e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 9.99200722162641e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 1.52655665885959e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 1.15463194561016e-14
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 7.105427357601e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 9.99200722162641e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 1.66533453693773e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 1.24344978758018e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 3.5527136788005e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 1.22124532708767e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 2.4980018054066e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 1.68753899743024e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 4.88498130835069e-15
+    }
+  ],
+  "panel_reg_notyet_universal_varying_weights": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 7.27196081129478e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 2.63677968348475e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 7.32747196252603e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 7.21644966006352e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 8.08242361927114e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 5.37347943918576e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 1.22124532708767e-15
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 2.08166817117217e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 6.30051566474776e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 1.4432899320127e-15
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 4.55191440096314e-15
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 3.28626015289046e-14
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 6.55031584528842e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 3.21964677141295e-15
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 2.39808173319034e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 4.77395900588817e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 1.66533453693773e-15
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 4.85722573273506e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 3.10862446895044e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 1.52655665885959e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 3.99680288865056e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 1.22124532708767e-14
+    }
+  ],
+  "panel_dr_never_varying_bootstrap_unit": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 1.2490009027033e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-16
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 1.24344978758018e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 1.31838984174237e-16
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 4.21884749357559e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 6.93889390390723e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 1.77635683940025e-15
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-15
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 3.10862446895044e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 3.5527136788005e-15
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 7.99360577730113e-15
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 1.2490009027033e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 5.32907051820075e-15
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 1.99840144432528e-15
+    }
+  ],
+  "panel_reg_notyet_universal_bootstrap_cluster": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 1.30451205393456e-15
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 9.43689570931383e-16
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 7.105427357601e-15
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 2.48689957516035e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-16
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 3.99680288865056e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 1.22124532708767e-15
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 4.85722573273506e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 7.99360577730113e-15
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 8.32667268468867e-15
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 3.10862446895044e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 1.94289029309402e-16
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 1.22124532708767e-15
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 3.10862446895044e-15
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 7.99360577730113e-15
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 8.88178419700125e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 1.30451205393456e-15
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 6.21724893790088e-15
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 2.48689957516035e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 6.77236045021345e-15
+    }
+  ],
+  "panel_dr_never_varying_analytic_cluster": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-17
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-16
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 4.88498130835069e-15
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 1.24344978758018e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 4.21884749357559e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-15
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 3.10862446895044e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 7.99360577730113e-15
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-15
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 5.32907051820075e-15
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 1.99840144432528e-15
+    }
+  ],
+  "rc_reg_never_varying_analytic_cluster": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 5.21804821573824e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 5.27355936696949e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 4.88498130835069e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 6.75015598972095e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 1.56319401867222e-13
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 3.90798504668055e-14
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 7.7715611723761e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 5.21804821573824e-15
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 1.80411241501588e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 1.3855583347322e-13
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 4.79616346638068e-14
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 9.99200722162641e-16
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 1.66533453693773e-16
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 3.77475828372553e-15
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 1.56319401867222e-13
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 4.79616346638068e-14
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 1.99840144432528e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 1.2490009027033e-16
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 6.75015598972095e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 2.8421709430404e-14
+    }
+  ],
+  "unbalanced_ipw_never_varying_analytic_cluster": [
+    {
+      "field": "fit.group",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.t",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.att",
+      "same_support": true,
+      "max_abs": 4.10782519111308e-15
+    },
+    {
+      "field": "fit.se",
+      "same_support": true,
+      "max_abs": 1.94289029309402e-16
+    },
+    {
+      "field": "fit.c",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.l_se",
+      "same_support": true,
+      "max_abs": 4.32986979603811e-15
+    },
+    {
+      "field": "fit.u_se",
+      "same_support": true,
+      "max_abs": 3.99680288865056e-15
+    },
+    {
+      "field": "fit.W",
+      "same_support": true,
+      "max_abs": 2.04281036531029e-14
+    },
+    {
+      "field": "fit.Wpval",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "fit.inffunc",
+      "same_support": true,
+      "max_abs": 2.75335310107039e-14
+    },
+    {
+      "field": "aggs.simple.overall_att",
+      "same_support": true,
+      "max_abs": 3.33066907387547e-16
+    },
+    {
+      "field": "aggs.simple.overall_se",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-17
+    },
+    {
+      "field": "aggs.simple.inf_function.simple_att",
+      "same_support": true,
+      "max_abs": 9.76996261670138e-15
+    },
+    {
+      "field": "aggs.group.overall_att",
+      "same_support": true,
+      "max_abs": 4.44089209850063e-16
+    },
+    {
+      "field": "aggs.group.overall_se",
+      "same_support": true,
+      "max_abs": 4.16333634234434e-17
+    },
+    {
+      "field": "aggs.group.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.att_egt",
+      "same_support": true,
+      "max_abs": 5.55111512312578e-16
+    },
+    {
+      "field": "aggs.group.se_egt",
+      "same_support": true,
+      "max_abs": 1.2490009027033e-16
+    },
+    {
+      "field": "aggs.group.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func_g",
+      "same_support": true,
+      "max_abs": 2.75335310107039e-14
+    },
+    {
+      "field": "aggs.group.inf_function.selective_inf_func",
+      "same_support": true,
+      "max_abs": 1.33226762955019e-14
+    },
+    {
+      "field": "aggs.dynamic.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-15
+    },
+    {
+      "field": "aggs.dynamic.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.dynamic.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.att_egt",
+      "same_support": true,
+      "max_abs": 4.10782519111308e-15
+    },
+    {
+      "field": "aggs.dynamic.se_egt",
+      "same_support": true,
+      "max_abs": 1.38777878078145e-16
+    },
+    {
+      "field": "aggs.dynamic.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func_e",
+      "same_support": true,
+      "max_abs": 2.22044604925031e-14
+    },
+    {
+      "field": "aggs.dynamic.inf_function.dynamic_inf_func",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-14
+    },
+    {
+      "field": "aggs.calendar.overall_att",
+      "same_support": true,
+      "max_abs": 1.11022302462516e-16
+    },
+    {
+      "field": "aggs.calendar.overall_se",
+      "same_support": true,
+      "max_abs": 2.77555756156289e-17
+    },
+    {
+      "field": "aggs.calendar.egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.att_egt",
+      "same_support": true,
+      "max_abs": 1.88737914186277e-15
+    },
+    {
+      "field": "aggs.calendar.se_egt",
+      "same_support": true,
+      "max_abs": 9.71445146547012e-17
+    },
+    {
+      "field": "aggs.calendar.crit_val_egt",
+      "same_support": true,
+      "max_abs": 0
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func_t",
+      "same_support": true,
+      "max_abs": 1.95399252334028e-14
+    },
+    {
+      "field": "aggs.calendar.inf_function.calendar_inf_func",
+      "same_support": true,
+      "max_abs": 6.66133814775094e-15
+    }
+  ]
+}

@@ -1,0 +1,193 @@
+name: R upstream parity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      did-ref:
+        description: R did commit to validate; empty uses the current default branch.
+        type: string
+        default: ''
+      r-drdid-ref:
+        description: R DRDID commit to validate; empty uses the current default branch.
+        type: string
+        default: ''
+  # Check current R upstreams monthly even when Python source is unchanged.
+  schedule:
+    - cron: '17 9 1 * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r-upstream-parity-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  parity:
+    name: Python self-tests and current R upstream parity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+        working-directory: csdid
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+    steps:
+      - name: Initialize report directory
+        working-directory: ${{ runner.temp }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/r-upstream-parity"
+          printf 'REPORT_DIR=%s\n' "$RUNNER_TEMP/r-upstream-parity" >> "$GITHUB_ENV"
+
+      - name: Check out csdid
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: ${{ (inputs.did-ref || inputs.r-drdid-ref) && 'd2cml-ai/csdid' || github.repository }}
+          # R repositories call this workflow after their own pushes.
+          # Own-repository runs continue to validate the exact push/PR commit.
+          ref: ${{ (inputs.did-ref || inputs.r-drdid-ref) && 'main' || github.sha }}
+          path: csdid
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Omitting ref checks out each official repository's default branch once.
+      # Full history lets the runner inspect changes since the reviewed pins.
+      - name: Check out current R did
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: bcallaway11/did
+          ref: ${{ inputs.did-ref }}
+          path: upstream/did
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check out current R DRDID
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: pedrohcgs/DRDID
+          ref: ${{ inputs.r-drdid-ref }}
+          path: upstream/DRDID
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: csdid/setup.py
+
+      - name: Read reviewed Python DRDID source
+        id: python-peer
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import os
+          from pathlib import Path
+          path = Path('csdid/test_csdid/joint_sync/run.py')
+          spec = importlib.util.spec_from_file_location('joint_gate', path)
+          gate = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(gate)
+          lock = gate.load_lock(path.with_name('python_drdid.json'))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('repository=' + lock['repository'] + '\n')
+              output.write('commit=' + lock['commit'] + '\n')
+          PY
+
+      - name: Check out reviewed Python DRDID
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: ${{ steps.python-peer.outputs.repository }}
+          ref: ${{ steps.python-peer.outputs.commit }}
+          path: upstream/python-drdid
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Record checked-out commits
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          workspace = Path(os.environ['GITHUB_WORKSPACE'])
+          output = Path(os.environ['REPORT_DIR'])
+          output.mkdir(parents=True, exist_ok=True)
+          paths = {'csdid': 'csdid', 'did': 'upstream/did', 'DRDID': 'upstream/DRDID',
+                   'python_drdid': 'upstream/python-drdid'}
+          commits = {
+              name: subprocess.check_output(
+                  ['git', '-C', str(workspace / path), 'rev-parse', 'HEAD'], text=True).strip()
+              for name, path in paths.items()
+          }
+          (output / 'checkout-heads.json').write_text(json.dumps(commits, indent=2) + '\n')
+          PY
+
+      - name: Install Python package and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest "$GITHUB_WORKSPACE/upstream/python-drdid" .
+
+      - name: Run canonical Python tests and automation failure tests
+        run: |
+          python -m pytest csdid/test_csdid/ -m 'not slow' -q \
+            --junitxml="$REPORT_DIR/selftests-junit.xml" \
+            2>&1 | tee "$REPORT_DIR/selftests.log"
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - name: Install the frozen R checkouts and their dependencies
+        uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          working-directory: csdid
+          packages: |
+            local::${{ github.workspace }}/upstream/DRDID
+            local::${{ github.workspace }}/upstream/did
+            any::pkgload
+            any::digest
+            any::jsonlite
+            any::testthat
+          dependencies: '"hard"'
+          install-pandoc: false
+          install-quarto: false
+
+      - name: Audit upstream test drift and compare complete numerical output
+        run: |
+          python csdid/test_csdid/upstream_sync/run.py \
+            --did "$GITHUB_WORKSPACE/upstream/did" \
+            --drdid "$GITHUB_WORKSPACE/upstream/DRDID" \
+            --output "$REPORT_DIR/comparison"
+
+      - name: Publish run summary
+        if: always()
+        working-directory: ${{ runner.temp }}
+        run: |
+          if [ -f "$REPORT_DIR/comparison/summary.md" ]; then
+            cat "$REPORT_DIR/comparison/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            printf '%s\n' 'R upstream parity did not produce a report. Check the failed setup or Python self-test step and the uploaded logs.' > "$REPORT_DIR/summary.md"
+            cat "$REPORT_DIR/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload complete parity reports and logs
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: r-upstream-parity-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/r-upstream-parity/
+          if-no-files-found: warn
+          retention-days: 14

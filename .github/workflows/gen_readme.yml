@@ -1,0 +1,129 @@
+name: Actualizar Readme
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'README.qmd'
+      - 'data/mpdta.csv'
+      - 'csdid/**'
+      - 'setup.py'
+      - 'setup.cfg'
+      - 'pyproject.toml'
+      - 'MANIFEST.in'
+      - 'requirements.txt'
+      - 'docs/requirements-readme.txt'
+      - 'scripts/check_readme.py'
+      - 'scripts/normalize_readme_png.py'
+      - 'scripts/check_release_ci.py'
+      - '.github/workflows/gen_readme.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: readme-generation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  CreateQuarto:
+    # Manual runs on other branches validate a preview; only main publishes PRs.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: csdid
+    env:
+      MPLBACKEND: Agg
+      PYTHONHASHSEED: '0'
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - name: Check out the source being documented
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          path: csdid
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: csdid/docs/requirements-readme.txt
+
+      - name: Check README source content
+        run: python scripts/check_readme.py --source-only
+
+      - name: Read the reviewed Python DRDID source
+        id: peer
+        run: >-
+          python scripts/check_release_ci.py lock
+          --lock csdid/test_csdid/joint_sync/python_drdid.json
+
+      - name: Check out the reviewed Python DRDID
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: ${{ steps.peer.outputs.repository }}
+          ref: ${{ steps.peer.outputs.commit }}
+          path: python-drdid
+          persist-credentials: false
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: '1.8.25'
+
+      - name: Install the checked-out package and rendering dependencies
+        run: |
+          python -m venv "$RUNNER_TEMP/readme-venv"
+          echo "$RUNNER_TEMP/readme-venv/bin" >> "$GITHUB_PATH"
+          echo "QUARTO_PYTHON=$RUNNER_TEMP/readme-venv/bin/python" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/readme-venv/bin/python" -m pip install \
+            -r docs/requirements-readme.txt "$GITHUB_WORKSPACE/python-drdid" .
+          "$RUNNER_TEMP/readme-venv/bin/python" -m pip check
+
+      - name: Render twice and reject unstable output
+        run: |
+          quarto render README.qmd
+          cp README.md "$RUNNER_TEMP/README-first.md"
+          find README_files/figure-commonmark -type f -name '*.png' -print0 \
+            | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/readme-first.sha256"
+          quarto render README.qmd
+          cmp "$RUNNER_TEMP/README-first.md" README.md
+          find README_files/figure-commonmark -type f -name '*.png' -print0 \
+            | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/readme-second.sha256"
+          cmp "$RUNNER_TEMP/readme-first.sha256" "$RUNNER_TEMP/readme-second.sha256"
+
+      - name: Restore equivalent PNGs with compression-only changes
+        run: python scripts/normalize_readme_png.py
+
+      - name: Check generated content and regression guards
+        run: |
+          python scripts/check_readme.py
+          python -m unittest discover -s scripts/tests -p 'test_*.py'
+
+      - name: Open a PR with the regenerated README
+        if: github.ref == 'refs/heads/main'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          path: csdid
+          token: ${{ secrets.GITHUB_TOKEN }}
+          add-paths: |
+            README.md
+            README_files/figure-commonmark/*.png
+          commit-message: 'docs: update generated README'
+          title: 'docs: update generated README'
+          body: |
+            Automated regeneration of `README.md` from `README.qmd` using
+            the checked-out package, pinned rendering dependencies, and a fixed
+            example seed. Content guards and two identical renders passed.
+
+            Edit `README.qmd` to change authored documentation. This PR contains
+            only the rendered README and its generated figures.
+          branch: auto/update-readme
+          delete-branch: true
+          author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          committer: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"

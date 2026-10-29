@@ -1,0 +1,326 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-10-26",
+  "scope": "Live official-head runner replay and an isolated committed R-test-only future-drift probe after PR85 synchronization. No runtime source or reviewed fixture changes by this audit.",
+  "preflight": {
+    "verified_utc": "2026-10-27T02:16:06.059672+00:00",
+    "python": "3.12.12 (main, Oct  9 2025, 11:07:00) [Clang 17.0.0 (clang-1700.4.4.1)]",
+    "dependencies": {
+      "numpy": "2.5.4",
+      "pandas": "3.1.0",
+      "scipy": "1.18.1",
+      "statsmodels": "0.15.0",
+      "pytest": "9.1.1",
+      "drdid": "1.1.6"
+    },
+    "sources": {
+      "did": {
+        "official_url": "https://github.com/bcallaway11/did.git",
+        "official_head": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
+        "local_checkout": "/private/tmp/csdid-parity-20261026/did",
+        "local_head": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
+        "tracked_source_clean": true
+      },
+      "DRDID": {
+        "official_url": "https://github.com/pedrohcgs/DRDID.git",
+        "official_head": "eaac3b49cd225d0d7706c633858555a5f204e21e",
+        "local_checkout": "/private/tmp/csdid-parity-20261026/DRDID",
+        "local_head": "eaac3b49cd225d0d7706c633858555a5f204e21e",
+        "tracked_source_clean": true
+      }
+    }
+  },
+  "worktree_files_sha256": {
+    ".github/workflows/r-upstream-parity.yml": "cefc42da7eeda75ab16d4ad7c1f39517a737f7613353f8bdc29080617d8ed398",
+    "csdid/test_csdid/upstream_sync/run.py": "bea1ed695ede8b27bb503a888ce1e9ac29cc90ed0258d6800320dcf5ab7818ef",
+    "csdid/test_csdid/upstream_sync/audit.py": "ee5df5751d090c5fb855287d44bacbf9d2778d1a4e5823a4c3ae199a8abd25b3",
+    "csdid/test_csdid/test_r_current_parity.py": "4b6b4a58664898604150361f4e8e2d3d8f41bdbfb23c81be037ab961f462a058",
+    "csdid/test_csdid/r_ref/current/generate.R": "1e40ac2dfd9ee88f2a001f11069aace632786c12c65037dd9e18b90156dc27d3",
+    "csdid/test_csdid/r_ref/current/manifest.json": "768d230721c35b50e4c7b7c47ad00898b75069b811b7d3d2ea86232a9eb4a080",
+    "csdid/test_csdid/r_test_alignment_did.json": "d68f8e16e9fa0d2e63cd5ee658b4f06095100459df5c093dac57ce713405db57",
+    "csdid/test_csdid/r_test_alignment_drdid.json": "3c8345fa1dda4c97f2a2adf511dc10cfbf7f1fd10b5d18ca65cd0111ad31b8f8"
+  },
+  "live": {
+    "report": {
+      "exit_code": 0,
+      "finished_utc": "2026-10-27T02:19:31.831556+00:00",
+      "python": "3.12.12 (main, Oct  9 2025, 11:07:00) [Clang 17.0.0 (clang-1700.4.4.1)]",
+      "reference_policy": "Reviewed fixtures, inputs and tolerances are never updated",
+      "reviewed_references_unchanged": true,
+      "schema_version": 1,
+      "source_checkouts": {
+        "DRDID": "/private/tmp/csdid-parity-20261026/DRDID",
+        "did": "/private/tmp/csdid-parity-20261026/did"
+      },
+      "sources": {
+        "DRDID": {
+          "commit": "eaac3b49cd225d0d7706c633858555a5f204e21e",
+          "version": "1.4.0"
+        },
+        "did": {
+          "commit": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
+          "version": "2.5.1.904"
+        }
+      },
+      "stages": {
+        "numerical_comparison": 0,
+        "r_generation": 0,
+        "test_coverage_audit": 0
+      },
+      "started_utc": "2026-10-27T02:19:03.145453+00:00",
+      "status": "passed"
+    },
+    "audit": {
+      "comparison": "pinned baseline Git tree versus checkout HEAD; no network access",
+      "coverage_limit": "Declarations and prior crosswalk entries are evidence for manual review; automation does not port tests or establish assertion coverage.",
+      "exit_code": 0,
+      "packages": {
+        "DRDID": {
+          "baseline_commit": "eaac3b49cd225d0d7706c633858555a5f204e21e",
+          "baseline_crosswalk_test_count": 29,
+          "current_commit": "eaac3b49cd225d0d7706c633858555a5f204e21e",
+          "source_change_count": 0,
+          "source_changes": [],
+          "status": "unchanged",
+          "test_change_count": 0,
+          "test_changes": []
+        },
+        "did": {
+          "baseline_commit": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
+          "baseline_crosswalk_test_count": 44,
+          "current_commit": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
+          "source_change_count": 0,
+          "source_changes": [],
+          "status": "unchanged",
+          "test_change_count": 0,
+          "test_changes": []
+        }
+      },
+      "schema_version": 1,
+      "status": "unchanged",
+      "test_drift_scope": "all tracked paths under tests/, including helpers and fixtures"
+    },
+    "junit": {
+      "tests": "125",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "3.656"
+    },
+    "frozen_artifacts_byte_identical": {
+      "panel.csv": true,
+      "rc.csv": true,
+      "unbalanced.csv": true,
+      "multipliers_unit.csv": true,
+      "multipliers_cluster.csv": true,
+      "cases.json": true,
+      "references.json.gz": true,
+      "r_mode_checks.json": true
+    },
+    "artifact_sha256": {
+      "audit.json": "9a6995279b720238fde4ccc65cb84565d9de3a06610aee839272f1fec190703e",
+      "audit.log": "cdf978dac1262017fed49216ba83b257008333b0370163a66709d0a541a8479b",
+      "audit.md": "86eeca50116119154a0139c2b48556790c802a73ac4d9f7030b2bdae18598fd6",
+      "junit.xml": "92b478775ead0a46cd54de766043744ff00844a62e2141ebb40e59325856608b",
+      "pytest.log": "22bedbebda2bb06d6901e62c6b3d110e68d294abe1dbaece15c9b1feb722e83b",
+      "r-generation.log": "fb4d57d19f520c0dd94b213324cdc285cb763f62173d92e1c2b1fd7dea85c16b",
+      "references/cases.json": "2c8acb36421787eadef586f49709dd4a201bb4e761ace9203992114cc72dfa17",
+      "references/generate.R": "1e40ac2dfd9ee88f2a001f11069aace632786c12c65037dd9e18b90156dc27d3",
+      "references/manifest.json": "e0d73ff83d6b4803778b38d01e08a2a9558eec912e55acf52487f40016553d30",
+      "references/multipliers_cluster.csv": "191ce42ffcaa952ab6b20763dad200df4bf256384afb90cfb6dd7b162e694c98",
+      "references/multipliers_unit.csv": "71f4bc1e96192ca0780784dbe33943fd541f4e9b2e8907622c05af0ebe1359bf",
+      "references/panel.csv": "0dc4db99e051fffbbb398d46f7bbe8c92bf2d435f416ed42ea41e23343cd419b",
+      "references/r_mode_checks.json": "5e30e71e675cbd2a074e9786dd25a0c90fed999e0b83120638f0ec4462547084",
+      "references/rc.csv": "53e446420fdb975ba6dcd100e9f51f760ac88643dca043864cd4f763970312c2",
+      "references/references.json.gz": "6b48d1ba8b4629124f0d73e6b1fac9b01070b969ed2c817ad62cd88cc8f302d2",
+      "references/sessionInfo.txt": "df05ca84b8e937324e8318bd08d64c331ff494666cbe28df19eef8e1a3536b96",
+      "references/unbalanced.csv": "bda7a76092cb8282128a118d91525484782b9a2c13d9c585c92db9cf6dc7c973",
+      "report.json": "636cf82743ebbf132db809f2cb292245d892877f5841bd78420a9f4a5f2c1da9",
+      "source-lock.json": "0f0b7eadd05f076fda9fd88a79060ccbf9c1029d8473e63b3f34c56332a50123",
+      "summary.md": "86018164c69120cdbe9c07dc7330dffbfee762507158d486b381c2605afa87aa"
+    }
+  },
+  "future_test_probe": {
+    "report": {
+      "exit_code": 3,
+      "finished_utc": "2026-10-27T02:20:46.500280+00:00",
+      "python": "3.12.12 (main, Oct  9 2025, 11:07:00) [Clang 17.0.0 (clang-1700.4.4.1)]",
+      "reference_policy": "Reviewed fixtures, inputs and tolerances are never updated",
+      "reviewed_references_unchanged": true,
+      "schema_version": 1,
+      "source_checkouts": {
+        "DRDID": "/private/tmp/csdid-parity-20261026/DRDID",
+        "did": "/private/tmp/csdid-pr85-sync-20261026/did-future"
+      },
+      "sources": {
+        "DRDID": {
+          "commit": "eaac3b49cd225d0d7706c633858555a5f204e21e",
+          "version": "1.4.0"
+        },
+        "did": {
+          "commit": "7b51f4a8ae5c2e97690ff709e97db7febea63d54",
+          "version": "2.5.1.904"
+        }
+      },
+      "stages": {
+        "numerical_comparison": 0,
+        "r_generation": 0,
+        "test_coverage_audit": 3
+      },
+      "started_utc": "2026-10-27T02:20:19.685215+00:00",
+      "status": "coverage_review_required"
+    },
+    "audit": {
+      "comparison": "pinned baseline Git tree versus checkout HEAD; no network access",
+      "coverage_limit": "Declarations and prior crosswalk entries are evidence for manual review; automation does not port tests or establish assertion coverage.",
+      "exit_code": 3,
+      "packages": {
+        "DRDID": {
+          "baseline_commit": "eaac3b49cd225d0d7706c633858555a5f204e21e",
+          "baseline_crosswalk_test_count": 29,
+          "current_commit": "eaac3b49cd225d0d7706c633858555a5f204e21e",
+          "source_change_count": 0,
+          "source_changes": [],
+          "status": "unchanged",
+          "test_change_count": 0,
+          "test_changes": []
+        },
+        "did": {
+          "baseline_commit": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
+          "baseline_crosswalk_test_count": 44,
+          "current_commit": "7b51f4a8ae5c2e97690ff709e97db7febea63d54",
+          "source_change_count": 0,
+          "source_changes": [],
+          "status": "manual_review_required",
+          "test_change_count": 1,
+          "test_changes": [
+            {
+              "coverage_review": "required",
+              "is_testthat_file": true,
+              "new": {
+                "kind": "blob",
+                "mode": "100644",
+                "oid": "18bd502abc53c655e41292cf5461ef44172494f4",
+                "sha256": "e1e75bee5e3584202e53055e7f45d6043692d7f0c1801ebbc3622af282b1da85"
+              },
+              "new_test_that": [
+                {
+                  "expression": "testthat::test_that(\"upstream synchronization notices a new test file\", {",
+                  "line": 1
+                }
+              ],
+              "old": null,
+              "old_test_that": [],
+              "path": "tests/testthat/test-upstream-sync-20261026-probe.R",
+              "previous_coverage": null,
+              "status": "added"
+            }
+          ]
+        }
+      },
+      "schema_version": 1,
+      "status": "manual_review_required",
+      "test_drift_scope": "all tracked paths under tests/, including helpers and fixtures"
+    },
+    "junit": {
+      "tests": "125",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "3.511"
+    },
+    "frozen_artifacts_byte_identical": {
+      "panel.csv": true,
+      "rc.csv": true,
+      "unbalanced.csv": true,
+      "multipliers_unit.csv": true,
+      "multipliers_cluster.csv": true,
+      "cases.json": true,
+      "references.json.gz": true,
+      "r_mode_checks.json": true
+    },
+    "artifact_sha256": {
+      "audit.json": "f731d940eb0640e0f8ffe74e62bbc3621f1be2b358e9d05de264655ca7b08d05",
+      "audit.log": "e92db72bb6d68efb7f0f98bcc94c4b2548f51b9dc219e0391fcd6207710855d5",
+      "audit.md": "e6b31e29975f4600b2b9d688a3c3da7617d9a374339881c4b0c2e88413653d05",
+      "junit.xml": "7c08d1650a86aaa20dfa8e686ab26030a2eed36fdbb52d57fdfa7e524e81fd49",
+      "pytest.log": "596ddd13166ad05fde32b2c4ed7d4550755f5f2b976fead538c51c1ed27cddb6",
+      "r-generation.log": "b65746363560157de0f0ad1e3dce9205dbfec9c8e0c0ede78ffd7a8f78961fae",
+      "references/cases.json": "2c8acb36421787eadef586f49709dd4a201bb4e761ace9203992114cc72dfa17",
+      "references/generate.R": "1e40ac2dfd9ee88f2a001f11069aace632786c12c65037dd9e18b90156dc27d3",
+      "references/manifest.json": "d3744c67ad2e8b51c03d7d3d7567acee9bca1883f590412850f4d2eb12b90e30",
+      "references/multipliers_cluster.csv": "191ce42ffcaa952ab6b20763dad200df4bf256384afb90cfb6dd7b162e694c98",
+      "references/multipliers_unit.csv": "71f4bc1e96192ca0780784dbe33943fd541f4e9b2e8907622c05af0ebe1359bf",
+      "references/panel.csv": "0dc4db99e051fffbbb398d46f7bbe8c92bf2d435f416ed42ea41e23343cd419b",
+      "references/r_mode_checks.json": "5e30e71e675cbd2a074e9786dd25a0c90fed999e0b83120638f0ec4462547084",
+      "references/rc.csv": "53e446420fdb975ba6dcd100e9f51f760ac88643dca043864cd4f763970312c2",
+      "references/references.json.gz": "6b48d1ba8b4629124f0d73e6b1fac9b01070b969ed2c817ad62cd88cc8f302d2",
+      "references/sessionInfo.txt": "df05ca84b8e937324e8318bd08d64c331ff494666cbe28df19eef8e1a3536b96",
+      "references/unbalanced.csv": "bda7a76092cb8282128a118d91525484782b9a2c13d9c585c92db9cf6dc7c973",
+      "report.json": "c695b072011a33987d9785ef76b1163ca5fc1f4de516ec26649fb696708e0148",
+      "source-lock.json": "1260c0e8185f5645962f958f332b7f944540b956851f4618e3410eb590e91f21",
+      "summary.md": "35a6fa8793d72803d0efa36ae8ce1914f35aa4c109261a978bd86cfbe504e18e"
+    }
+  },
+  "future_test_runtime_source_identical": true,
+  "original_r_checkouts_remain_tracked_clean": true,
+  "disposition": "report; current source passes and newly added upstream assertions still require manual review despite passing numerical references",
+  "integration": {
+    "base_branch": "main",
+    "base_commit": "5cd3678cc7427d4d3d0662a81b97f7c5782e6152",
+    "previous_pr_head": "b7d48ed48a2252cedd0e0671519c1ad37ac977d6",
+    "conflicts_resolved": [
+      "csdid/test_csdid/r_ref/current/generate.R",
+      "csdid/test_csdid/r_ref/current/manifest.json",
+      "csdid/test_csdid/test_r_current_parity.py"
+    ],
+    "full_suite": {
+      "tests": "2310",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "72.866"
+    },
+    "full_suite_warnings": 25,
+    "full_suite_log_sha256": "856cfd9c72459c94bf2a6c5155383046a20addc1964557b13bddddb6304c16ba",
+    "default_replay": {
+      "panel.csv": {
+        "unchanged_from_main": true,
+        "sha256": "0dc4db99e051fffbbb398d46f7bbe8c92bf2d435f416ed42ea41e23343cd419b"
+      },
+      "rc.csv": {
+        "unchanged_from_main": true,
+        "sha256": "53e446420fdb975ba6dcd100e9f51f760ac88643dca043864cd4f763970312c2"
+      },
+      "unbalanced.csv": {
+        "unchanged_from_main": true,
+        "sha256": "bda7a76092cb8282128a118d91525484782b9a2c13d9c585c92db9cf6dc7c973"
+      },
+      "multipliers_unit.csv": {
+        "unchanged_from_main": true,
+        "sha256": "71f4bc1e96192ca0780784dbe33943fd541f4e9b2e8907622c05af0ebe1359bf"
+      },
+      "multipliers_cluster.csv": {
+        "unchanged_from_main": true,
+        "sha256": "191ce42ffcaa952ab6b20763dad200df4bf256384afb90cfb6dd7b162e694c98"
+      },
+      "cases.json": {
+        "unchanged_from_main": true,
+        "sha256": "2c8acb36421787eadef586f49709dd4a201bb4e761ace9203992114cc72dfa17"
+      },
+      "references.json.gz": {
+        "unchanged_from_main": true,
+        "sha256": "6b48d1ba8b4629124f0d73e6b1fac9b01070b969ed2c817ad62cd88cc8f302d2"
+      },
+      "r_mode_checks.json": {
+        "unchanged_from_main": true,
+        "sha256": "5e30e71e675cbd2a074e9786dd25a0c90fed999e0b83120638f0ec4462547084"
+      }
+    },
+    "actionlint": "passed",
+    "independent_source_lock_tests": 31,
+    "estimator_runtime_unchanged_from_main": true,
+    "generate.R_sha256": "1e40ac2dfd9ee88f2a001f11069aace632786c12c65037dd9e18b90156dc27d3",
+    "manifest.json_sha256": "768d230721c35b50e4c7b7c47ad00898b75069b811b7d3d2ea86232a9eb4a080"
+  }
+}

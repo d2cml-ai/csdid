@@ -1,36 +1,166 @@
 name: Publish to PyPI
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ['CI', 'R upstream parity']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # Serialize versions across all main revisions, including delayed retries.
+  group: pypi-csdid
+  cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-
+  gate:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository &&
+       github.event.workflow_run.head_repository.id == github.event.repository.id)
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+      checks: read
+    outputs:
+      ready: ${{ steps.release.outputs.ready }}
+      sha: ${{ steps.verify.outputs.sha }}
     steps:
-      - uses: actions/checkout@v2
-
-      - id: Python_pip
-        name: Python dependencies
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          python-version: "3.8"
-          cache: "pip"
-      - run: pip install -r requirements.txt
-
-      - name: Build Package
-        run: |
-          python setup.py sdist
-
-      - name: Upload to PyPi
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          path: source
+          persist-credentials: false
+      - name: Require all three tested-main GitHub Actions checks
+        id: verify
+        working-directory: source
         env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USER}}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/check_release_ci.py ci
+      - name: Skip an identical release or wait for its backend
+        if: steps.verify.outputs.ready == 'true'
+        id: release
+        timeout-minutes: 8
+        working-directory: source
+        run: python3 scripts/check_release_ci.py release
+
+  build-and-publish:
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    environment: pypi
+    permissions:
+      contents: read
+      actions: read
+      checks: read
+      # Required for PyPI Trusted Publishing (OIDC) — lets GitHub publish without
+      # any stored PyPI password or API token.
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ needs.gate.outputs.sha }}
+          path: source
+          persist-credentials: false
+
+      # Recheck after any environment approval delay. A pending check or newer
+      # main revision skips this attempt; a later completion or manual run retries.
+      - name: Recheck CI immediately before preparing publication
+        id: verify
+        working-directory: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/check_release_ci.py ci
+
+      - name: Recheck release state after any environment delay
+        if: steps.verify.outputs.ready == 'true'
+        id: release
+        timeout-minutes: 8
+        working-directory: source
+        run: python3 scripts/check_release_ci.py release
+
+      - name: Read the reviewed backend release lock
+        if: steps.verify.outputs.ready == 'true' && steps.release.outputs.ready == 'true'
+        id: backend-lock
+        working-directory: source
+        run: >-
+          python3 scripts/check_release_ci.py lock
+          --lock csdid/test_csdid/joint_sync/python_drdid.json
+
+      - name: Check out exactly the reviewed backend source
+        if: steps.verify.outputs.ready == 'true' && steps.release.outputs.ready == 'true'
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: d2cml-ai/DRDIDpy
+          ref: ${{ steps.backend-lock.outputs.commit }}
+          path: reviewed-backend
+          persist-credentials: false
+
+      - name: Require the reviewed backend wheel to exist on PyPI
+        if: steps.verify.outputs.ready == 'true' && steps.release.outputs.ready == 'true'
+        working-directory: source
+        run: >-
+          python3 scripts/check_release_ci.py backend
+          --lock csdid/test_csdid/joint_sync/python_drdid.json
+          --peer ../reviewed-backend
+
+      - name: Set up Python
+        if: steps.verify.outputs.ready == 'true' && steps.release.outputs.ready == 'true'
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.11"
+
+      - name: Build sdist and wheel
+        if: steps.verify.outputs.ready == 'true' && steps.release.outputs.ready == 'true'
+        working-directory: source
         run: |
-          sudo apt-get install tree
-          tree /home/runner/work/csdid
-          twine upload dist/*
+          python -m pip install --upgrade pip build
+          python -m build
+
+      - name: Check distribution metadata
+        if: steps.verify.outputs.ready == 'true' && steps.release.outputs.ready == 'true'
+        working-directory: source
+        run: |
+          python -m pip install --upgrade twine
+          python -m twine check dist/*
+
+      - name: Recheck tested main immediately before upload
+        if: steps.verify.outputs.ready == 'true' && steps.release.outputs.ready == 'true'
+        id: final-ci
+        working-directory: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/check_release_ci.py ci
+
+      - name: Publish to PyPI
+        if: steps.final-ci.outputs.ready == 'true'
+        id: publish
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
+        with:
+          packages-dir: source/dist/
+          # Safely finish a partial upload. The gate verifies existing artifacts
+          # instead of silently accepting changed code under an existing version.
+          skip-existing: true
+
+      - name: Check out clean reviewed source for public verification
+        if: steps.publish.outcome == 'success'
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ needs.gate.outputs.sha }}
+          path: publication-source
+          persist-credentials: false
+
+      - name: Verify public artifacts and installer index after upload
+        if: steps.publish.outcome == 'success'
+        # Includes network time, in addition to the bounded 135s of backoff.
+        timeout-minutes: 8
+        working-directory: publication-source
+        run: python3 scripts/check_release_ci.py published

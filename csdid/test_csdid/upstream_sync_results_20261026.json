@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-10-26",
+  "objective": "Synchronize supported Python estimators with newly merged did sources, stress test complete numerical outputs, and update existing PR84.",
+  "sources": {
+    "did": "48863b646e657f2aaa5cc9e9d2e7b9d764a6a44e",
+    "DRDID": "eaac3b49cd225d0d7706c633858555a5f204e21e"
+  },
+  "pytest": {
+    "command": "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 python -m pytest csdid/test_csdid/ -q --disable-warnings --tb=short --junitxml=/tmp/csdid-sync-20261026-final.xml",
+    "tests": 2242,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "warnings": 25,
+    "seconds": 61.994,
+    "log_sha256": "9fc166494c3efc029261ffb592f2dc32369b0ae2f433e2558b90b20833683091"
+  },
+  "source_sha256": {
+    "csdid/att_gt.py": "5d6ef09799dc880581ee90ab529c17a0e18909242e750ba81917b13d366694c8",
+    "csdid/attgt_fnc/compute_att_gt.py": "7a3522eb15ee6a3473950646d5fe2a53d0519d48b993ca19617155779fc460f6",
+    "csdid/attgt_fnc/compute_att_gt2.py": "c14b4a8abeccfa8530616ea313e3025db0493c18c2e189a79e6dda357302fa22",
+    "csdid/attgt_fnc/compute_att_gt_shared.py": "f8201dfd6151662bce9c6592bec763a3cb45a14239fec3417e08ea639420d94b",
+    "csdid/attgt_fnc/preprocess_did.py": "4823a5803c03b2a4cca200a7869f29c55b3bc5d08eb79ab7546d8894d8223d2c",
+    "csdid/aggte_fnc/compute_aggte.py": "921fd3d10c51ea9ee4ed1c9a2bd6bb65db3ae7f57f5f3fdd4d0cacab2b31c688",
+    "csdid/aggte_fnc/utils.py": "9c180ce80f66af790ae1a041aa2bb96ad61f5d68531d33ee60c4296f2a529000",
+    "csdid/utils/mboot.py": "46919752135a38f7cd40d8b97be59cb9e61957860e3601dfff9b4566ecf630ef"
+  },
+  "evidence_sha256": {
+    "csdid/test_csdid/r_ref/current/stress_comparison_20261026.json.gz": "42017fe43d48814b97467a8a5135c9be667edb6d7d7019b8fe2a960b506236eb",
+    "csdid/test_csdid/r_ref/current/support_comparison_20261026.json": "2851ebeffcb3e447a7331684d312b1e79eb02dc039e56b335151eef6dd329bfc",
+    "csdid/test_csdid/upstream_20261026_performance.json": "a8542a9622b4e22cdb805cdf4e0db12a94ee7c6e631a0e2749616981243f9098",
+    "csdid/test_csdid/r_ref/current/manifest.json": "18d3d424fcd1a19a1f0de982291bc34d86478188c2744f1f2d75201ac83607bb",
+    "csdid/test_csdid/r_test_alignment_did.json": "d68f8e16e9fa0d2e63cd5ee658b4f06095100459df5c093dac57ce713405db57",
+    "csdid/test_csdid/audit20261026/inference_adversarial.json.gz": "f60279ddc1f5f2b03cac2983ea1f49fc2aaf8e815f961b891e53390b052a03e2",
+    "csdid/test_csdid/audit20261026/inference_adversarial_summary.json": "2184ca4f2caba845f3d5dfc4c38d3dff7a28249ab75d6c2f98948b99a64713c5",
+    "csdid/test_csdid/audit_anticipation_calibration_results_20261026.json.gz": "dce363ecac8b2c525185f5e2af90cd5a5e37aa83e91da8fb8345614a8ad6eaaf",
+    "csdid/test_csdid/r_ref/current/anticipation_regression_comparison_20261026.json.gz": "9c8a57e7a90edcf6f7f72277e470cc7ab1fcad62ae67ed44ec7d1b69103f9c05",
+    "csdid/test_csdid/validate_support_adversarial_results_20261026.json": "7654ba39896326c7c69238168a31d572d0da96d29f351ccc90dbb54676875021",
+    "csdid/test_csdid/installed_wheel_results_20261026.json": "2c4e31e9ae47adf1e59d0ef716b42599945f910827b629c72d46f0669a357ba9"
+  },
+  "claim_record": [
+    {
+      "claim": "Supported ordinary and small-scale numerical workflows agree under unchanged componentwise tolerances.",
+      "disposition": "report",
+      "evidence": "252 fresh mode comparisons plus 50 permanent workflows; exact support/nonfinite masks/full IFs."
+    },
+    {
+      "claim": "Arbitrary outcome scales satisfy raw fixed-absolute IF tolerance.",
+      "disposition": "qualify",
+      "evidence": "36 raw-scale failures at multiplier1e10 retained; reported estimates/inference pass, R modes have42 IF-field misses; separate72 normalized diagnostics pass."
+    },
+    {
+      "claim": "Guard changes have no speed cost.",
+      "disposition": "decline",
+      "evidence": "Five serial rounds in eight workloads measure median increases0.4%\u20132.9%;80 timed executions retain exact healthy outputs/warnings/RNG."
+    },
+    {
+      "claim": "All current R assertions/APIs are covered.",
+      "disposition": "qualify",
+      "evidence": "44file crosswalk names partial and not-applicable coverage, including R-only conditional tests and older diagnostic gaps."
+    },
+    {
+      "claim": "The fixes address reproducible defects while preserving audited healthy workflows.",
+      "disposition": "report within tested scope",
+      "evidence": "1,446 bit-identical healthy workflows; 1,484 independent equation cases; 200 paired DGP replications; 32 base-R oracles; 50 installed-wheel workflows. No further runtime changes required. Existing 36 raw extreme-scale IF misses remain."
+    }
+  ],
+  "additional_adversarial_audit": {
+    "runtime_commit": "81fa18073a239f40173c9a9a60e5c5d4934073be",
+    "runtime_changes_after_original_ci": false,
+    "healthy_workflows_with_bit_identical_outputs": 1446,
+    "independent_equation_cases_passed": 1484,
+    "substantive_old_case_failures_corrected": 835,
+    "diagnostic_only_old_case_differences": 346,
+    "support_targeted_checks_passed": 64,
+    "independent_base_r_oracles_passed": 32,
+    "seeded_weight_cache_defects_detected": 4,
+    "installed_wheel_workflows_passed": 50,
+    "monte_carlo": {
+      "paired_replications": 200,
+      "declared_anticipation_pretest_rejection_before": 1.0,
+      "declared_anticipation_pretest_rejection_after": 0.06,
+      "scope": "Specified DGP only; no general size guarantee"
+    },
+    "reported_unintended_regressions_in_tested_scope": 0,
+    "retained_large_scale_raw_IF_failures": 36
+  },
+  "github_ci": {
+    "runtime_commit": "81fa18073a239f40173c9a9a60e5c5d4934073be",
+    "url": "https://github.com/d2cml-ai/csdid/actions/runs/40433620064",
+    "python_versions": [
+      "3.8",
+      "3.12"
+    ],
+    "passed_per_lane": 2240,
+    "slow_deselected_per_lane": 2,
+    "both_slow_tests_passed_locally": true
+  }
+}

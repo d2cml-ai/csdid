@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "skip_slow": false,
+  "started_utc": "2026-10-27T12:18:49.713136+00:00",
+  "completed_utc": "2026-10-27T12:20:59.602618+00:00",
+  "peer_lock": {
+    "schema_version": 1,
+    "repository": "d2cml-ai/DRDIDpy",
+    "commit": "eb896640c7fb74e2baac06ec0e208ee19f290d7c",
+    "version": "1.1.7"
+  },
+  "peer_lock_sha256": "79a88d0becfc0fe22d877a407638aecba1ebaa2d0ec52a278c61fd5a75ed2dcf",
+  "driver_sha256": "9daca53a0a3459ba2a4ce1226267e67b9d0009f30b8917dafd2a1e956a315398",
+  "configuration_binding": {
+    "mode": "committed_peer_lock",
+    "archived_lock_sha256": "79a88d0becfc0fe22d877a407638aecba1ebaa2d0ec52a278c61fd5a75ed2dcf"
+  },
+  "sources": {
+    "csdid": {
+      "commit": "e8354bc3454e5ed5bc78eb5f2df3c8b8422b24aa",
+      "git_tree": "3ecebf7202460500ae9e796943bbfd73015b3125",
+      "archive_sha256": "dcd8a950690c2264ab82322e672bcbb785f0022c4157d1c4b3c8dd2344e28101",
+      "runtime_files_sha256": {
+        "csdid/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/_version.py": "eff0534396bcfa828eb9a81771606b6bec0b830a33ff6075ccd12d496f210edb",
+        "csdid/aggte_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/aggte_fnc/aggte.py": "992788709ff02d453cc0f1c921de6091af8a3f8fc1afc7cd1eee06654c009893",
+        "csdid/aggte_fnc/compute_aggte.py": "be4c92842a6c356c72b9e5c67f40234d54e92a3fadce80bbf0b9b30b37c7b3af",
+        "csdid/aggte_fnc/utils.py": "5385765417e65c291cc7d1ba38b67809374b1814127bbf0c6e9342ba09845354",
+        "csdid/att_gt.py": "5d6ef09799dc880581ee90ab529c17a0e18909242e750ba81917b13d366694c8",
+        "csdid/attgt_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/attgt_fnc/compute_att_gt.py": "a730165664510133257a98ab5d8db0498ad153f6d7a0deae9d1a615d8f5b3a0e",
+        "csdid/attgt_fnc/compute_att_gt2.py": "619184099812c3e0f8d1596108affc8249ae0979fb106468270a487d42a72929",
+        "csdid/attgt_fnc/compute_att_gt_shared.py": "3d048024cb804d8461917bfe61e822c91d4aa7cc2fda3d2d6a7d495e829aaf1b",
+        "csdid/attgt_fnc/drdid_trim.py": "5033b0301f74124950ddd199c3018442f706cefb87ab4e0b5c20e179f7db19ea",
+        "csdid/attgt_fnc/preprocess_did.py": "ea36bd4ba29ee6134d2d2a3a77bc3fe92f2bb121e4874d08316f59062deeea99",
+        "csdid/plots/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/plots/gplot.py": "84c850a2acb9142b01d318e2869af00781c85bd3a32c02829a4569021ffda5c0",
+        "csdid/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/utils/bmisc.py": "9650c57640f9a2fbfa91f01e0d3e7c38a411f7b8fcfd4129ad359c6a34e16c2d",
+        "csdid/utils/mboot.py": "46919752135a38f7cd40d8b97be59cb9e61957860e3601dfff9b4566ecf630ef",
+        "csdid/utils/weights.py": "e35d418cc81369ba4728b245d9856cc2c993a4bd0854d8ef86266fe600dbdf6c"
+      }
+    },
+    "drdid": {
+      "commit": "eb896640c7fb74e2baac06ec0e208ee19f290d7c",
+      "git_tree": "70e83abd331dc6e73dc37857291cb37fd9b8804f",
+      "archive_sha256": "6875c898a538e94bae99d27e409495d3d609c692ae12a49b7b79c569af5b9b3f",
+      "runtime_files_sha256": {
+        "drdid/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "drdid/_estimators.py": "c2e4b34725025f28fe7d962026907ea625136b4a1f341da2473c15e1fc045e4f",
+        "drdid/_validation.py": "8af5f6bbb2ca7938f03394237ae4bb9c61362f43e090435dd61d150a3b773a80",
+        "drdid/_version_.py": "39fb21c3aa19604042a10f7b68e4fb77fa98ed32853bf5fcdf23501e36ad405c",
+        "drdid/drdid.py": "87146a902802c5839bd2ec11c3b693ccab7a9778bf2847d7582b8556154599c2",
+        "drdid/ipwd_did.py": "383c456c22f542854ebdf9b169012a8efe71cae05c705f6f40d41aebc6c888c6",
+        "drdid/reg_did.py": "243e5a77137c39b19f2eedfa90030c345c79f3de56bbdea5539010799919d018",
+        "drdid/utils.py": "67a33cd4bfa45bbdea8c8dbefa1efc4e55302d7f65e62a174c551ac8fcf5dc03"
+      }
+    }
+  },
+  "wheels": {
+    "csdid": {
+      "filename": "csdid-0.4.4-py3-none-any.whl",
+      "version": "0.4.4",
+      "requires_dist": [
+        "pandas",
+        "numpy",
+        "scipy",
+        "patsy",
+        "plotnine",
+        "twine",
+        "joblib",
+        "statsmodels",
+        "drdid==1.1.7"
+      ],
+      "sha256": "820a1e429e4fc061bb28fee445e6fcce8d44ecf04ce327fdaffbc8d7752558c1",
+      "bytes": 75610,
+      "runtime_files_sha256": {
+        "csdid/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/_version.py": "eff0534396bcfa828eb9a81771606b6bec0b830a33ff6075ccd12d496f210edb",
+        "csdid/att_gt.py": "5d6ef09799dc880581ee90ab529c17a0e18909242e750ba81917b13d366694c8",
+        "csdid/aggte_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/aggte_fnc/aggte.py": "992788709ff02d453cc0f1c921de6091af8a3f8fc1afc7cd1eee06654c009893",
+        "csdid/aggte_fnc/compute_aggte.py": "be4c92842a6c356c72b9e5c67f40234d54e92a3fadce80bbf0b9b30b37c7b3af",
+        "csdid/aggte_fnc/utils.py": "5385765417e65c291cc7d1ba38b67809374b1814127bbf0c6e9342ba09845354",
+        "csdid/attgt_fnc/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/attgt_fnc/compute_att_gt.py": "a730165664510133257a98ab5d8db0498ad153f6d7a0deae9d1a615d8f5b3a0e",
+        "csdid/attgt_fnc/compute_att_gt2.py": "619184099812c3e0f8d1596108affc8249ae0979fb106468270a487d42a72929",
+        "csdid/attgt_fnc/compute_att_gt_shared.py": "3d048024cb804d8461917bfe61e822c91d4aa7cc2fda3d2d6a7d495e829aaf1b",
+        "csdid/attgt_fnc/drdid_trim.py": "5033b0301f74124950ddd199c3018442f706cefb87ab4e0b5c20e179f7db19ea",
+        "csdid/attgt_fnc/preprocess_did.py": "ea36bd4ba29ee6134d2d2a3a77bc3fe92f2bb121e4874d08316f59062deeea99",
+        "csdid/plots/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/plots/gplot.py": "84c850a2acb9142b01d318e2869af00781c85bd3a32c02829a4569021ffda5c0",
+        "csdid/utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "csdid/utils/bmisc.py": "9650c57640f9a2fbfa91f01e0d3e7c38a411f7b8fcfd4129ad359c6a34e16c2d",
+        "csdid/utils/mboot.py": "46919752135a38f7cd40d8b97be59cb9e61957860e3601dfff9b4566ecf630ef",
+        "csdid/utils/weights.py": "e35d418cc81369ba4728b245d9856cc2c993a4bd0854d8ef86266fe600dbdf6c"
+      }
+    },
+    "drdid": {
+      "filename": "drdid-1.1.7-py3-none-any.whl",
+      "version": "1.1.7",
+      "requires_dist": [
+        "pandas",
+        "numpy",
+        "statsmodels"
+      ],
+      "sha256": "4dc16ef4a684992d5390fc30382e2d9b1beef178d3bdf336bc25dd655ba14cca",
+      "bytes": 10242,
+      "runtime_files_sha256": {
+        "drdid/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "drdid/_estimators.py": "c2e4b34725025f28fe7d962026907ea625136b4a1f341da2473c15e1fc045e4f",
+        "drdid/_validation.py": "8af5f6bbb2ca7938f03394237ae4bb9c61362f43e090435dd61d150a3b773a80",
+        "drdid/_version_.py": "39fb21c3aa19604042a10f7b68e4fb77fa98ed32853bf5fcdf23501e36ad405c",
+        "drdid/drdid.py": "87146a902802c5839bd2ec11c3b693ccab7a9778bf2847d7582b8556154599c2",
+        "drdid/ipwd_did.py": "383c456c22f542854ebdf9b169012a8efe71cae05c705f6f40d41aebc6c888c6",
+        "drdid/reg_did.py": "243e5a77137c39b19f2eedfa90030c345c79f3de56bbdea5539010799919d018",
+        "drdid/utils.py": "67a33cd4bfa45bbdea8c8dbefa1efc4e55302d7f65e62a174c551ac8fcf5dc03"
+      }
+    }
+  },
+  "installed": {
+    "python": "3.12.12 (main, Oct  9 2025, 11:07:00) [Clang 17.0.0 (clang-1700.4.4.1)]",
+    "site_packages": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages",
+    "packages": {
+      "narwhals": "2.27.1",
+      "setuptools": "84.2.1",
+      "cloudpickle": "3.1.2",
+      "rfc3986": "2.0.0",
+      "kiwisolver": "1.5.1",
+      "jaraco.classes": "3.4.0",
+      "packaging": "26.3",
+      "joblib": "1.6.0",
+      "jaraco.context": "6.1.2",
+      "Pygments": "2.21.0",
+      "requests": "2.34.2",
+      "rich": "15.0.0",
+      "certifi": "2026.10.23",
+      "mizani": "0.14.6",
+      "pandas": "3.1.0",
+      "readme_renderer": "46.0",
+      "iniconfig": "2.3.1",
+      "csdid": "0.4.4",
+      "jaraco.functools": "4.6.0",
+      "numpy": "2.5.4",
+      "wheel": "0.48.0",
+      "formulaic": "1.2.2",
+      "wrapt": "2.5.1",
+      "tzdata": "2026.5",
+      "pillow": "13.0.0",
+      "contourpy": "1.4.0",
+      "pluggy": "1.7.0",
+      "pytest": "9.1.1",
+      "urllib3": "2.8.0",
+      "mdurl": "0.1.2",
+      "id": "1.6.1",
+      "matplotlib": "3.11.2",
+      "twine": "7.0.0",
+      "statsmodels": "0.15.0",
+      "drdid": "1.1.7",
+      "pip": "26.2.2",
+      "cycler": "0.12.1",
+      "nh3": "0.3.7",
+      "markdown-it-py": "4.2.0",
+      "interface_meta": "2.0.1",
+      "requests-toolbelt": "1.0.0",
+      "more-itertools": "11.2.1",
+      "patsy": "1.0.3",
+      "typing_extensions": "4.16.0",
+      "plotnine": "0.15.8",
+      "fonttools": "4.67.0",
+      "python-dateutil": "3.0.0",
+      "charset-normalizer": "3.5.2",
+      "keyring": "25.7.0",
+      "docutils": "0.23",
+      "pyparsing": "3.3.3",
+      "six": "1.17.0",
+      "scipy": "1.18.1",
+      "idna": "3.20"
+    }
+  },
+  "bridge": {
+    "cases": 72,
+    "script_sha256": "3ca566bd6a1ec4fba36ca00411eaeea2e011f2017718b9a3d23253cf349a9340",
+    "cases_sha256": "e995f46b619ae49b653f4dfe807667cb1edf1dcc3e05b06ad9fa09df6e81c51c",
+    "checks": "Unchanged raw ATT/full IF and declared original-unit comparisons"
+  },
+  "test_snapshot_sha256": {
+    "csdid": "4ee5db1c1c468f31050ac2c6fad4e223fa4aa54e41ad9f1c685ce0ee57e34c53",
+    "drdid": "6513775d4887ddaa172dc9bae4ec1298bdc7e4053e216381c8edbb6becc7af21"
+  },
+  "test_counts": {
+    "tests": 2954,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "by_package": {
+      "csdid": 2556,
+      "drdid": 379
+    }
+  },
+  "module_origins": {
+    "pytest": {
+      "csdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/__init__.py",
+      "drdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/__init__.py",
+      "csdid.aggte_fnc": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/aggte_fnc/__init__.py",
+      "csdid.utils": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/__init__.py",
+      "csdid.utils.bmisc": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/bmisc.py",
+      "csdid.utils.mboot": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/mboot.py",
+      "csdid.utils.weights": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/weights.py",
+      "csdid.aggte_fnc.utils": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/aggte_fnc/utils.py",
+      "csdid.aggte_fnc.compute_aggte": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/aggte_fnc/compute_aggte.py",
+      "csdid.aggte_fnc.aggte": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/aggte_fnc/aggte.py",
+      "csdid.attgt_fnc": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/__init__.py",
+      "csdid.attgt_fnc.preprocess_did": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/preprocess_did.py",
+      "drdid._validation": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/_validation.py",
+      "drdid._estimators": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/_estimators.py",
+      "drdid.reg_did": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/reg_did.py",
+      "csdid.attgt_fnc.drdid_trim": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/drdid_trim.py",
+      "csdid.attgt_fnc.compute_att_gt_shared": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/compute_att_gt_shared.py",
+      "csdid.attgt_fnc.compute_att_gt": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/compute_att_gt.py",
+      "csdid.attgt_fnc.compute_att_gt2": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/compute_att_gt2.py",
+      "csdid.plots": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/plots/__init__.py",
+      "csdid.plots.gplot": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/plots/gplot.py",
+      "csdid.att_gt": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/att_gt.py",
+      "drdid.drdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/drdid.py",
+      "drdid.ipwd_did": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/ipwd_did.py"
+    },
+    "bridge": {
+      "csdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/__init__.py",
+      "drdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/__init__.py",
+      "csdid.attgt_fnc": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/__init__.py",
+      "drdid._validation": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/_validation.py",
+      "drdid._estimators": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/_estimators.py",
+      "drdid.reg_did": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/reg_did.py",
+      "csdid.utils": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/__init__.py",
+      "csdid.utils.weights": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/utils/weights.py",
+      "csdid.attgt_fnc.drdid_trim": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/drdid_trim.py",
+      "csdid.attgt_fnc.compute_att_gt_shared": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/csdid/attgt_fnc/compute_att_gt_shared.py",
+      "drdid.drdid": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/drdid.py",
+      "drdid.ipwd_did": "/private/tmp/csdid-joint-locked-release-20261027/venv/lib/python3.12/site-packages/drdid/ipwd_did.py"
+    }
+  },
+  "test_snapshots_unchanged": true,
+  "evidence_sha256": {
+    "joint-junit.xml": "e35fa7aca7eafa94c34cdae5b9a54b60525333bde79cdd1e26cb836ee94ace1b",
+    "logs/joint-pytest.log": "76aa5dbc1400a62dc07163946835ea0a979b648cbe5374605309b5b32b6f77be",
+    "logs/direct-72-case-bridge.log": "79d87e0d645d078dbeeaf32e82ca8a89e6881dd08ebb5cca04125c3b28eda1d5"
+  },
+  "pytest_returncode": 0,
+  "bridge_returncode": 0,
+  "returncode": 0,
+  "raw_receipt_sha256": "623b063cf8f54467f3728053c9851b3e49e8a8296c544d5dd86d00fe94d70e87",
+  "pytest_test_functions": 2935,
+  "pytest_subtests": 19,
+  "expected_warnings": 25,
+  "description": "Final exact-locked release pair, built and installed together; full tests including slow tests and publisher units. JUnit counts include subtests; they are not additional test functions."
+}
