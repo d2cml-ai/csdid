@@ -57,7 +57,7 @@ def histories(tmp_path):
             _write(repo / path, text)
         _write(repo / "tests/testthat/helper-fixture.R", "make_fixture <- function() 1\n")
         _write(repo / "tests/testthat/_snaps/output.md", "baseline snapshot\n")
-        _write(repo / "DESCRIPTION", f"Package: {package}\nVersion: 1.0.0\n")
+        _write(repo / "DESCRIPTION", f"Package: {package}\nVersion: 1.0.0.904\n")
         _write(repo / "R/estimator.R", "estimate <- function() 1\n")
         commit = _commit(repo)
         sources[package] = {"commit": commit, "files_sha256": {
@@ -80,14 +80,18 @@ def histories(tmp_path):
         crosswalks[package] = crosswalk_path
     manifest = tmp_path / "manifest.json"
     _json(manifest, {"schema_version": 1, "sources": sources})
+    reviewed = tmp_path / "reviewed-automation.json"
+    _json(reviewed, {"schema_version": 1, "packages": {
+        package: {"baseline_commit": source["commit"], "rationale": "Temporary test review", "additions": []}
+        for package, source in sources.items()}})
     return {"repos": repos, "crosswalks": crosswalks, "manifest": manifest,
-            "sources": sources, "texts": texts, "root": tmp_path}
+            "sources": sources, "texts": texts, "root": tmp_path, "reviewed": reviewed}
 
 
 def _audit(history):
     return audit_module.audit(history["repos"]["did"], history["repos"]["DRDID"],
                               history["manifest"], history["crosswalks"]["did"],
-                              history["crosswalks"]["DRDID"])
+                              history["crosswalks"]["DRDID"], history["reviewed"])
 
 
 def _args(history):
@@ -95,6 +99,7 @@ def _args(history):
             "--baseline", str(history["manifest"]),
             "--did-crosswalk", str(history["crosswalks"]["did"]),
             "--drdid-crosswalk", str(history["crosswalks"]["DRDID"]),
+            "--reviewed-automation", str(history["reviewed"]),
             "--output", str(history["root"] / "report.json"),
             "--summary", str(history["root"] / "summary.md")]
 
@@ -159,12 +164,238 @@ def test_every_tracked_tree_category_requires_review(histories, path):
     assert [change["path"] for change in result["source_changes"]] == [path]
 
 
-@pytest.mark.parametrize("comparison_code,expected_status,expected_exit", [
-    (0, "coverage_review_required", 3),
-    (1, "numerical_mismatch", 1),
+def _review_workflow(history, package, text="name: reviewed automation\n"):
+    path = ".github/workflows/python-downstream.yml"
+    record = json.loads(history["reviewed"].read_text())
+    record["packages"][package]["additions"] = [{
+        "path": path, "status": "added", "kind": "blob", "mode": "100644", "sha256": _sha(text),
+    }]
+    _json(history["reviewed"], record)
+    _write(history["repos"][package] / path, text)
+    return path
+
+
+@pytest.mark.parametrize("package", ["did", "DRDID"])
+def test_exact_reviewed_workflow_addition_retains_raw_drift_and_succeeds(histories, package):
+    path = _review_workflow(histories, package)
+    _commit(histories["repos"][package])
+    report = _audit(histories)
+    assert report["status"] == "reviewed_automation_only"
+    assert report["exit_code"] == 0
+    assert report["source_review_required"] is False
+    assert report["reviewed_automation_record_sha256"] == hashlib.sha256(histories["reviewed"].read_bytes()).hexdigest()
+    result = report["packages"][package]
+    assert result["source_change_count"] == result["reviewed_automation_change_count"] == 1
+    assert result["unreviewed_source_change_count"] == 0
+    assert result["reviewed_automation_paths"] == [path]
+    assert result["test_changes"] == []
+    change, = result["source_changes"]
+    assert change["path"] == path and change["status"] == "added" and change["old"] is None
+    assert change["new"]["mode"] == "100644" and change["new"]["kind"] == "blob"
+    assert change["source_review"] == "reviewed_automation"
+    assert audit_module.main(_args(histories)) == 0
+    summary = (histories["root"] / "summary.md").read_text()
+    assert "1 reviewed automation additions; 0 unreviewed other tracked-file changes" in summary
+    assert path in summary and "reviewed_automation_only" in summary
+
+
+@pytest.mark.parametrize("tamper", ["content", "executable", "symlink", "other_source", "test"])
+def test_reviewed_automation_cannot_hide_modified_bytes_modes_or_other_drift(histories, tamper):
+    path = _review_workflow(histories, "did")
+    repo = histories["repos"]["did"]
+    if tamper == "content":
+        _write(repo / path, "name: different automation\n")
+    elif tamper == "executable":
+        (repo / path).chmod(0o755)
+    elif tamper == "symlink":
+        (repo / path).unlink()
+        (repo / path).symlink_to("../../R/estimator.R")
+    else:
+        _write(repo / ("NEWS.md" if tamper == "other_source" else "tests/fixtures/extra.csv"), "unreviewed\n")
+    _commit(repo)
+    report = _audit(histories)
+    assert report["status"] == "manual_review_required" and report["exit_code"] == 3
+    assert report["source_review_required"] is True
+    result = report["packages"]["did"]
+    assert result["source_review_required"] is True
+    if tamper in {"content", "executable", "symlink"}:
+        assert result["reviewed_automation_paths"] == []
+        assert result["unreviewed_source_paths"] == [path]
+    else:
+        assert result["reviewed_automation_paths"] == [path]
+        assert result["test_change_count"] == (1 if tamper == "test" else 0)
+        assert result["unreviewed_source_paths"] == ([] if tamper == "test" else ["NEWS.md"])
+
+
+@pytest.mark.parametrize("field,value", [
+    ("path", "R/estimator.R"), ("path", "../workflow.yml"),
+    ("path", ".github/workflows/nested/extra.yml"), ("status", "modified"),
+    ("kind", "commit"), ("mode", "100755"), ("sha256", "not-a-hash"),
 ])
-def test_real_source_only_git_drift_keeps_runner_numerical_stages(
-        histories, monkeypatch, comparison_code, expected_status, expected_exit):
+def test_invalid_review_record_fails_closed(histories, field, value):
+    _review_workflow(histories, "did")
+    _commit(histories["repos"]["did"])
+    record = json.loads(histories["reviewed"].read_text())
+    record["packages"]["did"]["additions"][0][field] = value
+    _json(histories["reviewed"], record)
+    assert audit_module.main(_args(histories)) == 2
+    assert json.loads((histories["root"] / "report.json").read_text())["status"] == "structural_failure"
+
+
+@pytest.mark.parametrize("defect", ["baseline", "duplicate", "missing", "schema"])
+def test_review_records_are_required_unique_and_bound_to_numerical_baseline(histories, defect):
+    _review_workflow(histories, "did")
+    _commit(histories["repos"]["did"])
+    record = json.loads(histories["reviewed"].read_text())
+    if defect == "baseline":
+        record["packages"]["did"]["baseline_commit"] = "a" * 40
+    elif defect == "duplicate":
+        record["packages"]["did"]["additions"] *= 2
+    elif defect == "schema":
+        record["ignore_directory"] = ".github"
+    if defect == "missing":
+        histories["reviewed"].unlink()
+    else:
+        _json(histories["reviewed"], record)
+    assert audit_module.main(_args(histories)) == 2
+
+
+def test_review_record_cannot_approve_a_preexisting_workflow(histories):
+    path = _review_workflow(histories, "did")
+    repo = histories["repos"]["did"]
+    baseline = _commit(repo)
+    manifest = json.loads(histories["manifest"].read_text())
+    manifest["sources"]["did"]["commit"] = baseline
+    _json(histories["manifest"], manifest)
+    crosswalk = json.loads(histories["crosswalks"]["did"].read_text())
+    crosswalk["r_commit"] = baseline
+    _json(histories["crosswalks"]["did"], crosswalk)
+    record = json.loads(histories["reviewed"].read_text())
+    record["packages"]["did"]["baseline_commit"] = baseline
+    _json(histories["reviewed"], record)
+    _write(repo / path, "name: changed existing workflow\n")
+    _commit(repo)
+    with pytest.raises(audit_module.AuditError, match="absent from the baseline"):
+        _audit(histories)
+
+
+def _review_version(history, apply=True):
+    path = history["repos"]["did"] / "DESCRIPTION"
+    before = path.read_text()
+    after = before.replace("Version: 1.0.0.904\n", "Version: 1.0.0.905\n")
+    assert before != after
+    record = json.loads(history["reviewed"].read_text())
+    record["packages"]["did"]["version_metadata"] = [{
+        "path": "DESCRIPTION", "status": "modified", "kind": "blob", "mode": "100644",
+        "before_sha256": _sha(before), "after_sha256": _sha(after),
+        "before_version": "1.0.0.904", "after_version": "1.0.0.905",
+        "rationale": "Exact expected development-version bump after the reviewed automation merge",
+    }]
+    _json(history["reviewed"], record)
+    if apply:
+        path.write_text(after)
+    return before, after
+
+
+@pytest.mark.parametrize("workflow", [False, True])
+def test_pending_version_review_does_not_require_the_bump_to_exist(histories, workflow):
+    _review_version(histories, apply=False)
+    if workflow:
+        _review_workflow(histories, "did")
+        _commit(histories["repos"]["did"])
+    report = _audit(histories)
+    assert report["exit_code"] == 0
+    assert report["status"] == ("reviewed_automation_only" if workflow else "unchanged")
+    assert report["packages"]["did"]["reviewed_version_metadata_change_count"] == 0
+
+
+@pytest.mark.parametrize("workflow", [False, True])
+def test_exact_reviewed_version_edit_retains_raw_description_change(histories, workflow):
+    before, after = _review_version(histories)
+    if workflow:
+        _review_workflow(histories, "did")
+    _commit(histories["repos"]["did"])
+    report = _audit(histories)
+    assert report["exit_code"] == 0 and report["status"] == "reviewed_changes_only"
+    result = report["packages"]["did"]
+    assert result["source_change_count"] == 1 + int(workflow)
+    assert result["reviewed_automation_change_count"] == int(workflow)
+    assert result["reviewed_version_metadata_change_count"] == 1
+    assert result["reviewed_version_metadata_paths"] == ["DESCRIPTION"]
+    assert result["unreviewed_source_paths"] == [] and result["test_change_count"] == 0
+    change = next(item for item in result["source_changes"] if item["path"] == "DESCRIPTION")
+    assert change["status"] == "modified" and change["source_review"] == "reviewed_version_metadata"
+    assert change["old"]["sha256"] == _sha(before) and change["new"]["sha256"] == _sha(after)
+    assert audit_module.main(_args(histories)) == 0
+    assert "1 reviewed DESCRIPTION version changes" in (histories["root"] / "summary.md").read_text()
+
+
+@pytest.mark.parametrize("tamper", ["unexpected_version", "first_component", "dependency",
+                                  "duplicate_version", "executable", "symlink", "runtime"])
+def test_version_review_cannot_accept_other_versions_description_bytes_modes_or_code(histories, tamper):
+    _, after = _review_version(histories)
+    repo = histories["repos"]["did"]
+    path = repo / "DESCRIPTION"
+    if tamper == "unexpected_version":
+        path.write_text(after.replace("1.0.0.905", "1.0.0.906"))
+    elif tamper == "first_component":
+        path.write_text(after.replace("1.0.0.905", "2.0.0.905"))
+    elif tamper == "dependency":
+        path.write_text(after + "Imports: unreviewedDependency\n")
+    elif tamper == "duplicate_version":
+        path.write_text(after + "Version: 1.0.0.905\n")
+    elif tamper == "executable":
+        path.chmod(0o755)
+    elif tamper == "symlink":
+        path.unlink()
+        path.symlink_to("R/estimator.R")
+    else:
+        _write(repo / "R/estimator.R", "estimate <- function() 99\n")
+    _commit(repo)
+    report = _audit(histories)
+    assert report["exit_code"] == 3 and report["status"] == "manual_review_required"
+    result = report["packages"]["did"]
+    assert result["source_review_required"] is True
+    assert result["reviewed_version_metadata_paths"] == (["DESCRIPTION"] if tamper == "runtime" else [])
+    assert result["unreviewed_source_paths"] == (["R/estimator.R"] if tamper == "runtime" else ["DESCRIPTION"])
+
+
+@pytest.mark.parametrize("field,value", [
+    ("before_sha256", "0" * 64), ("after_sha256", "0" * 64),
+    ("before_version", "1.0.1.904"), ("after_version", "1.0.0.906"),
+    ("path", "R/estimator.R"), ("mode", "100755"), ("status", "added"),
+])
+def test_invalid_version_review_record_cannot_redefine_the_accepted_edit(histories, field, value):
+    _review_version(histories)
+    _commit(histories["repos"]["did"])
+    record = json.loads(histories["reviewed"].read_text())
+    record["packages"]["did"]["version_metadata"][0][field] = value
+    _json(histories["reviewed"], record)
+    assert audit_module.main(_args(histories)) == 2
+
+
+def test_version_review_after_hash_cannot_include_a_dependency_change(histories):
+    _, after = _review_version(histories)
+    changed = after + "Imports: unreviewedDependency\n"
+    _write(histories["repos"]["did"] / "DESCRIPTION", changed)
+    _commit(histories["repos"]["did"])
+    record = json.loads(histories["reviewed"].read_text())
+    record["packages"]["did"]["version_metadata"][0]["after_sha256"] = _sha(changed)
+    _json(histories["reviewed"], record)
+    with pytest.raises(audit_module.AuditError, match="exact version-only edit"):
+        _audit(histories)
+
+
+@pytest.mark.parametrize("reviewed,comparison_code,expected_status,expected_exit", [
+    (False, 0, "coverage_review_required", 3),
+    (False, 1, "numerical_mismatch", 1),
+    (True, 0, "passed", 0),
+    (True, 1, "numerical_mismatch", 1),
+    ("version", 0, "passed", 0),
+    ("version", 1, "numerical_mismatch", 1),
+])
+def test_real_git_audit_keeps_runner_numerical_stages_and_failure_precedence(
+        histories, monkeypatch, reviewed, comparison_code, expected_status, expected_exit):
     # The Git audit is real; R generation and estimator execution are stubbed
     # here. The separate live source-only probe checks actual R/Python numbers.
     spec = importlib.util.spec_from_file_location(
@@ -172,7 +403,14 @@ def test_real_source_only_git_drift_keeps_runner_numerical_stages(
     runner = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(runner)
     repo = histories["repos"]["did"]
-    _write(repo / "R/estimator.R", "estimate <- function() 2\n")
+    if reviewed == "version":
+        _review_version(histories)
+        changed_path = "DESCRIPTION"
+    elif reviewed:
+        changed_path = _review_workflow(histories, "did")
+    else:
+        changed_path = "R/estimator.R"
+        _write(repo / changed_path, "estimate <- function() 2\n")
     _commit(repo)
     pinned = histories["root"] / "reviewed"
     pinned.mkdir()
@@ -200,11 +438,14 @@ def test_real_source_only_git_drift_keeps_runner_numerical_stages(
     assert runner.run(repo, histories["repos"]["DRDID"], output) == expected_exit
     report = json.loads((output / "report.json").read_text())
     audit = json.loads((output / "audit.json").read_text())
-    assert audit["exit_code"] == 3
+    audit_code = 0 if reviewed else 3
+    assert audit["exit_code"] == audit_code
+    assert audit["status"] == ("reviewed_changes_only" if reviewed == "version" else
+                               "reviewed_automation_only" if reviewed else "manual_review_required")
     assert audit["packages"]["did"]["test_changes"] == []
-    assert [change["path"] for change in audit["packages"]["did"]["source_changes"]] == ["R/estimator.R"]
+    assert [change["path"] for change in audit["packages"]["did"]["source_changes"]] == [changed_path]
     assert numerical_stages == ["r-generation", "pytest"]
-    assert report["stages"] == {"test_coverage_audit": 3, "r_generation": 0,
+    assert report["stages"] == {"test_coverage_audit": audit_code, "r_generation": 0,
                                 "numerical_comparison": comparison_code}
     assert report["status"] == expected_status
     assert runner._hashes(pinned) == before
@@ -293,6 +534,9 @@ def test_unavailable_baseline_git_object_is_failure_not_empty_diff(histories):
     manifest = json.loads(histories["manifest"].read_text())
     manifest["sources"]["did"]["commit"] = "a" * 40
     _json(histories["manifest"], manifest)
+    record = json.loads(histories["reviewed"].read_text())
+    record["packages"]["did"]["baseline_commit"] = "a" * 40
+    _json(histories["reviewed"], record)
     with pytest.raises(audit_module.AuditError, match="cat-file.*failed"):
         _audit(histories)
 

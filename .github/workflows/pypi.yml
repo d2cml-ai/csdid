@@ -6,10 +6,6 @@ on:
     types: [completed]
     branches: [main]
   workflow_dispatch:
-  # The reviewed backend may reach PyPI after CSDID's main CI has finished.
-  # Retry without cross-repository tokens or a manual workflow dispatch.
-  schedule:
-    - cron: '17 * * * *'
 
 permissions:
   contents: read
@@ -23,8 +19,6 @@ jobs:
   gate:
     if: >-
       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'schedule' && github.ref == 'refs/heads/main' &&
-       github.event.repository.default_branch == 'main') ||
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.event == 'push' &&
@@ -78,7 +72,7 @@ jobs:
           persist-credentials: false
 
       # Recheck after any environment approval delay. A pending check or newer
-      # main revision skips this attempt; a later completion/hourly run retries.
+      # main revision skips this attempt; a later completion or manual run retries.
       - name: Recheck CI immediately before preparing publication
         id: verify
         working-directory: source

@@ -1,14 +1,30 @@
 name: R upstream parity
 
 on:
-  # Every push to this repository; no branch or changed-file filters.
   push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      did-ref:
+        description: R did commit to validate; empty uses the current default branch.
+        type: string
+        default: ''
+      r-drdid-ref:
+        description: R DRDID commit to validate; empty uses the current default branch.
+        type: string
+        default: ''
+  # Check current R upstreams monthly even when Python source is unchanged.
+  schedule:
+    - cron: '17 9 1 * *'
 
 permissions:
   contents: read
 
 concurrency:
-  group: r-upstream-parity-${{ github.ref }}
+  group: r-upstream-parity-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -35,6 +51,10 @@ jobs:
       - name: Check out csdid
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
+          repository: ${{ (inputs.did-ref || inputs.r-drdid-ref) && 'd2cml-ai/csdid' || github.repository }}
+          # R repositories call this workflow after their own pushes.
+          # Own-repository runs continue to validate the exact push/PR commit.
+          ref: ${{ (inputs.did-ref || inputs.r-drdid-ref) && 'main' || github.sha }}
           path: csdid
           fetch-depth: 0
           persist-credentials: false
@@ -45,6 +65,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: bcallaway11/did
+          ref: ${{ inputs.did-ref }}
           path: upstream/did
           fetch-depth: 0
           persist-credentials: false
@@ -53,6 +74,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: pedrohcgs/DRDID
+          ref: ${{ inputs.r-drdid-ref }}
           path: upstream/DRDID
           fetch-depth: 0
           persist-credentials: false

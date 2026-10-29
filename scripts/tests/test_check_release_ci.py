@@ -134,19 +134,14 @@ class ReleaseChecks(unittest.TestCase):
         with self.assertRaises(gate.GateError):
             gate.candidate("workflow_dispatch", manual, REPO, 123, "refs/heads/feature", SHA)
 
-    def test_schedule_requires_default_main_and_still_needs_exact_sha_ci(self):
-        event = {"repository": dict(IDENTITY, default_branch="main"), "schedule": "17 * * * *"}
-        self.assertEqual(gate.candidate("schedule", event, REPO, 123, "refs/heads/main", SHA), SHA)
-        for ref, default, identity, sha in [
-                ("refs/heads/feature", "main", 123, SHA),
-                ("refs/heads/main", "feature", 123, SHA),
-                ("refs/heads/main", "main", 999, SHA),
-                ("refs/heads/main", "main", 123, "main")]:
-            bad = {"repository": dict(IDENTITY, default_branch=default, id=identity)}
-            with self.subTest(ref=ref, default=default, identity=identity, sha=sha), self.assertRaises(gate.GateError):
-                gate.candidate("schedule", bad, REPO, 123, ref, sha)
-        self.checks.pop()
-        self.assertFalse(self.ready())
+    def test_monthly_validation_cannot_authorize_publication(self):
+        event = {"repository": dict(IDENTITY, default_branch="main"), "schedule": "17 9 1 * *"}
+        with self.assertRaisesRegex(gate.GateError, "Unsupported publication event"):
+            gate.candidate("schedule", event, REPO, 123, "refs/heads/main", SHA)
+        run = dict(self.runs["10"], name="R upstream parity", event="schedule")
+        with self.assertRaises(gate.GateError):
+            gate.candidate("workflow_run", {"repository": IDENTITY, "workflow_run": run},
+                           REPO, 123, "refs/heads/main", SHA)
 
 
 class BackendWheelChecks(unittest.TestCase):
@@ -299,11 +294,11 @@ class ReleaseCatchupChecks(unittest.TestCase):
     def missing(self):
         return HTTPError("url", 404, "Not found", {}, None)
 
-    def test_missing_backend_waits_then_retries_without_manual_event(self):
+    def test_missing_backend_waits_for_manual_retry(self):
         with patch.object(gate, "fetch_json", side_effect=[self.missing(), self.missing()]):
             ready, message = gate.release_ready(self.root)
             self.assertFalse(ready)
-            self.assertIn("retry automatically", message)
+            self.assertIn("rerun Publish to PyPI manually", message)
         with patch.object(gate, "fetch_json", side_effect=[self.missing(), {"urls": [{"packagetype": "bdist_wheel"}]}]):
             self.assertTrue(gate.release_ready(self.root)[0])
 

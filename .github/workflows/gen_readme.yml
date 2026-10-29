@@ -4,6 +4,20 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'README.qmd'
+      - 'data/mpdta.csv'
+      - 'csdid/**'
+      - 'setup.py'
+      - 'setup.cfg'
+      - 'pyproject.toml'
+      - 'MANIFEST.in'
+      - 'requirements.txt'
+      - 'docs/requirements-readme.txt'
+      - 'scripts/check_readme.py'
+      - 'scripts/normalize_readme_png.py'
+      - 'scripts/check_release_ci.py'
+      - '.github/workflows/gen_readme.yml'
   workflow_dispatch:
 
 concurrency:

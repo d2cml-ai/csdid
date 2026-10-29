@@ -49,9 +49,6 @@ def candidate(event_name, event, repository, repository_id, ref, sha):
     if event_name == "workflow_dispatch":
         if ref != "refs/heads/main" or event.get("ref") not in ("main", "refs/heads/main"):
             raise GateError("Manual publication is allowed only on main")
-    elif event_name == "schedule":
-        if ref != "refs/heads/main" or event["repository"].get("default_branch") != "main":
-            raise GateError("Scheduled publication is allowed only on default branch main")
     elif event_name == "workflow_run":
         run = event.get("workflow_run", {})
         if (run.get("event") != "push" or run.get("head_branch") != "main"
@@ -307,10 +304,10 @@ def release_ready(source_path, release=None, confirm_publication=False):
         backend = fetch_json("https://pypi.org/pypi/drdid/" + lock["version"] + "/json")
     except HTTPError as error:
         if error.code == 404:
-            return False, "Waiting: reviewed drdid " + lock["version"] + " is not on PyPI yet; the hourly catch-up will retry automatically."
+            return False, "Waiting: reviewed drdid " + lock["version"] + " is not on PyPI yet; rerun Publish to PyPI manually after the backend is published."
         raise
     if not any(item.get("packagetype") == "bdist_wheel" and not item.get("yanked") for item in backend["urls"]):
-        return False, "Waiting: the reviewed DRDID wheel is not on PyPI yet; the hourly catch-up will retry automatically."
+        return False, "Waiting: the reviewed DRDID wheel is not on PyPI yet; rerun Publish to PyPI manually after the backend is published."
     return True, "CSDID " + version + " needs publication; the locked backend is available for byte verification."
 
 
@@ -399,7 +396,7 @@ def backend_ready(lock_path, peer_path):
         release = fetch_json("https://pypi.org/pypi/drdid/" + version + "/json")
     except HTTPError as error:
         if error.code == 404:
-            raise GateError("Publish reviewed DRDID " + version + " first; the hourly catch-up will retry automatically") from error
+            raise GateError("Publish reviewed DRDID " + version + " first, then rerun Publish to PyPI manually") from error
         raise
     wheel_bytes = published_wheel(release)
     verify_backend_wheel(wheel_bytes, release, version, expected)
