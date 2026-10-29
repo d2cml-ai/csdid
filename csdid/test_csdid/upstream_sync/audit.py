@@ -3,8 +3,9 @@
 This stdlib-only command never fetches sources or translates tests. Every
 tracked Git-tree change requires human review, including runtime sources,
 tests, helpers, fixtures, documentation and build metadata. Test and other
-source changes remain separate evidence categories.
-Exit codes: 0 = no tracked-tree drift, 3 = review required, 2 = invalid evidence.
+source changes remain separate evidence categories. Exact reviewed automation
+additions are retained in the report without requiring a numerical rebaseline.
+Exit codes: 0 = no unreviewed drift, 3 = review required, 2 = invalid evidence.
 """
 from __future__ import annotations
 
@@ -23,6 +24,7 @@ DEFAULT_CROSSWALKS = {
     "did": TEST_ROOT / "r_test_alignment_did.json",
     "DRDID": TEST_ROOT / "r_test_alignment_drdid.json",
 }
+DEFAULT_REVIEWED_AUTOMATION = Path(__file__).with_name("reviewed_automation.json")
 _SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 _COMMIT = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})\Z")
 _DECLARATION = re.compile(r"^\s*(?:testthat::)?test_that\s*\(")
@@ -122,6 +124,43 @@ def _baseline(path):
     return sources
 
 
+def _reviewed_automation(path, sources):
+    """Read a narrow, baseline-bound review record; never ignore a directory."""
+    record = _read_json(path)
+    if set(record) != {"schema_version", "packages"} \
+            or not isinstance(record["packages"], dict) \
+            or set(record["packages"]) != set(sources):
+        raise AuditError("Reviewed automation must identify exactly did and DRDID")
+    reviewed = {}
+    for package, entry in record["packages"].items():
+        if not isinstance(entry, dict) \
+                or set(entry) != {"baseline_commit", "rationale", "additions"} \
+                or entry["baseline_commit"] != sources[package]["commit"]:
+            raise AuditError(f"{package} reviewed automation baseline does not match numerical baseline")
+        if not isinstance(entry["rationale"], str) or not entry["rationale"].strip() \
+                or not isinstance(entry["additions"], list):
+            raise AuditError(f"Invalid {package} reviewed automation rationale/additions")
+        additions = {}
+        for addition in entry["additions"]:
+            if not isinstance(addition, dict) \
+                    or set(addition) != {"path", "status", "kind", "mode", "sha256"}:
+                raise AuditError(f"Invalid {package} reviewed automation addition")
+            name = addition["path"]
+            if not _valid_path(name) or "\\" in name \
+                    or PurePosixPath(name).parent != PurePosixPath(".github/workflows") \
+                    or PurePosixPath(name).suffix not in {".yml", ".yaml"} \
+                    or addition["status"] != "added" \
+                    or addition["kind"] != "blob" or addition["mode"] != "100644" \
+                    or not isinstance(addition["sha256"], str) \
+                    or not _SHA256.fullmatch(addition["sha256"]):
+                raise AuditError(f"Invalid {package} reviewed automation path/status/blob/mode/hash")
+            if name in additions:
+                raise AuditError(f"Duplicate {package} reviewed automation path: {name}")
+            additions[name] = addition
+        reviewed[package] = additions
+    return reviewed
+
+
 def _crosswalk(path, package, commit):
     crosswalk = _read_json(path)
     commit_key, entries_key, hash_key = (
@@ -150,7 +189,7 @@ def _crosswalk(path, package, commit):
     return result
 
 
-def _audit_package(package, repo, baseline, crosswalk_path):
+def _audit_package(package, repo, baseline, crosswalk_path, reviewed_automation):
     commit = baseline["commit"]
     # A shallow checkout without the pinned tree must fail, never look unchanged.
     _git(repo, "cat-file", "-e", commit + "^{commit}")
@@ -160,6 +199,8 @@ def _audit_package(package, repo, baseline, crosswalk_path):
     if _git(repo, "ls-files", "--others", "--exclude-standard", "--", "tests/"):
         raise AuditError(f"{package} checkout has untracked tests; commit or remove them before auditing")
     old_tree, new_tree = _tree(repo, commit), _tree(repo, head)
+    if any(path in old_tree for path in reviewed_automation):
+        raise AuditError(f"{package} reviewed automation must be absent from the baseline tree")
     cache = {}
 
     def content(entry):
@@ -207,29 +248,51 @@ def _audit_package(package, repo, baseline, crosswalk_path):
             })
             test_changes.append(change)
         else:
+            reviewed = reviewed_automation.get(path)
+            accepted = (reviewed is not None and old is None and new is not None
+                        and all(change[key] == reviewed[key] for key in ("path", "status"))
+                        and all(change["new"][key] == reviewed[key]
+                                for key in ("kind", "mode", "sha256")))
+            change["source_review"] = "reviewed_automation" if accepted else "required"
             source_changes.append(change)
-    status = "manual_review_required" if test_changes or source_changes else "unchanged"
+    reviewed_paths = [item["path"] for item in source_changes
+                      if item["source_review"] == "reviewed_automation"]
+    unreviewed_paths = [item["path"] for item in source_changes
+                        if item["source_review"] == "required"]
+    review_required = bool(test_changes or unreviewed_paths)
+    status = ("manual_review_required" if review_required else
+              "reviewed_automation_only" if reviewed_paths else "unchanged")
     return {
         "baseline_commit": commit, "current_commit": head, "status": status,
         "baseline_crosswalk_test_count": len(coverage),
         "test_changes": test_changes, "source_changes": source_changes,
         "test_change_count": len(test_changes), "source_change_count": len(source_changes),
+        "source_review_required": review_required,
+        "reviewed_automation_paths": reviewed_paths,
+        "reviewed_automation_change_count": len(reviewed_paths),
+        "unreviewed_source_paths": unreviewed_paths,
+        "unreviewed_source_change_count": len(unreviewed_paths),
     }
 
 
 def audit(did, drdid, baseline=DEFAULT_BASELINE, did_crosswalk=DEFAULT_CROSSWALKS["did"],
-          drdid_crosswalk=DEFAULT_CROSSWALKS["DRDID"]):
+          drdid_crosswalk=DEFAULT_CROSSWALKS["DRDID"],
+          reviewed_automation=DEFAULT_REVIEWED_AUTOMATION):
     """Return deterministic evidence for two clean, already-fetched checkouts."""
     sources = _baseline(baseline)
+    reviewed = _reviewed_automation(reviewed_automation, sources)
     packages = {}
     for package, repo, crosswalk in (("did", did, did_crosswalk), ("DRDID", drdid, drdid_crosswalk)):
-        packages[package] = _audit_package(package, repo, sources[package], crosswalk)
-    test_drift = any(item["test_changes"] for item in packages.values())
-    source_drift = any(item["source_changes"] for item in packages.values())
+        packages[package] = _audit_package(package, repo, sources[package], crosswalk, reviewed[package])
+    review_required = any(item["source_review_required"] for item in packages.values())
+    accepted = any(item["reviewed_automation_paths"] for item in packages.values())
     return {
         "schema_version": 1,
-        "status": "manual_review_required" if test_drift or source_drift else "unchanged",
-        "exit_code": 3 if test_drift or source_drift else 0,
+        "status": ("manual_review_required" if review_required else
+                   "reviewed_automation_only" if accepted else "unchanged"),
+        "exit_code": 3 if review_required else 0,
+        "source_review_required": review_required,
+        "reviewed_automation_record_sha256": _hash(Path(reviewed_automation).read_bytes()),
         "comparison": "pinned baseline Git tree versus checkout HEAD; no network access",
         "review_drift_scope": "all tracked Git-tree paths, including runtime sources, tests, documentation and build metadata",
         "test_drift_scope": "all tracked paths under tests/, including helpers and fixtures",
@@ -259,9 +322,15 @@ def _markdown(report):
                 lines.append(f"| `{path}` | {change['status']} | {status} |")
             lines.extend(["", "Every listed test-tree change requires manual coverage review; prior coverage is not a new-tree verdict.", ""])
         if result["source_changes"]:
-            lines.extend(["Other tracked-file changes (manual source review required):", ""])
+            label = ("manual source review required" if result["unreviewed_source_paths"]
+                     else "reviewed automation only")
+            lines.extend([f"Other tracked-file changes ({label}):", ""])
             for change in result["source_changes"]:
-                lines.append(f"- {change['status']}: `{change['path']}`")
+                review = ("reviewed automation" if change["source_review"] == "reviewed_automation"
+                          else "manual review required")
+                lines.append(f"- {change['status']}: `{change['path']}` ({review})")
+            lines.append(f"\n{result['reviewed_automation_change_count']} reviewed automation additions; "
+                         f"{result['unreviewed_source_change_count']} unreviewed other tracked-file changes.")
             lines.append("")
     return "\n".join(lines)
 
@@ -273,11 +342,13 @@ def main(argv=None):
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
     parser.add_argument("--did-crosswalk", type=Path, default=DEFAULT_CROSSWALKS["did"])
     parser.add_argument("--drdid-crosswalk", type=Path, default=DEFAULT_CROSSWALKS["DRDID"])
+    parser.add_argument("--reviewed-automation", type=Path, default=DEFAULT_REVIEWED_AUTOMATION)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--summary", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
-        report = audit(args.did, args.drdid, args.baseline, args.did_crosswalk, args.drdid_crosswalk)
+        report = audit(args.did, args.drdid, args.baseline, args.did_crosswalk,
+                       args.drdid_crosswalk, args.reviewed_automation)
     except AuditError as exc:
         report = {"schema_version": 1, "status": "structural_failure", "exit_code": 2, "error": str(exc)}
     try:

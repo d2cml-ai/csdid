@@ -10,14 +10,17 @@ automatically.
 
 ## When checks run
 
-On every push to this Python repository, with no branch or changed-file filters.
-This includes documentation-only changes. The pushed revision must contain the
-workflow. Each run checks the latest R GitHub revisions available at checkout.
+On pushes to Python `main`, pull requests targeting `main`, manual dispatch,
+and the first of each month at 09:17 UTC. Main and pull-request checks include
+documentation-only changes. Superseded runs are cancelled within the same
+event type and ref; monthly or manual checks cannot cancel a main-push check.
 
-There is no daily schedule or separate pull-request trigger. A newer push to
-the same branch or tag cancels its superseded run. A push to an R repository
-alone does not start this workflow; its changes are checked on the next Python
-repository push.
+The workflow is also reusable by the reviewed R repository callers. An R caller
+supplies its exact pushed commit through `did-ref` or `r-drdid-ref`; omitted
+inputs select the current R default branches. Each report records the commits
+actually checked. A monthly check validates the current R upstreams even when
+Python source has not changed. Validation does not publish Python packages;
+scheduled PyPI catch-up runs have been removed.
 
 The workflow needs only `contents: read`; results appear in the job summary and
 an artifact retained for 14 days. Setup failures also retain available logs.
@@ -30,10 +33,12 @@ an artifact retained for 14 days. Setup failures also retain available logs.
    commits. Install their dependencies and selected package sources.
 3. Compare each R Git tree with the reviewed baseline. Validate baseline source
    hashes and the complete did/DRDID test-file crosswalk before reporting drift.
-   Every tracked-tree difference requires review: runtime R/native code,
+   Every unreviewed tracked-tree difference requires review: runtime R/native code,
    tests, helpers, fixtures, snapshots, documentation and build metadata.
    Test-tree and other source changes are reported separately, so a source-only
    change does not imply that R tests changed or that new behavior is covered.
+   The two exact, reviewed downstream-caller workflow additions are recorded
+   separately as described below; their raw tree changes remain visible.
 4. Write a strict `source-lock.json` containing the selected commits and package
    versions. Copy the five frozen input/multiplier CSVs to a new directory.
 5. Generate all 25 R configurations in both R modes, then run all 50 Python
@@ -48,10 +53,10 @@ R is needed for the upstream workflow, not for ordinary pinned tests.
 
 | Exit | Meaning | Required response |
 |---:|---|---|
-| 0 | Numerical comparisons passed; no upstream tracked-tree changes | Retain the recorded source identities and comparison evidence |
+| 0 | Numerical comparisons passed; no unreviewed upstream tracked-tree changes | Retain the recorded source identities and comparison evidence |
 | 1 | Python and the generated R output disagree | Diagnose the discrepancy; preserve the evidence |
 | 2 | Evidence or execution failed, including source, schema, generation or environment errors | Fix the failure and rerun; this is not a parity pass |
-| 3 | Numbers passed, but the upstream tracked tree changed | Review source and test changes, port applicable assertions, and update the reviewed baseline explicitly |
+| 3 | Numbers passed, but the upstream tracked tree has unreviewed changes | Review source and test changes, port applicable assertions, and update the reviewed baseline explicitly |
 
 Numerical comparisons still run when the change audit returns 3, including for
 source-only changes. If upstream drift and numerical failures both occur, exit 1
@@ -87,6 +92,29 @@ python csdid/test_csdid/upstream_sync/audit.py \
   --did /path/to/did --drdid /path/to/DRDID \
   --output /tmp/r-test-changes.json --summary /tmp/r-test-changes.md
 ```
+
+## Reviewed automation additions
+
+The [review record](reviewed_automation.json) accepts only the exact added
+`.github/workflows/python-downstream.yml` file reviewed on 2026-10-29 in each R
+repository. These callers run the Python compatibility workflow after an R
+push; they do not change R package sources, tests, build inputs or numerical
+fixtures. This limited review does not advance the pinned numerical baseline
+or claim coverage of additional R assertions.
+
+Each record binds the original numerical baseline commit, added path, SHA256,
+regular-blob kind and `100644` mode. The path must be absent from that baseline.
+Different bytes or file mode, any change to an existing file, any extra path,
+and every test-tree change still require review. There is no directory ignore
+rule. Missing, malformed, duplicate or baseline-mismatched review records fail
+as invalid evidence.
+
+The audit retains `source_changes` and its raw `source_change_count`, annotates
+each source change with its review status, and reports reviewed additions and
+unreviewed paths separately. Only exact reviewed additions produce
+`reviewed_automation_only` with audit exit 0. The numerical runner must still
+generate fresh R output and pass the unchanged comparisons before its overall
+exit can be 0. The audit report also records the review file's SHA256.
 
 ## Advancing the reviewed baseline
 

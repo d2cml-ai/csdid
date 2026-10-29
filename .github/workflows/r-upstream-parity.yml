@@ -51,10 +51,10 @@ jobs:
       - name: Check out csdid
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          repository: d2cml-ai/csdid
+          repository: ${{ (inputs.did-ref || inputs.r-drdid-ref) && 'd2cml-ai/csdid' || github.repository }}
           # R repositories call this workflow after their own pushes.
           # Own-repository runs continue to validate the exact push/PR commit.
-          ref: ${{ github.repository == 'd2cml-ai/csdid' && github.sha || 'main' }}
+          ref: ${{ (inputs.did-ref || inputs.r-drdid-ref) && 'main' || github.sha }}
           path: csdid
           fetch-depth: 0
           persist-credentials: false
