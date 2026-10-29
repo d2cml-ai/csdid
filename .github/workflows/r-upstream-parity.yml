@@ -1,14 +1,20 @@
 name: R upstream parity
 
 on:
-  # Every push to this repository; no branch or changed-file filters.
   push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  # Check current R upstreams monthly even when Python source is unchanged.
+  schedule:
+    - cron: '17 9 1 * *'
 
 permissions:
   contents: read
 
 concurrency:
-  group: r-upstream-parity-${{ github.ref }}
+  group: r-upstream-parity-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
